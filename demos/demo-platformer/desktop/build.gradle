@@ -1,0 +1,17 @@
+plugins {
+    id 'application'
+}
+
+description = 'Platformer demo: desktop (LWJGL3) launcher.'
+
+dependencies {
+    implementation project(':demos:demo-platformer:core')
+    implementation project(':ember-desktop')
+}
+
+application {
+    mainClass = 'dev.ember2d.demo.platformer.desktop.DesktopLauncher'
+    if (System.getProperty('os.name').toLowerCase().contains('mac')) {
+        applicationDefaultJvmArgs = ['-XstartOnFirstThread']
+    }
+}

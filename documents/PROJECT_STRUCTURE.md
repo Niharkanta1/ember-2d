@@ -5,7 +5,7 @@
 ```text
 ember2d/
 ├── ember-core/                  # all engine packages (see ARCHITECTURE.md); Android-safe Java only
-│   └── src/main/java/ember/
+│   └── src/main/java/dev/ember2d/
 │       ├── core/  event/  ecs/  assets/  input/
 │       ├── render/  camera/  animation/  collision/  tilemap/
 │       ├── scene/  data/  audio/  ui/  save/  debug/  particles/
@@ -52,7 +52,7 @@ All paths in the documents are relative to `documents/` (for example `specs/F-00
 - **Demo assets** live in each demo's `core/assets/` folder (shared by desktop and Android), produced from `assets-src/` (atlas packing via a Gradle task, Ink compiled to JSON).
 - **Tiled project:** each demo has a `.tiled-project` file in `assets-src/` with object templates (`.tx`) per prefab and generated custom types.
 - **Templates:** there is no separate game-template tree. A new game starts by copying a demo. `templates/` holds documentation templates only.
-- **Package base name** `ember` is a placeholder; choose the final base package in I-000.
+- **Package base name** is `dev.ember2d` (Maven group `dev.ember2d`, chosen in I-000). Documents use the short form `ember.<package>` for `dev.ember2d.<package>`.
 - **Module creation rule:** a package becomes its own module only when it gains a second consumer with different dependencies, or needs a backend/native/licensed dependency other code must not see.
 - **Tests:** `src/test/java` mirroring production packages; architecture tests in `ember-core`. Android instrumentation is limited to the demo smoke test.
 - **Not present:** `ember-ios` (iOS is not a target; ADR-019), `ember-spine` until adopted (ADR-021).

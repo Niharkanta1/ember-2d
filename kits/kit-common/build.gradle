@@ -1,0 +1,9 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Ember2D shared kit: health, damage, triggers, pools, spawners, dialogue (F-021).'
+
+dependencies {
+    api project(':ember-core')
+}

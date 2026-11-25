@@ -1,0 +1,9 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Ember2D developer tools (desktop dev builds only).'
+
+dependencies {
+    api project(':ember-core')
+}

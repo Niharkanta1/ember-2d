@@ -1,0 +1,27 @@
+plugins {
+    alias(libs.plugins.android.library)
+}
+
+description = 'Ember2D Android platform: launcher support, lifecycle, context loss (F-022).'
+
+android {
+    namespace = 'dev.ember2d.android'
+    compileSdk = libs.versions.androidCompileSdk.get().toInteger()
+
+    defaultConfig {
+        // Placeholder; the minimum API level is decided in I-015 (ADR-015).
+        minSdk = libs.versions.androidMinSdk.get().toInteger()
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+        coreLibraryDesugaringEnabled = true
+    }
+}
+
+dependencies {
+    api project(':ember-core')
+    api libs.gdx.backend.android
+    coreLibraryDesugaring libs.android.desugar
+}

@@ -1,0 +1,9 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Ember2D optional rigid-body physics (F-006B).'
+
+dependencies {
+    api project(':ember-core')
+}

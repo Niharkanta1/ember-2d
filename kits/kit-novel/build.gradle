@@ -1,0 +1,9 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Ember2D genre kit: visual novel (F-023).'
+
+dependencies {
+    api project(':kits:kit-common')
+}

@@ -1,0 +1,41 @@
+plugins {
+    alias(libs.plugins.android.library) apply false
+}
+
+allprojects {
+    group = 'dev.ember2d'
+    version = '0.1.0-SNAPSHOT'
+}
+
+// Shared configuration for every plain Java module (everything except Android modules and container projects).
+subprojects {
+    pluginManager.withPlugin('java') {
+        java {
+            // Build on JDK 21; compile to the Java 17 language level and API (ADR-015).
+            toolchain {
+                languageVersion = JavaLanguageVersion.of(21)
+            }
+        }
+
+        tasks.withType(JavaCompile).configureEach {
+            options.release = 17
+            options.encoding = 'UTF-8'
+            options.compilerArgs += ['-Xlint:all,-processing,-serial']
+        }
+
+        tasks.withType(Javadoc).configureEach {
+            options.encoding = 'UTF-8'
+        }
+
+        dependencies {
+            testImplementation platform(libs.junit.bom)
+            testImplementation libs.junit.jupiter
+            testImplementation libs.assertj.core
+            testRuntimeOnly libs.junit.platform.launcher
+        }
+
+        tasks.withType(Test).configureEach {
+            useJUnitPlatform()
+        }
+    }
+}

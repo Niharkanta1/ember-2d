@@ -1,0 +1,9 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Ember2D engine: all engine packages. Android-safe Java only (ADR-015).'
+
+dependencies {
+    api libs.gdx.core
+}

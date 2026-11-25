@@ -54,7 +54,7 @@ Arrows point from a module to what it depends on. Demos depend on the kits they 
 | `demos/demo-*` | Demo | — | `demo-platformer`, `demo-shooter` (with a bullet-hell boss stage), `demo-rpg`, `demo-novel`; each doubles as a project template. |
 
 ## Packages in `ember-core`
-Placeholder base package `ember` (final base package chosen in Phase 0).
+Base package `dev.ember2d` (chosen in I-000). Package names in the documents are written in short form: `ember.core` means `dev.ember2d.core`, and so on.
 
 | Package | Responsibility | Spec |
 | --- | --- | --- |

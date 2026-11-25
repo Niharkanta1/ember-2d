@@ -1,0 +1,11 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Ember2D desktop platform: LWJGL3 launcher support.'
+
+dependencies {
+    api project(':ember-core')
+    api libs.gdx.backend.lwjgl3
+    runtimeOnly variantOf(libs.gdx.platform) { classifier('natives-desktop') }
+}

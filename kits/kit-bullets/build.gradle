@@ -1,0 +1,10 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Ember2D shared kit: data-oriented bullets and patterns (F-024).'
+
+dependencies {
+    api project(':ember-core')
+    api project(':kits:kit-common')
+}

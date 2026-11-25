@@ -1,0 +1,35 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode = RepositoriesMode.FAIL_ON_PROJECT_REPOS
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.name = 'ember2d'
+
+// Platform and optional modules (ADR-003). ember-spine is added only if adopted (ADR-021).
+include 'ember-core'
+include 'ember-desktop'
+include 'ember-android'
+include 'ember-devtools'
+include 'ember-box2d'
+
+// Kits
+include 'kits:kit-common'
+include 'kits:kit-bullets'
+include 'kits:kit-platformer'
+include 'kits:kit-topdown'
+include 'kits:kit-novel'
+
+// Demos (other demos are added in their phase; the Android launcher in I-015)
+include 'demos:demo-platformer:core'
+include 'demos:demo-platformer:desktop'
