@@ -30,6 +30,8 @@ Time-boxed throwaway prototypes (`templates/SPIKE_TEMPLATE.md`). Code is deleted
 - **I-008 Logging** — logger setup, levels, categories, dev file output.
 - **I-009 Desktop packaging** — Construo configuration and a release task. (F-020)
 
+- **G-0 Guide chapter** — write `documents/guide/00-getting-started.md` from the delivered code and demos; developer review and approval required for the phase gate (`ROADMAP.md`)
+
 ### Phase 1 — Runtime core
 - **I-010 App lifecycle and EngineContext** (F-001, F-019)
 - **I-015 Android launcher and smoke build** — `ember-android`, minimum API level decision, debug APK in CI, suspend/resume wiring (F-022, F-020)
@@ -42,6 +44,8 @@ Time-boxed throwaway prototypes (`templates/SPIKE_TEMPLATE.md`). Code is deleted
 - **I-070 Scene lifecycle** — scene stack, enter/exit, per-scene `World`, cleanup (F-010)
 - **I-080 Debug overlay** — FPS, frame time, entity count (F-014)
 - **S-01 and S-04 spikes**
+
+- **G-1 Guide chapter** — write `documents/guide/01-core-loop-ecs-scenes.md` from the delivered code and demos; developer review and approval required for the phase gate (`ROADMAP.md`)
 
 ### Phase 2 — Platformer slice
 - **S-02 spike**
@@ -57,6 +61,8 @@ Time-boxed throwaway prototypes (`templates/SPIKE_TEMPLATE.md`). Code is deleted
 - **I-160 Dev tools** — ImGui panels, inspector, ASM view, collider view (F-018)
 - **I-170 demo-platformer level 1**
 
+- **G-2 Guide chapter** — write `documents/guide/02-levels-prefabs-collision-animation.md` from the delivered code and demos; developer review and approval required for the phase gate (`ROADMAP.md`)
+
 ### Phase 3 — Platformer kit + services (MVP)
 - **I-200 Extract kit-platformer** — move demo player code into the kit; add optional mechanics behind flags (F-015)
 - **I-210 Audio** (F-011)
@@ -68,6 +74,8 @@ Time-boxed throwaway prototypes (`templates/SPIKE_TEMPLATE.md`). Code is deleted
 - **I-250 demo-platformer complete; desktop release** (F-020)
 - **I-255 Android release build** — signed AAB, R8, device test (F-020, F-022)
 
+- **G-3 Guide chapter** — write `documents/guide/03-platformer-ui-audio-saves-android.md` from the delivered code and demos; developer review and approval required for the phase gate (`ROADMAP.md`)
+
 ### Phase 4 — Shooter + bullet hell
 - **I-300 kit-common** — health, damage, hitboxes, triggers, pools, spawners (F-021)
 - **I-310 kit-topdown movement, Y-sort, scrolling camera** (F-016, F-004)
@@ -75,6 +83,8 @@ Time-boxed throwaway prototypes (`templates/SPIKE_TEMPLATE.md`). Code is deleted
 - **I-325 kit-bullets** — bullet world, circle collision, graze, emitters, patterns, bullet clear (F-024)
 - **I-330 Enemy AI hooks with gdx-ai** (F-016)
 - **I-340 demo-shooter with bullet-hell boss stage**
+
+- **G-4 Guide chapter** — write `documents/guide/04-shooter-and-bullet-hell.md` from the delivered code and demos; developer review and approval required for the phase gate (`ROADMAP.md`)
 
 ### Phase 5 — RPG + visual novel
 - **S-03 spike**
@@ -87,6 +97,8 @@ Time-boxed throwaway prototypes (`templates/SPIKE_TEMPLATE.md`). Code is deleted
 - **I-460 kit-novel** — tag commands, characters, dialogue box, choices, backlog, auto/skip, save anywhere, gallery (F-023)
 - **I-470 demo-novel**
 
+- **G-5 Guide chapter** — write `documents/guide/05-rpg-and-visual-novel.md` from the delivered code and demos; developer review and approval required for the phase gate (`ROADMAP.md`)
+
 ### Phase 6 — Optional extras
 - **I-500 ember-box2d** (F-006B)
 - **I-510 Particles** (F-014)
@@ -96,6 +108,8 @@ Time-boxed throwaway prototypes (`templates/SPIKE_TEMPLATE.md`). Code is deleted
 - **I-560 ember-spine** (ADR-021, F-007; only with a Spine license)
 - **I-570 iOS decision** (ADR-019 review; spike first if pursued)
 
+- **G-6 Guide chapters** — one chapter per adopted extra in `documents/guide/`; developer review and approval required
+
 ## Definition of Done
 - Acceptance criteria fulfilled.
 - Unit/integration tests pass; architecture tests pass; Android debug build passes (from Phase 1).
@@ -103,5 +117,6 @@ Time-boxed throwaway prototypes (`templates/SPIKE_TEMPLATE.md`). Code is deleted
 - Public API documented and marked `@PublicApi`.
 - Resource lifecycle validated (including Android suspend/resume where relevant).
 - A demo or test proves the behaviour.
+- If the task changes a public API covered by an approved guide chapter, that chapter is updated.
 - No unrelated refactor.
 - Specification and implementation match, or the deviation is documented and approved.

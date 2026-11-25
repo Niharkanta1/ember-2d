@@ -30,17 +30,23 @@ ember2d/
 ├── tools/
 │   └── tiled-types/             # Gradle task: generate Tiled custom types from prefabs (F-009)
 ├── assets-src/                  # source art: Aseprite files, Tiled projects and templates, Ink sources
-├── adr/                         # architecture decision records
-├── specs/                       # feature specifications
-├── templates/                   # spec, task, spike and ADR templates
-├── images/                      # logo and architecture diagram
-├── old-files/                   # pre-revision docs, reference only
+├── documents/                   # all project documentation (this file lives here)
+│   ├── README.md                # documentation index; start here
+│   ├── VISION.md  ARCHITECTURE.md  ROADMAP.md  IMPLEMENTATION_PLAN.md  ...
+│   ├── adr/                     # architecture decision records
+│   ├── specs/                   # feature specifications
+│   ├── guide/                   # user guide, one chapter per phase gate (reviewed by the developer)
+│   ├── templates/               # spec, task, spike and ADR templates
+│   ├── images/                  # logo and architecture diagram
+│   └── old-files/               # pre-revision docs, reference only
+├── CLAUDE.md                    # standing instructions for coding agents (points into documents/)
 ├── gradle/
 ├── settings.gradle
 ├── build.gradle
 ├── gradle.properties
-└── README.md
+└── README.md                    # short project readme pointing to documents/README.md
 ```
+All paths in the documents are relative to `documents/` (for example `specs/F-001-CORE-LIFECYCLE.md` means `documents/specs/F-001-CORE-LIFECYCLE.md`), except code paths such as `ember-core/...`, `kits/...`, `demos/...`, `tools/...` and `assets-src/...`, which are relative to the repository root.
 
 ## Notes
 - **Demo assets** live in each demo's `core/assets/` folder (shared by desktop and Android), produced from `assets-src/` (atlas packing via a Gradle task, Ink compiled to JSON).
