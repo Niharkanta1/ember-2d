@@ -1,5 +1,8 @@
+import io.github.fourlastor.construo.Target
+
 plugins {
     id 'application'
+    alias(libs.plugins.construo)
 }
 
 description = 'Platformer demo: desktop (LWJGL3) launcher.'
@@ -16,7 +19,91 @@ application {
     }
 }
 
+// The version shown in the window title and crash logs (F-020).
+tasks.named('jar', Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'Ember2D Platformer Demo',
+                'Implementation-Version': project.version
+    }
+}
+
 // `gradlew run` is a dev build: debug logging plus logs/platformer-demo-dev.log (I-008).
 tasks.named('run', JavaExec) {
     systemProperty 'ember.devMode', 'true'
+}
+
+// ----------------------------------------------------------------------------------------------------
+// Desktop release packaging with Construo (F-020, I-009). Each target bundles a jlink-trimmed Temurin
+// JDK 21 runtime, so players need no Java installed. Output: build/construo/dist/<name>-<target>.zip
+// ----------------------------------------------------------------------------------------------------
+// Construo packages one runnable jar, so the release jar contains the game and all its dependencies.
+tasks.register('releaseJar', Jar) {
+    group = 'distribution'
+    description = 'Builds the runnable release jar (game plus all runtime dependencies) used for packaging.'
+    archiveClassifier = 'release'
+    // Own folder: Construo packages the jar task's whole output folder, which would also pick up the thin jar.
+    destinationDirectory = layout.buildDirectory.dir('release-jar')
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest {
+        attributes 'Main-Class': application.mainClass.get(),
+                'Implementation-Title': 'Ember2D Platformer Demo',
+                'Implementation-Version': project.version
+    }
+    from sourceSets.main.output
+    def runtimeFiles = configurations.runtimeClasspath
+    dependsOn runtimeFiles
+    from { runtimeFiles.collect { it.isDirectory() ? it : zipTree(it) } }
+    exclude 'META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA', 'META-INF/maven/**',
+            'module-info.class', 'META-INF/versions/*/module-info.class'
+}
+
+def jdkRelease = 'jdk-21.0.13.1%2B2'
+def jdkBaseUrl = "https://github.com/adoptium/temurin21-binaries/releases/download/${jdkRelease}"
+
+construo {
+    name.set('platformer-demo')
+    humanName.set('Ember2D Platformer Demo')
+    // The package version defaults to project.version.
+    jarTask.set('releaseJar')
+
+    targets.configure {
+        create('winX64', Target.Windows) {
+            architecture.set(Target.Architecture.X86_64)
+            jdkUrl.set("${jdkBaseUrl}/OpenJDK21U-jdk_x64_windows_hotspot_21.0.13.1_2.zip")
+            jdkSha256.set('bbebea1469996b276683c9299c227b294f85c847039c82633218186a4ad4fbf2')
+        }
+        create('linuxX64', Target.Linux) {
+            architecture.set(Target.Architecture.X86_64)
+            jdkUrl.set("${jdkBaseUrl}/OpenJDK21U-jdk_x64_linux_hotspot_21.0.13.1_2.tar.gz")
+            jdkSha256.set('bb8a93f9ae6e7a693b2b721e85dbeff26ae1a77447985a8d7afcdd9c7cf6222e')
+        }
+        create('macX64', Target.MacOs) {
+            architecture.set(Target.Architecture.X86_64)
+            jdkUrl.set("${jdkBaseUrl}/OpenJDK21U-jdk_x64_mac_hotspot_21.0.13.1_2.tar.gz")
+            jdkSha256.set('1b5eff1741bb83d32e2e19aade71452bb42e40f047c01d3e178d438304c9a26d')
+            identifier.set('dev.ember2d.demo.platformer')
+        }
+        create('macM1', Target.MacOs) {
+            architecture.set(Target.Architecture.AARCH64)
+            jdkUrl.set("${jdkBaseUrl}/OpenJDK21U-jdk_aarch64_mac_hotspot_21.0.13.1_2.tar.gz")
+            jdkSha256.set('48067f2b7c958ed104a9d8a5749be7d25220b0a356b4d2d1bcfaab3e16ad0b14')
+            identifier.set('dev.ember2d.demo.platformer')
+        }
+    }
+}
+
+// Release builds must never contain dev tools (F-020).
+def verifyReleaseClasspath = tasks.register('verifyReleaseClasspath') {
+    group = 'verification'
+    description = 'Fails if ember-devtools is on the release runtime classpath.'
+    def runtimeFiles = configurations.runtimeClasspath
+    doLast {
+        def devtools = runtimeFiles.files.findAll { it.name.startsWith('ember-devtools') }
+        if (!devtools.isEmpty()) {
+            throw new GradleException("ember-devtools must not be packaged in a release build: ${devtools*.name}")
+        }
+    }
+}
+tasks.matching { it.name.startsWith('package') }.configureEach {
+    dependsOn verifyReleaseClasspath
 }

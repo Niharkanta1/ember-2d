@@ -1,0 +1,8 @@
+// Short packaging task names, as written in F-020: ./gradlew :demos:demo-platformer:packageWinX64
+['WinX64', 'LinuxX64', 'MacX64', 'MacM1'].each { target ->
+    tasks.register("package${target}") {
+        group = 'distribution'
+        description = "Packages the platformer demo for ${target} (alias of :desktop:package${target})."
+        dependsOn ":demos:demo-platformer:desktop:package${target}"
+    }
+}

@@ -4,8 +4,10 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import dev.ember2d.core.Log;
 import dev.ember2d.demo.platformer.PlatformerDemo;
+import dev.ember2d.desktop.CrashLog;
 import dev.ember2d.desktop.DesktopLogging;
 import dev.ember2d.desktop.StartupHelper;
+import java.util.List;
 
 /** Launches the platformer demo on desktop (LWJGL3). */
 public final class DesktopLauncher {
@@ -22,7 +24,13 @@ public final class DesktopLauncher {
         boolean devMode = DesktopLogging.devModeFromSystemProperty();
         DesktopLogging.configure(devMode, GAME_NAME);
         String version = version();
+        if (!devMode) {
+            CrashLog.install(GAME_NAME, version);
+        }
         Log.get("launcher").info("Ember2D Platformer Demo " + version + (devMode ? " (dev mode)" : ""));
+        if (List.of(args).contains("--crash-test")) {
+            throw new IllegalStateException("Crash test requested with --crash-test");
+        }
 
         Lwjgl3ApplicationConfiguration configuration = new Lwjgl3ApplicationConfiguration();
         configuration.setTitle("Ember2D - Platformer Demo " + version);

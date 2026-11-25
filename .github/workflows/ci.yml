@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -37,3 +38,31 @@ jobs:
         with:
           name: test-reports
           path: '**/build/reports/tests/'
+
+  package:
+    name: Package desktop builds
+    # Release packaging (F-020): pushes to main and manual runs only; each JDK download is about 200 MB.
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Package Windows and Linux zips
+        run: ./gradlew :demos:demo-platformer:packageWinX64 :demos:demo-platformer:packageLinuxX64 --stacktrace
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: platformer-demo-desktop
+          path: demos/demo-platformer/desktop/build/construo/dist/*.zip
+          if-no-files-found: error
