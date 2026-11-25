@@ -28,6 +28,7 @@ This package is a living engineering specification, not a code implementation. I
 - `REVIEW-2026-11.md` — the architecture review that produced revision 2
 - `specs/` — feature specifications (index in `specs/README.md`)
 - `guide/` — user guide, one chapter per phase gate (`guide/00-getting-started.md` first)
+- `spikes/` — spike findings (`spikes/S-04-android-java17-r8.md`, ...)
 - `templates/` — templates for specs, tasks, spikes and decision records
 - `images/` — logo and architecture diagram
 - `old-files/` — pre-revision versions, kept for reference only; not authoritative

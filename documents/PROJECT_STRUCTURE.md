@@ -36,6 +36,7 @@ ember2d/
 │   ├── adr/                     # architecture decision records
 │   ├── specs/                   # feature specifications
 │   ├── guide/                   # user guide, one chapter per phase gate (reviewed by the developer)
+│   ├── spikes/                  # spike findings (spike code lives on unmerged spike/* branches)
 │   ├── templates/               # spec, task, spike and ADR templates
 │   ├── images/                  # logo and architecture diagram
 │   └── old-files/               # pre-revision docs, reference only
