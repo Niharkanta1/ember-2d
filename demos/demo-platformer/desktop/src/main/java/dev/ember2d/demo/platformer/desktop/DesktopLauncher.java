@@ -35,11 +35,12 @@ public final class DesktopLauncher {
 
         Lwjgl3ApplicationConfiguration configuration = new Lwjgl3ApplicationConfiguration();
         configuration.setTitle("Ember2D - Platformer Demo " + version);
-        configuration.useVsync(true);
-        configuration.setForegroundFPS(Lwjgl3ApplicationConfiguration.getDisplayMode().refreshRate + 1);
+        boolean uncapped = Boolean.getBoolean("spike.uncapped");   // SPIKE S-01 measurement
+        configuration.useVsync(!uncapped);
+        configuration.setForegroundFPS(uncapped ? 0 : Lwjgl3ApplicationConfiguration.getDisplayMode().refreshRate + 1);
         configuration.setWindowedMode(1280, 720);
         try {
-            new Lwjgl3Application(new EmberGame(PlatformerDemo.config(devMode)), configuration);
+            new Lwjgl3Application(new ImGuiSpike(new EmberGame(PlatformerDemo.config(devMode))), configuration);   // SPIKE S-01
         } finally {
             Log.get("launcher").info("Exited");
             DesktopLogging.shutdown();
