@@ -93,7 +93,10 @@ public class EmberGame implements ApplicationListener {
 
     private void runPhase(Phase phase) {
         // Systems and scenes plug in here with the ECS (I-040) and scene manager (I-070).
-        if (phase == Phase.RENDER && Gdx.gl != null) {
+        if (phase == Phase.UPDATE) {
+            context.timers().update();
+            context.tweens().update();
+        } else if (phase == Phase.RENDER && Gdx.gl != null) {
             // Placeholder until the renderer (I-060). No GL on headless backends.
             ScreenUtils.clear(0f, 0f, 0f, 1f);
         }

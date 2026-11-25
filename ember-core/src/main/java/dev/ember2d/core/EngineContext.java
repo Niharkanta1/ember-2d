@@ -30,12 +30,17 @@ public final class EngineContext {
 
     private final EngineConfig config;
     private final TimeState time;
+    private final Timers timers;
+    private final Tweens tweens;
     private final Map<Class<?>, Object> services;
     private final List<Object> instancesInOrder;
 
-    private EngineContext(EngineConfig config, TimeState time, Map<Class<?>, Object> services) {
+    private EngineContext(EngineConfig config, TimeState time, Timers timers, Tweens tweens,
+            Map<Class<?>, Object> services) {
         this.config = config;
         this.time = time;
+        this.timers = timers;
+        this.tweens = tweens;
         this.services = Collections.unmodifiableMap(new LinkedHashMap<>(services));
         Set<Object> seen = Collections.newSetFromMap(new IdentityHashMap<>());
         List<Object> ordered = new ArrayList<>();
@@ -55,6 +60,16 @@ public final class EngineContext {
     /** Frame timing, game time, pause and time scale (F-002). */
     public Time time() {
         return time;
+    }
+
+    /** Delayed and repeating actions in game time (F-002). */
+    public Timers timers() {
+        return timers;
+    }
+
+    /** Float property animation in game time (F-002). */
+    public Tweens tweens() {
+        return tweens;
     }
 
     /**
@@ -144,7 +159,7 @@ public final class EngineContext {
         }
 
         public EngineContext build() {
-            return new EngineContext(config, time, services);
+            return new EngineContext(config, time, new Timers(time), new Tweens(time), services);
         }
     }
 }

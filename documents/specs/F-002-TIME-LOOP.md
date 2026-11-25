@@ -1,6 +1,6 @@
 # F-002 — Time, Game Loop, Timers and Tweens
 
-- Status: `Time` and game loop Ready (approved in I-020, 2026-11-26; see "Decisions in I-020"). Timers, tweens and `StateMachine`: expanded, API awaiting approval in I-025
+- Status: Ready (`Time` and loop approved in I-020, timers/tweens/`StateMachine` in I-025, 2026-11-26; see the "Decisions" sections)
 - Phase: 1
 - Module / package: `ember-core` / `ember.core`
 - Depends on: F-001
@@ -121,5 +121,13 @@ Unit tests with a fake `Clock` for all criteria; no window required.
 - While paused (or at time scale 0) `UPDATE` and `LATE` still run with `delta() == 0`; skipping systems that are not `runsWhenPaused` is done by the ECS (I-040).
 - `EngineContext.time()` exposes the engine's `Time`; `EmberGame.render()` drives the loop.
 
+## Decisions in I-025
+- Timers and tweens advance at the start of `UPDATE` (timers first) with scaled time; they freeze while paused or at time scale 0. A `FIXED` variant is added only if a kit needs it. Unscaled variants (for pause-menu animation) are a known gap, to be added with the UI task (I-210).
+- `Timers`: `after`, `every` (interval > 0), `cancel`, `cancelAll`. Due times are kept against `Time.elapsed()` (double) with a 1 microsecond tolerance; due timers fire in due-time then creation order; `every` fires once per elapsed interval, several times in a long frame. Timers scheduled inside an action first run on the next frame; cancelling inside an action is safe.
+- `Tweens`: `to(...)`, `cancel`, `cancelAll`; `TweenHandle.then(Runnable)` runs after the target is set (not on cancel) — an addition to the original sketch. The start value is read at creation; zero duration sets the target on the next update; elapsed time is kept as a double so the target is reached exactly on the end frame.
+- Handles (`TimerHandle`, `TweenHandle`) carry a generation, so a stale handle can never cancel a reused pooled entry. Entries are pooled; updates do not allocate (one small handle object per schedule call).
+- `StateMachine`: changing to the current state does nothing; a change requested inside an enter/exit action is applied after the running change; the initial state's enter actions are not run.
+- Scene-scoped timers and tweens (cancelled on scene exit) arrive with the scene manager (I-070); until then use `cancelAll()` or handles.
+
 ## Risks/open questions
-- Should timers run on `fixed` or `update`? Default: `update` with scaled delta; a `fixed` variant can be added if a kit needs it.
+- None open. The former question "timers on `fixed` or `update`?" is decided above (update).
