@@ -59,6 +59,8 @@ Chapters must match the code at the gate; later phases update earlier chapters w
 
 **Exit gate:** a sprite moves with frame-independent, interpolated motion that looks smooth at 60 Hz and 144 Hz; pause/resume and scene switch work; the same build runs on an Android device and survives backgrounding; lifecycle, time and ECS tests pass. Guide chapter `documents/guide/01-core-loop-ecs-scenes.md` approved by the developer.
 
+**Closed 2026-11-26.** Smooth motion confirmed by the developer on desktop; Android verified on the API 23 emulator (a real-device check is still open); pause/resume and scene switching covered by tests (the demo shows them once input arrives in Phase 2).
+
 ## Phase 2 — Platformer slice
 - Input actions and contexts, including touch actions (F-005, F-022).
 - Tiled map loading, rendering, tile collision mapping (F-009).
