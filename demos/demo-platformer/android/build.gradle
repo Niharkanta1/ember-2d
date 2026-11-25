@@ -16,6 +16,15 @@ android {
         versionName = project.version.toString()
     }
 
+    // SPIKE S-04: minified release build, signed with the debug key so it installs on the emulator.
+    buildTypes {
+        release {
+            minifyEnabled = true
+            signingConfig = signingConfigs.debug
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17

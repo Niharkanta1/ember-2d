@@ -8,6 +8,12 @@ import dev.ember2d.demo.platformer.PlatformerDemo;
 public class AndroidLauncher extends EmberAndroidLauncher {
 
     @Override
+    protected void onCreate(android.os.Bundle savedInstanceState) {
+        SpikeChecks.run();   // SPIKE S-04
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
     protected EngineConfig config(boolean devMode) {
         EngineConfig config = PlatformerDemo.config(devMode);
         config.debugOverlayVisibleAtStart = devMode;   // phones have no F3 key
