@@ -19,7 +19,7 @@ Time-boxed throwaway prototypes (`templates/SPIKE_TEMPLATE.md`). Code is deleted
 | --- | --- | --- | --- |
 | S-01 | Can imgui-java render panels in the Ember2D LWJGL3 window and share input correctly with the game? | 1 day | Phase 1 — done: yes (`spikes/S-01-imgui-java.md`) |
 | S-04 | Does an Android build with Java 17 features (records, switch expressions), reflection-loaded components and R8 minification run correctly on the minimum API level? | 1 day | Phase 1 — done: yes, with rules (`spikes/S-04-android-java17-r8.md`) |
-| S-02 | Does the kinematic mover handle a Tiled platformer map (tile seams, one-way, moving platform) without snagging? Does the libGDX loader resolve object templates and class-typed properties, or must Ember2D resolve them? | 2 days | Start of Phase 2 |
+| S-02 | Does the kinematic mover handle a Tiled platformer map (tile seams, one-way, moving platform) without snagging? Does the libGDX loader resolve object templates and class-typed properties, or must Ember2D resolve them? | 2 days | Phase 2 — done: yes, with conditions (`spikes/S-02-collision-tiled.md`) |
 | S-03 | Does blade-ink load an Inky-compiled story and save/restore its state on desktop and Android? | 0.5 day | Start of Phase 5 |
 
 ## Sequence
