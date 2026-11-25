@@ -1,7 +1,5 @@
 package dev.ember2d.app;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.utils.ScreenUtils;
 import dev.ember2d.core.Phase;
 import dev.ember2d.core.Timers;
 import dev.ember2d.core.Tweens;
@@ -17,7 +15,8 @@ import java.util.Objects;
  *   <li>{@code FIXED}: systems, then flush queued events (once per fixed step).</li>
  *   <li>{@code UPDATE}: timers, tweens, systems, then flush.</li>
  *   <li>{@code LATE}: systems, then flush.</li>
- *   <li>{@code RENDER}: systems, then the placeholder screen clear (until the renderer, I-060).</li>
+ *   <li>{@code RENDER}: begin the world pass, systems, end the world pass (scale to the window). Without a
+ *       renderer (headless) only the systems run.</li>
  * </ul>
  *
  * The {@code systems} hook is where the ECS (I-040) and scenes (I-070) plug in.
@@ -29,13 +28,18 @@ final class EnginePhaseRunner implements PhaseRunner {
     private final DefaultEventBus events;
     private final PhaseRunner systems;
     private final Runnable assetLoading;
+    private final Runnable beginRender;
+    private final Runnable endRender;
 
-    EnginePhaseRunner(Timers timers, Tweens tweens, DefaultEventBus events, Runnable assetLoading, PhaseRunner systems) {
+    EnginePhaseRunner(Timers timers, Tweens tweens, DefaultEventBus events, Runnable assetLoading,
+            Runnable beginRender, Runnable endRender, PhaseRunner systems) {
         this.timers = Objects.requireNonNull(timers, "timers");
         this.tweens = Objects.requireNonNull(tweens, "tweens");
         this.events = Objects.requireNonNull(events, "events");
         this.systems = Objects.requireNonNull(systems, "systems");
         this.assetLoading = Objects.requireNonNull(assetLoading, "assetLoading");
+        this.beginRender = Objects.requireNonNull(beginRender, "beginRender");
+        this.endRender = Objects.requireNonNull(endRender, "endRender");
     }
 
     @Override
@@ -57,10 +61,11 @@ final class EnginePhaseRunner implements PhaseRunner {
                 events.flush();
             }
             case RENDER -> {
-                systems.run(phase);
-                if (Gdx.gl != null) {
-                    // Placeholder until the renderer (I-060). No GL on headless backends.
-                    ScreenUtils.clear(0f, 0f, 0f, 1f);
+                beginRender.run();
+                try {
+                    systems.run(phase);
+                } finally {
+                    endRender.run();
                 }
             }
         }

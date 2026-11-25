@@ -3,6 +3,7 @@ package dev.ember2d.app;
 import com.badlogic.gdx.utils.Disposable;
 import dev.ember2d.assets.Assets;
 import dev.ember2d.core.Log;
+import dev.ember2d.render.Renderer;
 import dev.ember2d.core.Phase;
 import dev.ember2d.core.PublicApi;
 import dev.ember2d.core.Time;
@@ -43,17 +44,19 @@ public final class EngineContext {
     private final Tweens tweens;
     private final DefaultEventBus events;
     private final Assets assets;
+    private final Renderer renderer;
     private final Map<Class<?>, Object> services;
     private final List<Object> instancesInOrder;
 
     private EngineContext(EngineConfig config, TimeState time, Timers timers, Tweens tweens, DefaultEventBus events,
-            Assets assets, Map<Class<?>, Object> services) {
+            Assets assets, Renderer renderer, Map<Class<?>, Object> services) {
         this.config = config;
         this.time = time;
         this.timers = timers;
         this.tweens = tweens;
         this.events = events;
         this.assets = assets;
+        this.renderer = renderer;
         this.services = Collections.unmodifiableMap(new LinkedHashMap<>(services));
         Set<Object> seen = Collections.newSetFromMap(new IdentityHashMap<>());
         List<Object> ordered = new ArrayList<>();
@@ -100,6 +103,19 @@ public final class EngineContext {
             throw new IllegalStateException("This EngineContext has no asset service; set one with Builder.assets(...)");
         }
         return assets;
+    }
+
+    /**
+     * The world renderer and camera (F-004).
+     *
+     * @throws IllegalStateException without OpenGL (headless backends) or in a context built without one (tests)
+     */
+    public Renderer renderer() {
+        if (renderer == null) {
+            throw new IllegalStateException("This EngineContext has no renderer (headless backend or test context); "
+                    + "set one with Builder.renderer(...)");
+        }
+        return renderer;
     }
 
     /**
@@ -160,6 +176,7 @@ public final class EngineContext {
         private final Tweens tweens;
         private final DefaultEventBus events;
         private Assets assets;
+        private Renderer renderer;
         private final Map<Class<?>, Object> services = new LinkedHashMap<>();
 
         public Builder(EngineConfig config) {
@@ -178,6 +195,12 @@ public final class EngineContext {
         /** Sets the asset service; the engine sets its own, tests may set a fake. */
         public Builder assets(Assets assets) {
             this.assets = Objects.requireNonNull(assets, "assets");
+            return this;
+        }
+
+        /** Sets the renderer; the engine sets its own (none on headless backends), tests may set a fake. */
+        public Builder renderer(Renderer renderer) {
+            this.renderer = Objects.requireNonNull(renderer, "renderer");
             return this;
         }
 
@@ -207,7 +230,7 @@ public final class EngineContext {
         }
 
         public EngineContext build() {
-            return new EngineContext(config, time, timers, tweens, events, assets, services);
+            return new EngineContext(config, time, timers, tweens, events, assets, renderer, services);
         }
     }
 }

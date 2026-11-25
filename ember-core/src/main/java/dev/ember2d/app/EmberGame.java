@@ -1,6 +1,7 @@
 package dev.ember2d.app;
 
 import com.badlogic.gdx.ApplicationListener;
+import com.badlogic.gdx.Gdx;
 import dev.ember2d.assets.internal.GdxAssets;
 import dev.ember2d.core.Log;
 import dev.ember2d.core.PublicApi;
@@ -8,6 +9,7 @@ import dev.ember2d.core.internal.GameLoop;
 import dev.ember2d.core.internal.GdxClock;
 import dev.ember2d.event.AppResumed;
 import dev.ember2d.event.AppSuspended;
+import dev.ember2d.render.internal.GdxRenderer;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
@@ -33,6 +35,7 @@ public class EmberGame implements ApplicationListener {
     private final EngineConfig config;
     private final Function<EngineConfig, GdxAssets> assetsFactory;
     private GdxAssets assets;
+    private GdxRenderer renderer;
     private AppState state = AppState.CREATED;
     private EngineContext context;
     private GameLoop loop;
@@ -77,19 +80,28 @@ public class EmberGame implements ApplicationListener {
         assets = assetsFactory.apply(config);
         try {
             builder.assets(assets);
+            renderer = GdxRenderer.create(config.virtualWidth, config.virtualHeight, config.pixelsPerUnit,
+                    config.renderMode, config.backgroundColor, builder.timeState());
+            if (renderer != null) {
+                builder.renderer(renderer);
+            }
             configureContext(builder);
             context = builder.build();
             if (assets.manifest().group(GLOBAL_GROUP) != null) {
                 assets.loadGroup(GLOBAL_GROUP).finish();
             }
         } catch (RuntimeException e) {
+            if (renderer != null) {
+                renderer.dispose();
+                renderer = null;
+            }
             assets.dispose();
             assets = null;
             context = null;
             throw e;
         }
         EnginePhaseRunner phases = new EnginePhaseRunner(context.timers(), context.tweens(), builder.eventBus(),
-                assets::update, phase -> { });
+                assets::update, this::beginRender, this::endRender, phase -> { });
         loop = new GameLoop(new GdxClock(), builder.timeState(), phases, config.maxCatchUpSteps);
         state = AppState.RUNNING;
         if (config.devMode) {
@@ -100,6 +112,11 @@ public class EmberGame implements ApplicationListener {
     @Override
     public final void resize(int width, int height) {
         requireStarted("resize");
+        if (renderer != null) {
+            // Pixel-perfect layout works in real pixels (the back buffer), which can differ from the logical size.
+            renderer.resize(Gdx.graphics != null ? Gdx.graphics.getBackBufferWidth() : width,
+                    Gdx.graphics != null ? Gdx.graphics.getBackBufferHeight() : height);
+        }
         context.forEachLifecycleListener("onResize", listener -> listener.onResize(width, height));
     }
 
@@ -157,8 +174,23 @@ public class EmberGame implements ApplicationListener {
             return; // never started: nothing to release
         }
         List<RuntimeException> failures = context.disposeServices();
-        assets.dispose();   // engine-owned; after the game's services (reverse boot order)
+        if (renderer != null) {
+            renderer.dispose();   // engine-owned; after the game's services (reverse boot order)
+        }
+        assets.dispose();
         LOG.info(failures.isEmpty() ? "Shut down" : "Shut down with " + failures.size() + " disposal failure(s)");
+    }
+
+    private void beginRender() {
+        if (renderer != null) {
+            renderer.beginFrame();
+        }
+    }
+
+    private void endRender() {
+        if (renderer != null) {
+            renderer.endFrame();
+        }
     }
 
     private void requireState(String call, AppState expected) {

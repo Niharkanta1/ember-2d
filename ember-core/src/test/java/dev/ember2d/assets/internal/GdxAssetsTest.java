@@ -4,27 +4,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 
-import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.loaders.FileHandleResolver;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
-import com.badlogic.gdx.backends.headless.HeadlessFiles;
-import com.badlogic.gdx.backends.headless.mock.audio.MockAudio;
-import com.badlogic.gdx.backends.headless.mock.graphics.MockGraphics;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.utils.GdxNativesLoader;
 import com.badlogic.gdx.utils.JsonValue;
+import dev.ember2d.HeadlessGdx;
 import dev.ember2d.assets.AssetLoadException;
 import dev.ember2d.assets.AsyncLoad;
 import dev.ember2d.core.LogConfig;
 import dev.ember2d.core.LogLevel;
 import dev.ember2d.core.LogSink;
-import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.AfterAll;
@@ -34,8 +28,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * Loads real files (test resources under {@code assets-test/}) without a window: libGDX headless files and mock
- * audio, plus do-nothing stand-ins for OpenGL and the application built with {@link Proxy} (test code only).
+ * Loads real files (test resources under {@code assets-test/}) without a window ({@link HeadlessGdx}).
  */
 class GdxAssetsTest {
 
@@ -53,48 +46,12 @@ class GdxAssetsTest {
 
     @BeforeAll
     static void headlessLibgdx() {
-        GdxNativesLoader.load();
-        Gdx.files = new HeadlessFiles();
-        Gdx.audio = new MockAudio();
-        Gdx.graphics = new MockGraphics();
-        GL20 gl = stub(GL20.class);
-        Gdx.gl = gl;
-        Gdx.gl20 = gl;
-        Gdx.app = stub(Application.class);
+        HeadlessGdx.install();
     }
 
     @AfterAll
     static void clearLibgdx() {
-        Gdx.files = null;
-        Gdx.audio = null;
-        Gdx.graphics = null;
-        Gdx.gl = null;
-        Gdx.gl20 = null;
-        Gdx.app = null;
-    }
-
-    /** An interface implementation whose methods do nothing and return defaults. */
-    @SuppressWarnings("unchecked")
-    private static <T> T stub(Class<T> type) {
-        return (T) Proxy.newProxyInstance(type.getClassLoader(), new Class<?>[] {type}, (proxy, method, args) -> {
-            Class<?> r = method.getReturnType();
-            if (r == boolean.class) {
-                return false;
-            } else if (r == int.class) {
-                return 0;
-            } else if (r == long.class) {
-                return 0L;
-            } else if (r == float.class) {
-                return 0f;
-            } else if (r == double.class) {
-                return 0d;
-            } else if (r == String.class) {
-                return "";
-            } else if (r == Application.ApplicationType.class) {
-                return Application.ApplicationType.HeadlessDesktop;
-            }
-            return null;
-        });
+        HeadlessGdx.clear();
     }
 
     @BeforeEach

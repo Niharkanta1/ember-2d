@@ -16,6 +16,7 @@ public final class PlatformerDemo {
         EngineConfig config = new EngineConfig();
         config.virtualWidth = 320;
         config.virtualHeight = 180;
+        config.backgroundColor.set(0.08f, 0.06f, 0.10f, 1f);
         config.devMode = devMode;
         return config;
     }

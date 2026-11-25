@@ -29,7 +29,7 @@ class EnginePhaseRunnerTest {
     private long nextDelta = FRAME;
 
     private final GameLoop loop = new GameLoop(() -> nextDelta, time,
-            new EnginePhaseRunner(timers, new Tweens(time), bus, () -> { }, phase -> {
+            new EnginePhaseRunner(timers, new Tweens(time), bus, () -> { }, () -> { }, () -> { }, phase -> {
                 trace.add(phase.name());
                 if (phase == queueIn) {
                     bus.queue(new Ping(phase.name()));

@@ -1,6 +1,8 @@
 package dev.ember2d.app;
 
+import com.badlogic.gdx.graphics.Color;
 import dev.ember2d.core.PublicApi;
+import dev.ember2d.render.RenderMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,6 +41,12 @@ public final class EngineConfig {
     /** Enables dev features: debug logging, boot timing, hot reload and dev tools hooks (later phases). */
     public boolean devMode = false;
 
+    /** How the virtual resolution is fitted to the window (F-004). */
+    public RenderMode renderMode = RenderMode.PIXEL_PERFECT;
+
+    /** Colour behind the world (inside the letterbox; the bars are black). */
+    public final Color backgroundColor = new Color(Color.BLACK);
+
     /** Asset manifest path relative to the assets root (F-008). */
     public String assetManifest = "manifest.json";
 
@@ -65,6 +73,9 @@ public final class EngineConfig {
             problems.add("maxCatchUpSteps must be between 1 and " + MAX_CATCH_UP_LIMIT
                     + " (was " + maxCatchUpSteps + ")");
         }
+        if (renderMode == null) {
+            problems.add("renderMode must be set (was null)");
+        }
         if (assetManifest == null || assetManifest.isBlank()) {
             problems.add("assetManifest must be a non-empty path (was " + quote(assetManifest) + ")");
         }
@@ -76,7 +87,7 @@ public final class EngineConfig {
     @Override
     public String toString() {
         return "EngineConfig[virtual=" + virtualWidth + "x" + virtualHeight + ", pixelsPerUnit=" + pixelsPerUnit
-                + ", fixedStep=" + fixedStep + ", maxCatchUpSteps=" + maxCatchUpSteps + ", devMode=" + devMode
+                + ", fixedStep=" + fixedStep + ", maxCatchUpSteps=" + maxCatchUpSteps + ", renderMode=" + renderMode + ", devMode=" + devMode
                 + ", assetManifest=" + quote(assetManifest) + "]";
     }
 

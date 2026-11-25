@@ -1,0 +1,141 @@
+package dev.ember2d.render;
+
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.FloatArray;
+import com.badlogic.gdx.utils.IntArray;
+import com.badlogic.gdx.utils.ObjectSet;
+import dev.ember2d.assets.Assets;
+import dev.ember2d.core.Log;
+import dev.ember2d.core.Phase;
+import dev.ember2d.core.PublicApi;
+import dev.ember2d.core.Time;
+import dev.ember2d.ecs.EntitySystem;
+import dev.ember2d.ecs.Transform;
+import dev.ember2d.ecs.World;
+import dev.ember2d.render.internal.EntitySort;
+import java.util.List;
+import java.util.Objects;
+
+/**
+ * Draws every entity with a {@link Transform} and a {@link Sprite} in {@code RENDER} (F-004): grouped by layer in
+ * the renderer's layer order, sorted per layer, at the interpolated transform. In the pixel-perfect modes draw
+ * positions are snapped to whole virtual pixels. Sorting and drawing do not allocate per frame.
+ */
+@PublicApi
+public final class SpriteRenderSystem extends EntitySystem {
+
+    private static final Log LOG = Log.get("render");
+
+    private final Renderer renderer;
+    private final Assets assets;
+    private final Time time;
+    private final Array<IntArray> buckets = new Array<>(true, 4);
+    private final Array<FloatArray> keys = new Array<>(true, 4);
+    private final EntitySort sorter = new EntitySort();
+    private final ObjectSet<String> warnedLayers = new ObjectSet<>();
+    private final Vector2 position = new Vector2();
+    private List<RenderLayer> layers;
+    private int fallbackLayer;
+    private boolean warnedMissingRegion;
+
+    public SpriteRenderSystem(World world, Renderer renderer, Assets assets, Time time) {
+        super(Phase.RENDER, world.family(Transform.class, Sprite.class));
+        this.renderer = Objects.requireNonNull(renderer, "renderer");
+        this.assets = assets;
+        this.time = Objects.requireNonNull(time, "time");
+    }
+
+    @Override
+    protected void begin() {
+        layers = renderer.layers();
+        while (buckets.size < layers.size()) {
+            buckets.add(new IntArray(true, 64));
+            keys.add(new FloatArray(true, 64));
+        }
+        fallbackLayer = 0;
+        for (int i = 0; i < layers.size(); i++) {
+            buckets.get(i).clear();
+            keys.get(i).clear();
+            if (layers.get(i).name().equals("world")) {
+                fallbackLayer = i;
+            }
+        }
+    }
+
+    @Override
+    protected void process(int entity, float delta) {
+        Sprite sprite = world().get(entity, Sprite.class);
+        int layer = layerIndex(sprite.layer);
+        float key = switch (layers.get(layer).sort()) {
+            case Z -> sprite.z;
+            case Y_SORT -> -world().get(entity, Transform.class).position.y;
+            case NONE -> 0f;
+        };
+        buckets.get(layer).add(entity);
+        keys.get(layer).add(key);
+    }
+
+    @Override
+    protected void end() {
+        Batch batch = renderer.batch();
+        for (int l = 0; l < layers.size(); l++) {
+            IntArray bucket = buckets.get(l);
+            if (layers.get(l).sort() != SortMode.NONE) {
+                sorter.sort(bucket, keys.get(l));
+            }
+            for (int i = 0; i < bucket.size; i++) {
+                draw(batch, bucket.get(i));
+            }
+        }
+        batch.setColor(Color.WHITE);
+    }
+
+    private void draw(Batch batch, int entity) {
+        Sprite sprite = world().get(entity, Sprite.class);
+        TextureRegion region = sprite.region;
+        if (region == null && sprite.regionId != null && assets != null) {
+            region = assets.region(sprite.regionId);
+            sprite.region = region;
+        }
+        if (region == null) {
+            if (!warnedMissingRegion) {
+                warnedMissingRegion = true;
+                LOG.warn("A Sprite has neither region nor regionId; it is not drawn (logged once)");
+            }
+            return;
+        }
+        Transform transform = world().get(entity, Transform.class);
+        float ppu = renderer.pixelsPerUnit();
+        transform.interpolated(time.alpha(), position);
+        float originX = sprite.origin.x / ppu;
+        float originY = sprite.origin.y / ppu;
+        float x = position.x - originX;
+        float y = position.y - originY;
+        if (renderer.mode() != RenderMode.SMOOTH) {
+            x = Math.round(x * ppu) / ppu;
+            y = Math.round(y * ppu) / ppu;
+        }
+        batch.setColor(sprite.tint);
+        batch.draw(region.getTexture(), x, y, originX, originY,
+                region.getRegionWidth() / ppu, region.getRegionHeight() / ppu,
+                transform.scale.x, transform.scale.y, transform.interpolatedRotation(time.alpha()),
+                region.getRegionX(), region.getRegionY(), region.getRegionWidth(), region.getRegionHeight(),
+                sprite.flipX != region.isFlipX(), sprite.flipY != region.isFlipY());
+    }
+
+    private int layerIndex(String name) {
+        for (int i = 0; i < layers.size(); i++) {
+            if (layers.get(i).name().equals(name)) {
+                return i;
+            }
+        }
+        if (warnedLayers.add(String.valueOf(name))) {
+            LOG.warn("Unknown render layer \"" + name + "\"; drawing on \"" + layers.get(fallbackLayer).name() + "\"");
+        }
+        return fallbackLayer;
+    }
+}
