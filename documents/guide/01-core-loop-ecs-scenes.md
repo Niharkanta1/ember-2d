@@ -2,7 +2,7 @@
 
 This chapter shows how to build a game on what Phase 1 delivers: starting the engine, scenes, entities and systems, time, events, assets, sprites and the camera, the debug overlay, and the Android build. Examples come from the platformer demo (`demos/demo-platformer`).
 
-> Status: written at the Phase 1 gate (2026-11-26) from the code at that point. Awaiting developer review.
+> Status: approved by the developer at the Phase 1 gate (2026-11-26).
 
 ## 1. What you get in Phase 1
 - `EmberGame`, the single entry point, configured with `EngineConfig` and running on desktop and Android.
