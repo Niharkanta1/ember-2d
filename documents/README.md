@@ -27,6 +27,7 @@ This package is a living engineering specification, not a code implementation. I
 - `PROJECT_STRUCTURE.md` — repository layout
 - `REVIEW-2026-11.md` — the architecture review that produced revision 2
 - `specs/` — feature specifications (index in `specs/README.md`)
+- `guide/` — user guide, one chapter per phase gate (`guide/00-getting-started.md` first)
 - `templates/` — templates for specs, tasks, spikes and decision records
 - `images/` — logo and architecture diagram
 - `old-files/` — pre-revision versions, kept for reference only; not authoritative
