@@ -2,10 +2,10 @@
 
 This chapter covers what Phase 0 delivers: building Ember2D, running the platformer demo, logging, the architecture rules that keep the code base in shape, and packaging a desktop release. Later chapters cover the engine itself.
 
-> Status: approved by the developer at the Phase 0 gate (2026-11-25). Updated for I-010: the demo now starts through `EmberGame`.
+> Status: approved by the developer at the Phase 0 gate (2026-11-25). Updated for I-010 (the demo starts through `EmberGame`) and I-015 (Android debug build, section 8).
 
 ## 1. What you get in Phase 0
-- A Gradle multi-module build: `ember-core`, `ember-desktop`, `ember-android`, `ember-devtools`, `ember-box2d`, five kits under `kits/`, and the platformer demo under `demos/demo-platformer/` (`core` + `desktop`). Most modules are still empty placeholders; the module layout is final (see `PROJECT_STRUCTURE.md`).
+- A Gradle multi-module build: `ember-core`, `ember-desktop`, `ember-android`, `ember-devtools`, `ember-box2d`, five kits under `kits/`, and the platformer demo under `demos/demo-platformer/` (`core`, `desktop` and `android`). Most modules are still empty placeholders; the module layout is final (see `PROJECT_STRUCTURE.md`).
 - The demo opens an empty window. It exists to prove the build, the launcher and packaging.
 - Logging (`Log`, `LogConfig`) with a dev log file on desktop.
 - Architecture tests that enforce the rules in `ARCHITECTURE.md` on every build.
@@ -174,12 +174,44 @@ The path is also logged at `ERROR` level. A fatal error screen comes with Phase 
 
 **macOS:** the macOS targets are configured but have not been tested on a Mac yet. The app needs no `-XstartOnFirstThread` flag; the launcher handles it.
 
-## 8. Continuous integration
+## 8. Android debug build
+Build and install the demo on a phone (USB debugging on) or an emulator:
+```powershell
+.\gradlew.bat :demos:demo-platformer:android:assembleDebug
+adb install -r demos\demo-platformerndroiduild\outputspk\debugndroid-debug.apk
+adb shell am start -n dev.ember2d.demo.platformer/.android.AndroidLauncher
+```
+The APK (about 5 MB) runs on Android 6 (API 23) and newer, in landscape, and contains libGDX natives for `arm64-v8a`, `armeabi-v7a` and `x86_64`. Debug builds run in dev mode (debug logging).
+
+The Android launcher is five lines: it extends `EmberAndroidLauncher` and returns the same config as the desktop launcher.
+```java
+public class AndroidLauncher extends EmberAndroidLauncher {
+    @Override
+    protected EngineConfig config(boolean devMode) {
+        return PlatformerDemo.config(devMode);
+    }
+}
+```
+
+**Smoke test.** Logs go to logcat; the engine's tags are the log categories (`core`, `launcher`, ...):
+```powershell
+adb logcat -c
+adb shell am start -W -n dev.ember2d.demo.platformer/.android.AndroidLauncher
+adb shell input keyevent KEYCODE_HOME          # expect "Suspended"
+adb shell am start -W -n dev.ember2d.demo.platformer/.android.AndroidLauncher   # expect "Resumed"
+adb shell input keyevent KEYCODE_BACK          # expect "Shut down"
+adb logcat -d -s core:* launcher:* AndroidRuntime:E
+```
+Expected: `launcher` logs package and version, then `core` logs `Starting Ember2D`, `Suspended`, `Resumed`, `Suspended`, `Shut down`, and no `AndroidRuntime` errors. The emulator used for verification is an API 23 `default` x86_64 image (`emulator -avd ember-api23`).
+
+Release builds (signed AAB, R8) come in Phase 3 (I-255).
+
+## 9. Continuous integration
 `.github/workflows/ci.yml` has two jobs:
-- **Build and test** — every push to `main`, every pull request, and manual runs: `./gradlew build` on Ubuntu with Temurin 21. Test reports are uploaded when it fails.
+- **Build and test** — every push to `main`, every pull request, and manual runs: `./gradlew build` on Ubuntu with Temurin 21. Uploads the Android debug APK (`platformer-demo-android-debug`), and test reports when it fails.
 - **Package desktop builds** — pushes to `main` and manual runs only (Actions tab → CI → Run workflow): builds the Windows and Linux zips and uploads them as the `platformer-demo-desktop` artifact.
 
-## 9. Common mistakes
+## 10. Common mistakes
 | Symptom | Cause | Fix |
 | --- | --- | --- |
 | `Failed to find Build Tools revision 36.0.0` | Android build-tools missing | `sdkmanager "build-tools;36.0.0"` |
@@ -190,9 +222,10 @@ The path is also logged at `ERROR` level. A fatal error screen comes with Phase 
 | `... is not listed in allowedModuleDependencies` | new module | add it to the root `build.gradle` map, following `ARCHITECTURE.md` |
 | No dev log file | game started outside `gradlew run` (release mode) | use `run`, or pass `-Dember.devMode=true` |
 | Packaged game closes immediately | an exception at startup | read the crash log (section 7) |
+| Android app closes immediately | an exception at startup | `adb logcat -d -s AndroidRuntime:E core:*` |
 | Window title says `dev` instead of a version | running from classes, not the packaged jar | expected; the version comes from the jar manifest |
 
-## 10. Where to look when something breaks
+## 11. Where to look when something breaks
 1. **Console** — the first `ERROR` or `WARN` line and its category.
 2. **Dev log** — `demos/demo-platformer/desktop/logs/platformer-demo-dev.log` (dev mode), with timestamps.
 3. **Crash log** — the per-OS folder in section 7 (release builds).

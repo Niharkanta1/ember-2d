@@ -1,6 +1,6 @@
 # F-022 — Android Platform and Touch Input
 
-- Status: Draft
+- Status: Platform launcher part Ready (I-015, 2026-11-25); context loss (I-060), back action (I-100), screen handling and touch input: Draft
 - Phase: 1 (Android launcher, smoke build), 2 (touch actions), 3 (on-screen controls, Android demo build)
 - Module / package: `ember-android`; `ember-core` / `ember.input`, `ember.render`, `ember.ui`
 - Depends on: F-001, F-004, F-005, F-012, F-013, F-020
@@ -29,6 +29,22 @@ Every Ember2D game can ship on Android with the same game code: touch controls, 
 - Pointer helpers: touch positions in world and UI coordinates, multi-touch (up to 5 pointers).
 - **On-screen controls** (`ember.ui` widgets bound to input actions): virtual joystick (fixed or floating), buttons, D-pad; opacity, size and position configurable and saved in settings; auto-hidden when a gamepad or keyboard is used.
 - Haptics: short vibration helper (optional, setting-controlled).
+
+## Launcher design (I-015)
+**API sketch** (`ember-android`, `dev.ember2d.android`):
+```java
+@PublicApi public abstract class EmberAndroidLauncher extends AndroidApplication {
+    protected abstract EngineConfig config(boolean devMode);      // the only method a game implements
+    protected AndroidApplicationConfiguration androidConfig();    // immersive, no accelerometer/compass
+    protected final boolean isDebuggable();
+}
+```
+- `onCreate` sets the log level (debug builds: DEBUG, release: INFO; output to logcat), starts `new EmberGame(config(devMode))` and logs package and version. Dev mode is the app's debuggable flag.
+- Android `onPause`/`onResume` reach `EmberGame` as suspend/resume through libGDX; Back currently finishes the activity, which disposes the engine. The `back` action replaces this in I-100.
+- A game's Android launcher is an application module (`demos/<demo>/android`) with a five-line `AndroidLauncher`, landscape by default, minSdk 23, compile and target SDK 36. libGDX natives are extracted for `arm64-v8a`, `armeabi-v7a` and `x86_64`.
+- Exposes Android types in its API: it is a platform module, like `ember-desktop`; game code never sees them.
+
+**Verified by** a scripted `adb` smoke test on the API 23 emulator: launch, Home (suspend), reopen (resume), Back (shut down), with the engine log lines checked in logcat.
 
 ## Non-goals
 - iOS (ADR-019). Google Play services, ads, in-app purchases, cloud saves (game-level integrations, later).

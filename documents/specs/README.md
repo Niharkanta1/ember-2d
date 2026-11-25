@@ -4,7 +4,7 @@ Specifications define feature scope, behaviour, API boundaries and acceptance cr
 
 | ID | Spec | Phase | Package / module | Status |
 | --- | --- | --- | --- | --- |
-| F-020 | Packaging and release builds (desktop, Android) | 0, 1, 3 | `ember-desktop`, `ember-android` | Desktop Ready; Android Draft |
+| F-020 | Packaging and release builds (desktop, Android) | 0, 1, 3 | `ember-desktop`, `ember-android` | Desktop Ready; Android debug build done; Android release Draft |
 | F-001 | Engine core and app lifecycle | 1 | `ember.core` | Ready |
 | F-002 | Time, loop, timers, tweens | 1 | `ember.core` | Expanded; API awaiting approval |
 | F-003 | Entity component system | 1 | `ember.ecs` | Expanded; API awaiting approval |
@@ -13,7 +13,7 @@ Specifications define feature scope, behaviour, API boundaries and acceptance cr
 | F-008 | Assets and hot reload | 1, 2, 3 | `ember.assets` | Draft |
 | F-010 | Scenes, data, prefabs, component registry | 1, 2, 3 | `ember.scene`, `ember.data` | Draft |
 | F-014 | Debug overlay and particles | 1, 6 | `ember.debug`, `ember.particles` | Draft |
-| F-022 | Android platform and touch input | 1, 2, 3 | `ember-android`, `ember.input` | Draft |
+| F-022 | Android platform and touch input | 1, 2, 3 | `ember-android`, `ember.input` | Launcher Ready; rest Draft |
 | F-005 | Input actions | 2, 3, 6 | `ember.input` | Draft |
 | F-006 | Physics: kinematic collision | 2 | `ember.collision` | Draft |
 | F-007 | Animation and animation state machine | 2, 6 | `ember.animation` | Draft |

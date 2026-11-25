@@ -46,6 +46,10 @@ Downloadable desktop and Android builds exist from the first phases, so shipping
 
 **Tests:** unit tests for the crash-log writer and the per-OS folder; packaging verified by running the Windows zip's executable without Java on `PATH` or `JAVA_HOME`. macOS targets are configured but verified only when a Mac is available.
 
+## Android debug build (I-015)
+- `./gradlew :demos:demo-platformer:android:assembleDebug` produces `demos/demo-platformer/android/build/outputs/apk/debug/android-debug.apk` (about 5 MB, three ABIs). It is part of every `./gradlew build`, and CI uploads it as the `platformer-demo-android-debug` artifact on every run.
+- Version name comes from the Gradle version; version code is 1 until the release build (I-255), which also adds signing, R8 and the AAB.
+
 ## Non-goals
 - Desktop installers, code signing and notarisation (document as later steps), Steam integration, iOS and web packaging, Play Store listing automation.
 

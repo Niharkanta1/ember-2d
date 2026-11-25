@@ -9,7 +9,7 @@ android {
     compileSdk = libs.versions.androidCompileSdk.get().toInteger()
 
     defaultConfig {
-        // Placeholder; the minimum API level is decided in I-015 (ADR-015).
+        // Android 6; decided in I-015 (ADR-015).
         minSdk = libs.versions.androidMinSdk.get().toInteger()
     }
 

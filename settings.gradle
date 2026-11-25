@@ -30,6 +30,7 @@ include 'kits:kit-platformer'
 include 'kits:kit-topdown'
 include 'kits:kit-novel'
 
-// Demos (other demos are added in their phase; the Android launcher in I-015)
+// Demos (other demos are added in their phase)
 include 'demos:demo-platformer:core'
 include 'demos:demo-platformer:desktop'
+include 'demos:demo-platformer:android'

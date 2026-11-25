@@ -10,9 +10,10 @@ assertj = "3.27.7"
 archunit = "1.5.1"
 construo = "2.3.0"
 
-# Android SDK levels (minSdk is a placeholder; the final value is decided in I-015).
+# Android SDK levels. minSdk 23 (Android 6) decided in I-015 (ADR-015).
 androidCompileSdk = "36"  # gdx-backend-android 1.14.2 pulls androidx.core 1.17.0, which requires 36+
-androidMinSdk = "21"
+androidTargetSdk = "36"
+androidMinSdk = "23"
 
 [libraries]
 gdx-core = { module = "com.badlogicgames.gdx:gdx", version.ref = "gdx" }
@@ -30,5 +31,6 @@ assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
 archunit = { module = "com.tngtech.archunit:archunit", version.ref = "archunit" }
 
 [plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 construo = { id = "io.github.fourlastor.construo", version.ref = "construo" }

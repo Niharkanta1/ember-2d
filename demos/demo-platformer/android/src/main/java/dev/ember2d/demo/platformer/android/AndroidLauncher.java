@@ -1,0 +1,14 @@
+package dev.ember2d.demo.platformer.android;
+
+import dev.ember2d.android.EmberAndroidLauncher;
+import dev.ember2d.core.EngineConfig;
+import dev.ember2d.demo.platformer.PlatformerDemo;
+
+/** Launches the platformer demo on Android. */
+public class AndroidLauncher extends EmberAndroidLauncher {
+
+    @Override
+    protected EngineConfig config(boolean devMode) {
+        return PlatformerDemo.config(devMode);
+    }
+}

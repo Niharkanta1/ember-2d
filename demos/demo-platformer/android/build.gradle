@@ -1,0 +1,63 @@
+plugins {
+    alias(libs.plugins.android.application)
+}
+
+description = 'Platformer demo: Android launcher (F-022).'
+
+android {
+    namespace = 'dev.ember2d.demo.platformer.android'
+    compileSdk = libs.versions.androidCompileSdk.get().toInteger()
+
+    defaultConfig {
+        applicationId = 'dev.ember2d.demo.platformer'
+        minSdk = libs.versions.androidMinSdk.get().toInteger()
+        targetSdk = libs.versions.androidTargetSdk.get().toInteger()
+        versionCode = 1                                 // real scheme with the release build (I-255)
+        versionName = project.version.toString()
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+        coreLibraryDesugaringEnabled = true
+    }
+
+    sourceSets {
+        main {
+            // libGDX native libraries, extracted by copyAndroidNatives below.
+            jniLibs.srcDirs += [layout.buildDirectory.dir('gdx-natives').get().asFile]
+        }
+    }
+}
+
+// libGDX ships its Android .so files inside jars; extract them per ABI so they are packed into the APK.
+// ABIs: phones (arm64-v8a, armeabi-v7a) and emulators (x86_64). 32-bit x86 is not shipped.
+def nativeAbis = ['arm64-v8a', 'armeabi-v7a', 'x86_64']
+configurations {
+    gdxNatives
+}
+
+dependencies {
+    implementation project(':demos:demo-platformer:core')
+    implementation project(':ember-android')
+    coreLibraryDesugaring libs.android.desugar
+    nativeAbis.each { abi ->
+        gdxNatives variantOf(libs.gdx.platform) { classifier("natives-${abi}") }
+    }
+}
+
+def copyAndroidNatives = tasks.register('copyAndroidNatives', Sync) {
+    description = 'Extracts libGDX native libraries per ABI into build/gdx-natives.'
+    into layout.buildDirectory.dir('gdx-natives')
+    def nativeJars = configurations.gdxNatives
+    nativeAbis.each { abi ->
+        into(abi) {
+            from { nativeJars.filter { it.name.endsWith("natives-${abi}.jar") }.collect { zipTree(it) } }
+            include '*.so'
+        }
+    }
+}
+
+tasks.matching { it.name.contains('merge') && it.name.contains('JniLibFolders') }.configureEach {
+    dependsOn copyAndroidNatives
+}
