@@ -6,7 +6,7 @@ Specifications define feature scope, behaviour, API boundaries and acceptance cr
 | --- | --- | --- | --- | --- |
 | F-020 | Packaging and release builds (desktop, Android) | 0, 1, 3 | `ember-desktop`, `ember-android` | Desktop Ready; Android debug build done; Android release Draft |
 | F-001 | Engine core and app lifecycle | 1 | `ember.core` | Ready |
-| F-002 | Time, loop, timers, tweens | 1 | `ember.core` | Expanded; API awaiting approval |
+| F-002 | Time, loop, timers, tweens | 1 | `ember.core` | Time and loop Ready; timers/tweens awaiting approval |
 | F-003 | Entity component system | 1 | `ember.ecs` | Expanded; API awaiting approval |
 | F-019 | Events and EngineContext | 1 | `ember.event`, `ember.core` | Context Ready; events awaiting approval |
 | F-004 | Rendering, camera, text | 1, 2, 4 | `ember.render`, `ember.camera` | Draft |

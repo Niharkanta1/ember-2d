@@ -55,7 +55,7 @@ public final class EntityRef {                                 // value type: in
 
 @PublicApi
 public abstract class EntitySystem {
-    public enum Phase { INPUT, FIXED, UPDATE, LATE, RENDER }
+    // Phase is dev.ember2d.core.Phase { INPUT, FIXED, UPDATE, LATE, RENDER } (moved to ember.core in I-020: rule 1)
     protected EntitySystem(Phase phase, Family family);
     protected abstract void process(int entity, float delta);
     protected void begin() {}  protected void end() {}

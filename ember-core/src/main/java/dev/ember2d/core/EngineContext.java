@@ -1,6 +1,7 @@
 package dev.ember2d.core;
 
 import com.badlogic.gdx.utils.Disposable;
+import dev.ember2d.core.internal.TimeState;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.IdentityHashMap;
@@ -28,11 +29,13 @@ public final class EngineContext {
     private static final Log LOG = Log.get("core");
 
     private final EngineConfig config;
+    private final TimeState time;
     private final Map<Class<?>, Object> services;
     private final List<Object> instancesInOrder;
 
-    private EngineContext(EngineConfig config, Map<Class<?>, Object> services) {
+    private EngineContext(EngineConfig config, TimeState time, Map<Class<?>, Object> services) {
         this.config = config;
+        this.time = time;
         this.services = Collections.unmodifiableMap(new LinkedHashMap<>(services));
         Set<Object> seen = Collections.newSetFromMap(new IdentityHashMap<>());
         List<Object> ordered = new ArrayList<>();
@@ -47,6 +50,11 @@ public final class EngineContext {
     /** The configuration the engine was started with. */
     public EngineConfig config() {
         return config;
+    }
+
+    /** Frame timing, game time, pause and time scale (F-002). */
+    public Time time() {
+        return time;
     }
 
     /**
@@ -102,10 +110,17 @@ public final class EngineContext {
     public static final class Builder {
 
         private final EngineConfig config;
+        private final TimeState time;
         private final Map<Class<?>, Object> services = new LinkedHashMap<>();
 
         public Builder(EngineConfig config) {
             this.config = Objects.requireNonNull(config, "config");
+            this.time = new TimeState(config.fixedStep);
+        }
+
+        /** The time the context will expose; the engine drives it from the game loop. */
+        TimeState timeState() {
+            return time;
         }
 
         /**
@@ -129,7 +144,7 @@ public final class EngineContext {
         }
 
         public EngineContext build() {
-            return new EngineContext(config, services);
+            return new EngineContext(config, time, services);
         }
     }
 }

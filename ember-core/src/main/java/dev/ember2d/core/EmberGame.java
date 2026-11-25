@@ -3,6 +3,8 @@ package dev.ember2d.core;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.ScreenUtils;
+import dev.ember2d.core.internal.GameLoop;
+import dev.ember2d.core.internal.GdxClock;
 import java.util.List;
 import java.util.Objects;
 
@@ -25,6 +27,7 @@ public class EmberGame implements ApplicationListener {
     private final EngineConfig config;
     private AppState state = AppState.CREATED;
     private EngineContext context;
+    private GameLoop loop;
 
     public EmberGame(EngineConfig config) {
         this.config = Objects.requireNonNull(config, "config");
@@ -59,6 +62,7 @@ public class EmberGame implements ApplicationListener {
         EngineContext.Builder builder = new EngineContext.Builder(config);
         configureContext(builder);
         context = builder.build();
+        loop = new GameLoop(new GdxClock(), builder.timeState(), this::runPhase, config.maxCatchUpSteps);
         state = AppState.RUNNING;
         if (config.devMode) {
             LOG.info("Boot took " + (System.nanoTime() - start) / 1_000_000 + " ms");
@@ -78,7 +82,7 @@ public class EmberGame implements ApplicationListener {
             return;
         }
         try {
-            frame();
+            loop.frame();
         } catch (RuntimeException e) {
             // Dev and release both rethrow: in release the platform crash handler writes the crash log
             // (desktop CrashLog). A fatal error screen arrives with the renderer (I-060).
@@ -87,9 +91,10 @@ public class EmberGame implements ApplicationListener {
         }
     }
 
-    private void frame() {
-        // Placeholder until the game loop (I-020) and renderer (I-060) exist. No GL on headless backends.
-        if (Gdx.gl != null) {
+    private void runPhase(Phase phase) {
+        // Systems and scenes plug in here with the ECS (I-040) and scene manager (I-070).
+        if (phase == Phase.RENDER && Gdx.gl != null) {
+            // Placeholder until the renderer (I-060). No GL on headless backends.
             ScreenUtils.clear(0f, 0f, 0f, 1f);
         }
     }
@@ -114,6 +119,7 @@ public class EmberGame implements ApplicationListener {
             return;
         }
         state = AppState.RUNNING;
+        loop.resetAccumulator();
         LOG.info("Resumed");
         context.forEachLifecycleListener("onResume", AppLifecycleListener::onResume);
     }

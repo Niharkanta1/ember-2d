@@ -109,6 +109,20 @@ class EmberGameTest {
     }
 
     @Test
+    void contextExposesTimeWithConfiguredFixedStep() {
+        EngineConfig config = new EngineConfig();
+        config.fixedStep = 1f / 30f;
+        EmberGame game = new EmberGame(config);
+        game.create();
+
+        Time time = game.context().time();
+        assertThat(time.fixedDelta()).isEqualTo(1f / 30f);
+        assertThat(time.fixedTick()).isZero();
+        assertThat(time.paused()).isFalse();
+        assertThat(time.timeScale()).isEqualTo(1f);
+    }
+
+    @Test
     void contextIsUnavailableBeforeCreate() {
         assertThatThrownBy(() -> gameWith().context())
                 .isInstanceOf(IllegalStateException.class)

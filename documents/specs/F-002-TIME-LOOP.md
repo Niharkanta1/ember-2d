@@ -1,6 +1,6 @@
 # F-002 — Time, Game Loop, Timers and Tweens
 
-- Status: Draft — expanded to template depth; becomes Ready when the API sketch is approved in I-020
+- Status: `Time` and game loop Ready (approved in I-020, 2026-11-26; see "Decisions in I-020"). Timers, tweens and `StateMachine`: expanded, API awaiting approval in I-025
 - Phase: 1
 - Module / package: `ember-core` / `ember.core`
 - Depends on: F-001
@@ -111,6 +111,15 @@ runPhase(update); runPhase(late); runPhase(render)
 
 ## Tests
 Unit tests with a fake `Clock` for all criteria; no window required.
+
+## Decisions in I-020
+- `Phase` is a public enum in `ember.core` (`INPUT, FIXED, UPDATE, LATE, RENDER`), because the loop in `ember.core` must name phases and `ember.core` may not depend on `ember.ecs` (ARCHITECTURE.md, rule 1). F-003 uses it.
+- `Time` gains `droppedFixedSteps()` (debug counter for the overlay, F-014). It counts whole fixed steps discarded when a frame needs more than `maxCatchUpSteps`; a warning is logged at most once per second of unscaled time.
+- The loop is internal (`ember.core.internal.GameLoop`, `Clock`, `TimeState`, `PhaseRunner`). The accumulator counts whole nanoseconds, so step timing is exact; `Time` reports seconds as floats. Frame deltas come from `Gdx.graphics.getDeltaTime()` (`GdxClock`); tests use a fake clock.
+- Frame delta clamp: `GameLoop.MAX_FRAME_DELTA_NANOS` = 0.25 s; negative deltas count as 0.
+- On app resume the accumulator is reset and the next frame's delta is ignored, so a resumed game never runs a catch-up burst.
+- While paused (or at time scale 0) `UPDATE` and `LATE` still run with `delta() == 0`; skipping systems that are not `runsWhenPaused` is done by the ECS (I-040).
+- `EngineContext.time()` exposes the engine's `Time`; `EmberGame.render()` drives the loop.
 
 ## Risks/open questions
 - Should timers run on `fixed` or `update`? Default: `update` with scaled delta; a `fixed` variant can be added if a kit needs it.

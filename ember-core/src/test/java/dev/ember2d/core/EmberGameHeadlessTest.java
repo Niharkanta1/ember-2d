@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.Disposable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
@@ -36,6 +37,7 @@ class EmberGameHeadlessTest {
     void bootsRunsFramesAndShutsDownCleanly() throws InterruptedException {
         CountDownLatch disposed = new CountDownLatch(1);
         AtomicInteger framesSeen = new AtomicInteger();
+        AtomicReference<Double> elapsedAtExit = new AtomicReference<>();
         final class DisposeProbe implements Probe, Disposable {
             @Override
             public void dispose() {
@@ -59,6 +61,7 @@ class EmberGameHeadlessTest {
                 if (framesSeen.incrementAndGet() < 5) {
                     Gdx.app.postRunnable(this);
                 } else {
+                    elapsedAtExit.set(game.context().time().unscaledElapsed());
                     Gdx.app.exit();
                 }
             }
@@ -67,5 +70,6 @@ class EmberGameHeadlessTest {
         assertThat(disposed.await(15, TimeUnit.SECONDS)).as("disposed within 15 s").isTrue();
         assertThat(framesSeen.get()).isEqualTo(5);
         assertThat(game.state()).isEqualTo(AppState.DISPOSED);
+        assertThat(elapsedAtExit.get()).as("the game loop advanced time").isGreaterThan(0.0);
     }
 }
