@@ -17,3 +17,23 @@ dependencies {
     testImplementation libs.gdx.backend.headless
     testRuntimeOnly variantOf(libs.gdx.platform) { classifier('natives-desktop') }
 }
+
+// ECS benchmark (F-003): a timed program, not a test. Run: gradlew :ember-core:benchmarkEcs
+sourceSets {
+    benchmark {
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+    }
+}
+
+tasks.register('benchmarkEcs', JavaExec) {
+    group = 'verification'
+    description = 'Runs the ECS benchmark (5,000 entities, 3 systems) and prints frame times.'
+    classpath = sourceSets.benchmark.runtimeClasspath
+    mainClass = 'dev.ember2d.ecs.EcsBenchmark'
+}
+
+// Keep the benchmark compiling with every build, without running it.
+tasks.named('check') {
+    dependsOn tasks.named('benchmarkClasses')
+}

@@ -1,6 +1,6 @@
 # F-003 — Entity Component System
 
-- Status: Draft — expanded to template depth; becomes Ready when the API sketch is approved in I-040
+- Status: Ready (API approved in I-040, 2026-11-26; see "Decisions in I-040")
 - Phase: 1
 - Module / package: `ember-core` / `ember.ecs`
 - Depends on: F-002 (phases), F-019 (events)
@@ -122,6 +122,25 @@ w.addSystem(new EntitySystem(Phase.FIXED, w.family(Transform.class, Velocity.cla
 
 ## Tests
 Unit tests for all criteria; benchmark as a JMH or simple timed test in a separate source set.
+
+## Decisions in I-040
+- **No reflection in `ember.ecs`** (rule 10): `add(entity, Class)` creates components through factories registered with `world.registerComponent(Type.class, Type::new)`; `Transform` is pre-registered; an unregistered type throws with the fix in the message. `add(entity, instance)` always works. The component registry in `ember.data` (I-130) will register prefab components automatically. This replaces "adding a type without a no-arg constructor throws".
+- **Structural changes** (destroy, add, remove) apply immediately when no system is running, and are queued while a system runs, applied after that system and at the end of the phase. `create()` is always immediate. A queued destroy keeps the entity alive (and complete) until the system ends.
+- **Pause and deltas**: `FIXED` gets the fixed step; `INPUT`, `UPDATE`, `LATE` the scaled delta; `RENDER` the unscaled delta. While paused, `UPDATE`/`LATE` systems are skipped unless `runsWhenPaused()`; those always get the unscaled delta. `INPUT` and `RENDER` systems keep running while paused.
+- **Who runs a World**: `World.runPhase(phase, time)` is public; the scene manager (I-070) runs the active scene's world from the engine's systems hook. Until then no world is wired into `EmberGame`.
+- **Additions to the sketch**: `World(boolean devMode)`, `registerComponent`, `entityCount()`, `name(entity)`, tags (`tag`, `untag`, `hasTag`, `findByTag`), `clear()`, `World.NONE`; `EntitySystem.world()`, `phase()`, `family()`; `Family.entities()`/`size()`; `Transform.interpolatedRotation(alpha)` and `teleport(x, y)`.
+- Handles: 20-bit index + 12-bit generation; index 0xFFFFF is never used, so no handle equals `NONE` (-1). Generations wrap after 4,096 reuses of one slot.
+- An `EntityRef` is only meaningful for the world that created it.
+
+## Benchmark (I-040)
+`gradlew :ember-core:benchmarkEcs` (source set `ember-core/src/benchmark`, compiled by `check`, not run in CI): 5,000 entities with `Transform`, velocity and lifetime components; 3 systems (`FIXED` movement, `UPDATE` bounds bounce, `LATE` interpolation read plus destroy-on-expiry with respawn, about 10,000 entities replaced per run); 60 Hz frames through the real game loop; 2,000 warm-up and 6,000 measured frames.
+
+| Date | Machine | Mean | Median | p99 | Max |
+| --- | --- | --- | --- | --- | --- |
+| 2026-11-26 | Developer desktop, Windows 11, Temurin 21.0.4 (run 1) | 0.192 ms | 0.179 ms | 0.386 ms | 2.093 ms |
+| 2026-11-26 | same (run 2) | 0.244 ms | 0.241 ms | 0.340 ms | 0.445 ms |
+
+About 1.5% of the 16.7 ms frame budget at 60 fps; no optimisation needed. A mid-range Android phone is measured later (TEST_PLAN performance checks).
 
 ## Risks/open questions
 - Parent/child transforms will likely be wanted for weapons and attachments in Phase 4; revisit then.
