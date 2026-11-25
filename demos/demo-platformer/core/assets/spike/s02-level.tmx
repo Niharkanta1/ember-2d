@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="40" height="12" tilewidth="16" tileheight="16" infinite="0" nextlayerid="4" nextobjectid="10">
+ <properties>
+  <property name="gravity" type="float" value="40"/>
+ </properties>
+ <tileset firstgid="1" name="tiles" tilewidth="16" tileheight="16" tilecount="4" columns="4">
+  <image source="s02-tiles.png" width="64" height="16"/>
+  <tile id="0">
+   <properties>
+    <property name="solid" type="bool" value="true"/>
+   </properties>
+  </tile>
+  <tile id="1">
+   <properties>
+    <property name="oneWay" type="bool" value="true"/>
+   </properties>
+  </tile>
+ </tileset>
+ <tileset firstgid="5" source="s02-icons.tsx"/>
+ <layer id="1" name="ground" width="40" height="12">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,
+0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,
+1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
+</data>
+ </layer>
+ <objectgroup id="2" name="entities">
+  <object id="1" name="slime_1" template="s02-slime.tx" x="96" y="176">
+   <properties>
+    <property name="Health.max" type="int" value="5"/>
+   </properties>
+  </object>
+  <object id="2" name="slime_2" template="s02-slime.tx" x="160" y="176"/>
+  <object id="3" name="coin_a" type="pickup/coin" x="200" y="150" width="8" height="8"/>
+  <object id="4" name="coin_b" class="pickup/coin" x="216" y="150" width="8" height="8"/>
+  <object id="5" name="door" type="door" x="400" y="144" width="16" height="32">
+   <properties>
+    <property name="stats" type="class" propertytype="DoorStats">
+     <properties>
+      <property name="cost" type="int" value="3"/>
+      <property name="locked" type="bool" value="true"/>
+     </properties>
+    </property>
+    <property name="switch" type="object" value="6"/>
+   </properties>
+  </object>
+  <object id="6" name="switch" type="switch" x="440" y="176">
+   <point/>
+  </object>
+  <object id="7" name="patrol" x="80" y="176">
+   <polyline points="0,0 64,0"/>
+  </object>
+  <object id="8" name="flipped_slime" type="enemy/slime" gid="2147483656" x="240" y="176" width="16" height="16"/>
+ </objectgroup>
+ <objectgroup id="3" name="platforms">
+  <object id="9" name="platform_1" type="platform/moving" x="352" y="112" width="48" height="8">
+   <properties>
+    <property name="distance" type="float" value="6"/>
+   </properties>
+  </object>
+ </objectgroup>
+</map>

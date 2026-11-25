@@ -1,0 +1,37 @@
+{
+ "automappingRulesFile": "",
+ "commands": [],
+ "extensionsPath": "extensions",
+ "folders": [
+  "."
+ ],
+ "propertyTypes": [
+  {
+   "id": 1,
+   "name": "DoorStats",
+   "type": "class",
+   "useAs": [
+    "property"
+   ],
+   "color": "#ffa0a0a4",
+   "drawFill": true,
+   "members": [
+    {
+     "name": "cost",
+     "type": "int",
+     "value": 0
+    },
+    {
+     "name": "locked",
+     "type": "bool",
+     "value": false
+    },
+    {
+     "name": "label",
+     "type": "string",
+     "value": "door"
+    }
+   ]
+  }
+ ]
+}

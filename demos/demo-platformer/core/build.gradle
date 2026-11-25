@@ -9,4 +9,8 @@ dependencies {
     api project(':ember-core')
     api project(':kits:kit-common')
     api project(':kits:kit-platformer')
+
+    // SPIKE S-02: headless libGDX for loading Tiled maps in tests
+    testImplementation libs.gdx.backend.headless
+    testRuntimeOnly variantOf(libs.gdx.platform) { classifier('natives-desktop') }
 }

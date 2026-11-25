@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+ <tileset firstgid="1" source="s02-icons.tsx"/>
+ <object name="slime" type="enemy/slime" gid="4" width="16" height="16">
+  <properties>
+   <property name="Health.max" type="int" value="3"/>
+   <property name="speed" type="float" value="1.5"/>
+  </properties>
+ </object>
+</template>

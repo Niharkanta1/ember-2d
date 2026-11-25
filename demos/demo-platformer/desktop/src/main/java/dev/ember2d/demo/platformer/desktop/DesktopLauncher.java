@@ -39,6 +39,10 @@ public final class DesktopLauncher {
         configuration.setForegroundFPS(Lwjgl3ApplicationConfiguration.getDisplayMode().refreshRate + 1);
         configuration.setWindowedMode(1280, 720);
         try {
+            if (List.of(args).contains("--spike-s02")) {   // SPIKE S-02: collision playground
+                new Lwjgl3Application(new dev.ember2d.demo.platformer.spike.SpikeS02Playground(), configuration);
+                return;
+            }
             new Lwjgl3Application(new EmberGame(PlatformerDemo.config(devMode)), configuration);
         } finally {
             Log.get("launcher").info("Exited");
