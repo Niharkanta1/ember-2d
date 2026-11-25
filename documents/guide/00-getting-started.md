@@ -2,7 +2,7 @@
 
 This chapter covers what Phase 0 delivers: building Ember2D, running the platformer demo, logging, the architecture rules that keep the code base in shape, and packaging a desktop release. Later chapters cover the engine itself.
 
-> Status: approved by the developer at the Phase 0 gate (2026-11-25). Updated for I-010 (the demo starts through `EmberGame`) and I-015 (Android debug build, section 8).
+> Status: approved by the developer at the Phase 0 gate (2026-11-25). Updated for I-010 (the demo starts through `EmberGame`), I-015 (Android debug build, section 8) and I-030 (`EmberGame`, `EngineConfig` and `EngineContext` are in `dev.ember2d.app`).
 
 ## 1. What you get in Phase 0
 - A Gradle multi-module build: `ember-core`, `ember-desktop`, `ember-android`, `ember-devtools`, `ember-box2d`, five kits under `kits/`, and the platformer demo under `demos/demo-platformer/` (`core`, `desktop` and `android`). Most modules are still empty placeholders; the module layout is final (see `PROJECT_STRUCTURE.md`).
@@ -108,7 +108,7 @@ Every `build` checks the rules of `ARCHITECTURE.md` automatically. You do not ru
 ### What is enforced
 | Rule | Where it applies | Example of a violation |
 | --- | --- | --- |
-| Engine package layering (rules 1–4): `core` → `event`/`ecs`/`assets`/`input` → `render`/`camera`/… → `tilemap` → `scene`/`data`/`save` | `ember-core` | a class in `ember.core` importing `ember.render` |
+| Engine package layering (rules 1–4a): `core` → `event`/`ecs`/`assets`/`input` → `render`/`camera`/… → `tilemap` → `scene`/`data`/`save` → `app` (`EmberGame`, `EngineContext`; ADR-022) | `ember-core` | a class in `ember.core` importing `ember.render`, or any engine package importing `ember.app` |
 | Only documented packages | `ember-core` | adding `dev.ember2d.misc` without updating `ARCHITECTURE.md` and the rules |
 | No genre words in engine names (rule 5): `jump`, `weapon`, `quest`, `inventory`, `bullet`, `enemy`, `platformer`, `shooter`, `rpg`, `novel` (whole words; `BulletinBoard` is fine) | `ember-core` | `dev.ember2d.collision.JumpSolver` |
 | Allowed module graph (rules 6–8) | all modules | `kit-platformer` depending on `kit-novel` |

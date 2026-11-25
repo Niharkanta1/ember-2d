@@ -1,8 +1,8 @@
 # F-019 — Events and EngineContext
 
-- Status: `EngineContext` part Ready (approved in I-010, 2026-11-25: `config()`, `service()`, `findService()`, `Builder.register()`; typed accessors arrive with each service). `EventBus` part: expanded, API awaiting approval in I-030
+- Status: Ready (`EngineContext` approved in I-010, `EventBus` in I-030, 2026-11-26; see "Decisions in I-030")
 - Phase: 1
-- Module / package: `ember-core` / `ember.event`, `ember.core`
+- Module / package: `ember-core` / `ember.event`, `ember.app` (`EngineContext`, ADR-022)
 - Depends on: F-001, F-002
 - Tasks: I-010, I-030
 
@@ -88,6 +88,16 @@ public void enter(EngineContext ctx) {
 
 ## Tests
 Unit tests for delivery order, flush points, scoping, re-entrancy and handler exceptions.
+
+## Decisions in I-030
+- `EngineContext` and `EmberGame` live in `ember.app`, the composition root (ADR-022), so `ember.core` keeps depending on no other engine package.
+- `Subscription` also has `isActive()`. Handlers match the event's exact class (no supertype or catch-all delivery; the dev-tools event log, I-160, can add a tap).
+- Flush points are run by `EmberGame` around the game's systems: after each `FIXED` step, after `UPDATE` (timers and tweens run first in `UPDATE`), after `LATE`. Events queued in `INPUT` reach the first flush of the frame; events queued in `RENDER` reach the next frame.
+- Re-entrancy: events queued while flushing are delivered in the same flush, up to 8 passes (`DefaultEventBus.MAX_FLUSH_PASSES`); the rest wait for the next flush point and a warning is logged.
+- Handler exceptions are logged with handler class and event type; other handlers still run. In dev mode the first failure per frame is rethrown when the outermost `publish` or `flush` finishes (never in the middle of delivery); release mode only logs.
+- Scope mechanism (`DefaultEventBus.openScope()`/`closeScope()`) is internal; `on()` registers into the innermost open scope and behaves like `onGlobal()` while none is open. The scene manager (I-070) opens a scope per scene.
+- Engine events so far: `AppSuspended` and `AppResumed`, published immediately by `EmberGame` after the lifecycle listeners. Other events in the data model arrive with their subsystems.
+- Returning pooled events to their pool after delivery is added with the first pooled event (collision contacts, I-120).
 
 ## Risks/open questions
 - Whether to deliver contacts as events only, or also as a per-entity contact list component for polling. Decide during I-120.

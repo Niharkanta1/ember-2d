@@ -25,6 +25,7 @@ Full records for new or changed decisions are in `adr/`. Revision 2 changes come
 | D-019 | Android as an official target from Phase 1; iOS kept possible but not committed | Accepted (new) | `adr/ADR-019-ANDROID.md` |
 | D-020 | Bullets as a data-oriented system outside the ECS (`kit-bullets`) | Accepted (new) | `adr/ADR-020-BULLETS.md` |
 | D-021 | Skeletal animation only through an optional Spine module (license required) | Accepted (new) | `adr/ADR-021-SPINE.md` |
+| D-022 | `ember.app` is the composition root (`EmberGame`, `EngineContext`, `EngineConfig`); `ember.core` depends on no other engine package | Accepted (new) | `adr/ADR-022-APP-COMPOSITION-ROOT.md` |
 
 ## Change policy
 A decision change requires an ADR (`templates/ADR_TEMPLATE.md`) with context, alternatives, consequences, migration impact and approval before implementation.

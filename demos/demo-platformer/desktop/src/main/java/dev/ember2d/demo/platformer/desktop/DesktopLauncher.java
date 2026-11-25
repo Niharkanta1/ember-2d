@@ -2,7 +2,7 @@ package dev.ember2d.demo.platformer.desktop;
 
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
-import dev.ember2d.core.EmberGame;
+import dev.ember2d.app.EmberGame;
 import dev.ember2d.core.Log;
 import dev.ember2d.demo.platformer.PlatformerDemo;
 import dev.ember2d.desktop.CrashLog;

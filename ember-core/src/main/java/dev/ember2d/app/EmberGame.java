@@ -1,10 +1,12 @@
-package dev.ember2d.core;
+package dev.ember2d.app;
 
 import com.badlogic.gdx.ApplicationListener;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.utils.ScreenUtils;
+import dev.ember2d.core.Log;
+import dev.ember2d.core.PublicApi;
 import dev.ember2d.core.internal.GameLoop;
 import dev.ember2d.core.internal.GdxClock;
+import dev.ember2d.event.AppResumed;
+import dev.ember2d.event.AppSuspended;
 import java.util.List;
 import java.util.Objects;
 
@@ -62,7 +64,9 @@ public class EmberGame implements ApplicationListener {
         EngineContext.Builder builder = new EngineContext.Builder(config);
         configureContext(builder);
         context = builder.build();
-        loop = new GameLoop(new GdxClock(), builder.timeState(), this::runPhase, config.maxCatchUpSteps);
+        EnginePhaseRunner phases = new EnginePhaseRunner(context.timers(), context.tweens(), builder.eventBus(),
+                phase -> { });
+        loop = new GameLoop(new GdxClock(), builder.timeState(), phases, config.maxCatchUpSteps);
         state = AppState.RUNNING;
         if (config.devMode) {
             LOG.info("Boot took " + (System.nanoTime() - start) / 1_000_000 + " ms");
@@ -91,17 +95,6 @@ public class EmberGame implements ApplicationListener {
         }
     }
 
-    private void runPhase(Phase phase) {
-        // Systems and scenes plug in here with the ECS (I-040) and scene manager (I-070).
-        if (phase == Phase.UPDATE) {
-            context.timers().update();
-            context.tweens().update();
-        } else if (phase == Phase.RENDER && Gdx.gl != null) {
-            // Placeholder until the renderer (I-060). No GL on headless backends.
-            ScreenUtils.clear(0f, 0f, 0f, 1f);
-        }
-    }
-
     @Override
     public final void pause() {
         requireStarted("pause");
@@ -112,6 +105,7 @@ public class EmberGame implements ApplicationListener {
         state = AppState.SUSPENDED;
         LOG.info("Suspended");
         context.forEachLifecycleListener("onSuspend", AppLifecycleListener::onSuspend);
+        context.events().publish(new AppSuspended());
     }
 
     @Override
@@ -125,6 +119,7 @@ public class EmberGame implements ApplicationListener {
         loop.resetAccumulator();
         LOG.info("Resumed");
         context.forEachLifecycleListener("onResume", AppLifecycleListener::onResume);
+        context.events().publish(new AppResumed());
     }
 
     @Override

@@ -122,8 +122,11 @@ public final class Tweens {
         return pool.getFree();
     }
 
-    /** Advances every tween by the frame's scaled delta. Called by the engine at the start of {@link Phase#UPDATE}. */
-    void update() {
+    /**
+     * Advances every tween by the frame's scaled delta. The engine calls this for {@code context.tweens()} at
+     * the start of {@link Phase#UPDATE}; call it yourself only for a {@code Tweens} instance you created.
+     */
+    public void update() {
         float delta = time.delta();
         if (delta <= 0f) {
             return; // paused or frozen

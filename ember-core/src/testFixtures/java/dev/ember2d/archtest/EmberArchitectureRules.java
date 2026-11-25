@@ -60,9 +60,11 @@ public final class EmberArchitectureRules {
             "render", "camera", "animation", "collision", "audio", "ui", "particles", "debug");
     private static final List<String> TIER_4 = List.of("tilemap");
     private static final List<String> TIER_5 = List.of("scene", "data", "save");
+    /** Composition root (ADR-022): may depend on everything; nothing depends on it. */
+    private static final List<String> TIER_APP = List.of("app");
 
     /** Every documented engine package in ember-core, in tier order. */
-    public static final List<String> ENGINE_PACKAGES = concat(TIER_1, TIER_2, TIER_3, TIER_4, TIER_5);
+    public static final List<String> ENGINE_PACKAGES = concat(TIER_1, TIER_2, TIER_3, TIER_4, TIER_5, TIER_APP);
 
     private static final Pattern WORD_BOUNDARY =
             Pattern.compile("(?<=[a-z0-9])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])|[_$]");
@@ -104,7 +106,7 @@ public final class EmberArchitectureRules {
     // Rules 1-4: package dependencies inside ember-core
     // ------------------------------------------------------------------------------------------------
 
-    /** Which engine packages each engine package may depend on (rules 1-4). */
+    /** Which engine packages each engine package may depend on (rules 1-4a; 4a is ADR-022). */
     public static Map<String, List<String>> allowedPackageDependencies() {
         Map<String, List<String>> allowed = new LinkedHashMap<>();
         allowed.put("core", List.of());
@@ -119,9 +121,11 @@ public final class EmberArchitectureRules {
         allowed.put("render", concat(lower, List.of("camera")));
         allowed.put("ui", concat(lower, List.of("render")));
         allowed.put("tilemap", concat(lower, List.of("render", "collision")));
+        List<String> belowApp = concat(TIER_1, TIER_2, TIER_3, TIER_4, TIER_5);
         for (String p : TIER_5) {
-            allowed.put(p, ENGINE_PACKAGES);
+            allowed.put(p, belowApp);
         }
+        allowed.put("app", ENGINE_PACKAGES);
         return allowed;
     }
 

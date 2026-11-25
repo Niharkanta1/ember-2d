@@ -1,9 +1,13 @@
-package dev.ember2d.core;
+package dev.ember2d.app;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.badlogic.gdx.utils.Disposable;
+import dev.ember2d.core.LogConfig;
+import dev.ember2d.core.LogLevel;
+import dev.ember2d.core.LogSink;
+import dev.ember2d.core.Time;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
@@ -144,6 +148,19 @@ class EmberGameTest {
                 "audio.resize 800x600", "saves.resize 800x600",
                 "audio.suspend", "saves.suspend",
                 "audio.resume", "saves.resume");
+    }
+
+    @Test
+    void suspendAndResumeArePublishedAsImmediateEvents() {
+        EmberGame game = gameWith(new FakeAudio(journal));
+        game.create();
+        game.context().events().onGlobal(dev.ember2d.event.AppSuspended.class, e -> journal.add("event suspended"));
+        game.context().events().onGlobal(dev.ember2d.event.AppResumed.class, e -> journal.add("event resumed"));
+
+        game.pause();
+        game.resume();
+
+        assertThat(journal).containsExactly("audio.suspend", "event suspended", "audio.resume", "event resumed");
     }
 
     @Test

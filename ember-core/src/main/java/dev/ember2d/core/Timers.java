@@ -103,8 +103,11 @@ public final class Timers {
         return count;
     }
 
-    /** Fires every due timer. Called by the engine at the start of {@link Phase#UPDATE}. */
-    void update() {
+    /**
+     * Fires every due timer. The engine calls this for {@code context.timers()} at the start of
+     * {@link Phase#UPDATE}; call it yourself only for a {@code Timers} instance you created.
+     */
+    public void update() {
         updateCount++;
         updating = true;
         try {

@@ -1,4 +1,6 @@
-package dev.ember2d.core;
+package dev.ember2d.app;
+
+import dev.ember2d.core.PublicApi;
 
 /**
  * Callbacks for application lifecycle changes. Every service registered in the {@link EngineContext} that

@@ -1,4 +1,6 @@
-package dev.ember2d.core;
+package dev.ember2d.app;
+
+import dev.ember2d.core.PublicApi;
 
 /**
  * Application lifecycle state of an {@link EmberGame}: {@code CREATED -> RUNNING <-> SUSPENDED -> DISPOSED}.

@@ -58,7 +58,8 @@ Base package `dev.ember2d` (chosen in I-000). Package names in the documents are
 
 | Package | Responsibility | Spec |
 | --- | --- | --- |
-| `ember.core` | App lifecycle, game loop, time, fixed step, `EngineContext`, timers, tweens, state-machine helper | F-001, F-002 |
+| `ember.app` | Composition root: `EmberGame` (app lifecycle), `EngineConfig`, `EngineContext` (ADR-022) | F-001, F-019 |
+| `ember.core` | Logging, game loop, time, fixed step, phases, timers, tweens, state-machine helper, `@PublicApi` | F-002 |
 | `ember.event` | Event bus: immediate and queued events | F-019 |
 | `ember.ecs` | Entities, components, systems, families, phases | F-003 |
 | `ember.assets` | Asset IDs, manifest, groups, wrapper over `AssetManager`, hot reload hooks | F-008 |
@@ -82,7 +83,8 @@ Enforced by ArchUnit tests that run in CI (`ember-core/src/test/.../Architecture
 1. `ember.core` depends on no other engine package.
 2. `ember.event`, `ember.ecs`, `ember.assets`, `ember.input` depend only on `ember.core` (and `ember.event`).
 3. `ember.render`, `ember.camera`, `ember.animation`, `ember.collision`, `ember.audio`, `ember.ui`, `ember.particles`, `ember.debug` depend only on packages in rules 1–2 (`ember.render` may use `ember.camera`; `ember.ui` may use `ember.render`).
-4. `ember.tilemap` may depend on `render` and `collision`. `ember.scene`, `ember.data` and `ember.save` sit on top and may depend on anything in `ember-core`.
+4. `ember.tilemap` may depend on `render` and `collision`. `ember.scene`, `ember.data` and `ember.save` may depend on anything in `ember-core` except `ember.app`.
+4a. `ember.app` is the composition root (ADR-022): it may depend on every package; no other engine package depends on it.
 5. No engine package names a genre concept (`jump`, `weapon`, `quest`, `inventory`, `bullet`…).
 6. **Shared kits** (`kit-common`, `kit-bullets`) depend only on `ember-core`; `kit-bullets` may also use `kit-common`.
 7. **Genre kits** (`kit-platformer`, `kit-topdown`, `kit-novel`) depend on `ember-core` and shared kits; genre kits never depend on each other.
@@ -119,7 +121,7 @@ Hidden behind Ember2D APIs: Box2D and Spine types, the LWJGL3 and Android backen
 - Subscriptions are scoped to a scene and removed on scene exit.
 
 ## Services and `EngineContext`
-A single `EngineContext` object is built at bootstrap and passed to systems and scenes. It exposes `time`, `events`, `assets`, `input`, `audio`, `save`, `renderer`. No global static service locator. Tests build a context with fakes. The one exception is logging (`Log`, `LogConfig` in `ember.core`): loggers are obtained statically by category because logging is needed before the context exists and in code that never sees it.
+A single `EngineContext` object (`ember.app`, ADR-022) is built at bootstrap and passed to systems and scenes. It exposes `time`, `events`, `assets`, `input`, `audio`, `save`, `renderer`. No global static service locator. Tests build a context with fakes. The one exception is logging (`Log`, `LogConfig` in `ember.core`): loggers are obtained statically by category because logging is needed before the context exists and in code that never sees it.
 
 ## Collision (ADR-005)
 - Default: kinematic collision in `ember.collision`. Actors move with `moveAndCollide`/`moveAndSlide` against solids (tile grids and boxes). Colliders are AABBs (circles optional). Solids can be one-way. Moving solids carry riders.

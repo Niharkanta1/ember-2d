@@ -1,6 +1,6 @@
 package dev.ember2d.demo.platformer;
 
-import dev.ember2d.core.EngineConfig;
+import dev.ember2d.app.EngineConfig;
 
 /**
  * Platformer demo setup, shared by the desktop and Android launchers. Games configure Ember2D rather than

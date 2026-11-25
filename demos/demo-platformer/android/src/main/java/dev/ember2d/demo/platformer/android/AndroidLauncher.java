@@ -1,7 +1,7 @@
 package dev.ember2d.demo.platformer.android;
 
 import dev.ember2d.android.EmberAndroidLauncher;
-import dev.ember2d.core.EngineConfig;
+import dev.ember2d.app.EngineConfig;
 import dev.ember2d.demo.platformer.PlatformerDemo;
 
 /** Launches the platformer demo on Android. */

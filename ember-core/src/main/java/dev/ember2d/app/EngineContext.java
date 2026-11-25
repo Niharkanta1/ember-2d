@@ -1,7 +1,15 @@
-package dev.ember2d.core;
+package dev.ember2d.app;
 
 import com.badlogic.gdx.utils.Disposable;
+import dev.ember2d.core.Log;
+import dev.ember2d.core.Phase;
+import dev.ember2d.core.PublicApi;
+import dev.ember2d.core.Time;
+import dev.ember2d.core.Timers;
+import dev.ember2d.core.Tweens;
 import dev.ember2d.core.internal.TimeState;
+import dev.ember2d.event.EventBus;
+import dev.ember2d.event.internal.DefaultEventBus;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.IdentityHashMap;
@@ -32,15 +40,17 @@ public final class EngineContext {
     private final TimeState time;
     private final Timers timers;
     private final Tweens tweens;
+    private final DefaultEventBus events;
     private final Map<Class<?>, Object> services;
     private final List<Object> instancesInOrder;
 
-    private EngineContext(EngineConfig config, TimeState time, Timers timers, Tweens tweens,
+    private EngineContext(EngineConfig config, TimeState time, Timers timers, Tweens tweens, DefaultEventBus events,
             Map<Class<?>, Object> services) {
         this.config = config;
         this.time = time;
         this.timers = timers;
         this.tweens = tweens;
+        this.events = events;
         this.services = Collections.unmodifiableMap(new LinkedHashMap<>(services));
         Set<Object> seen = Collections.newSetFromMap(new IdentityHashMap<>());
         List<Object> ordered = new ArrayList<>();
@@ -70,6 +80,11 @@ public final class EngineContext {
     /** Float property animation in game time (F-002). */
     public Tweens tweens() {
         return tweens;
+    }
+
+    /** The event bus: immediate and queued events (F-019). */
+    public EventBus events() {
+        return events;
     }
 
     /**
@@ -126,16 +141,27 @@ public final class EngineContext {
 
         private final EngineConfig config;
         private final TimeState time;
+        private final Timers timers;
+        private final Tweens tweens;
+        private final DefaultEventBus events;
         private final Map<Class<?>, Object> services = new LinkedHashMap<>();
 
         public Builder(EngineConfig config) {
             this.config = Objects.requireNonNull(config, "config");
             this.time = new TimeState(config.fixedStep);
+            this.timers = new Timers(time);
+            this.tweens = new Tweens(time);
+            this.events = new DefaultEventBus(config.devMode);
         }
 
         /** The time the context will expose; the engine drives it from the game loop. */
         TimeState timeState() {
             return time;
+        }
+
+        /** The engine's event bus implementation, flushed by the engine at the flush points. */
+        DefaultEventBus eventBus() {
+            return events;
         }
 
         /**
@@ -159,7 +185,7 @@ public final class EngineContext {
         }
 
         public EngineContext build() {
-            return new EngineContext(config, time, new Timers(time), new Tweens(time), services);
+            return new EngineContext(config, time, timers, tweens, events, services);
         }
     }
 }

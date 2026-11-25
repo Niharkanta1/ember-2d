@@ -1,5 +1,6 @@
-package dev.ember2d.core;
+package dev.ember2d.app;
 
+import dev.ember2d.core.PublicApi;
 import java.util.ArrayList;
 import java.util.List;
 

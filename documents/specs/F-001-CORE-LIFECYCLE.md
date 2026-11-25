@@ -2,7 +2,7 @@
 
 - Status: Ready (API approved in I-010, 2026-11-25; see "Decisions in I-010")
 - Phase: 1
-- Module / package: `ember-core` / `ember.core`
+- Module / package: `ember-core` / `ember.app` (moved from `ember.core` in I-030, ADR-022)
 - Depends on: F-019 (events, `EngineContext`), F-002 (time)
 - Tasks: I-010
 

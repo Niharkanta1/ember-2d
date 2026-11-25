@@ -1,4 +1,4 @@
-package dev.ember2d.core;
+package dev.ember2d.app;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
