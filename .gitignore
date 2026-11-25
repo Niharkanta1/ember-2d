@@ -5,6 +5,9 @@
 build/
 !gradle/wrapper/gradle-wrapper.jar
 
+# Dev logs written by `gradlew run` (I-008)
+logs/
+
 # Android
 local.properties
 .cxx/

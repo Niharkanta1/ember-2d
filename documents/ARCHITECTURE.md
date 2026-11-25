@@ -119,7 +119,7 @@ Hidden behind Ember2D APIs: Box2D and Spine types, the LWJGL3 and Android backen
 - Subscriptions are scoped to a scene and removed on scene exit.
 
 ## Services and `EngineContext`
-A single `EngineContext` object is built at bootstrap and passed to systems and scenes. It exposes `time`, `events`, `assets`, `input`, `audio`, `save`, `renderer`. No global static service locator. Tests build a context with fakes.
+A single `EngineContext` object is built at bootstrap and passed to systems and scenes. It exposes `time`, `events`, `assets`, `input`, `audio`, `save`, `renderer`. No global static service locator. Tests build a context with fakes. The one exception is logging (`Log`, `LogConfig` in `ember.core`): loggers are obtained statically by category because logging is needed before the context exists and in code that never sees it.
 
 ## Collision (ADR-005)
 - Default: kinematic collision in `ember.collision`. Actors move with `moveAndCollide`/`moveAndSlide` against solids (tile grids and boxes). Colliders are AABBs (circles optional). Solids can be one-way. Moving solids carry riders.

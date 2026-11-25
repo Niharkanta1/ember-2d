@@ -15,3 +15,8 @@ application {
         applicationDefaultJvmArgs = ['-XstartOnFirstThread']
     }
 }
+
+// `gradlew run` is a dev build: debug logging plus logs/platformer-demo-dev.log (I-008).
+tasks.named('run', JavaExec) {
+    systemProperty 'ember.devMode', 'true'
+}
