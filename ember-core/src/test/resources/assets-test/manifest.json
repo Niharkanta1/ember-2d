@@ -1,0 +1,16 @@
+{ "version": 1, "assets": [
+  { "id": "tex.square", "path": "square.png", "type": "texture", "group": "global" },
+  { "id": "atlas.sheet", "path": "sheet.atlas", "type": "atlas", "group": ["global", "level1"] },
+  { "id": "font.test", "path": "test.fnt", "type": "font", "group": "global" },
+  { "id": "data.player", "path": "data.json", "type": "json", "group": "level1" },
+  { "id": "sfx.blip", "path": "blip.wav", "type": "sound", "group": "level1" },
+  { "id": "music.theme", "path": "theme.wav", "type": "music", "group": "level1" },
+  { "id": "sfx.missing", "path": "nope.wav", "type": "sound", "group": "extras", "optional": true },
+  { "id": "music.missing", "path": "nope.ogg", "type": "music", "group": "extras", "optional": true },
+  { "id": "tex.missing", "path": "nope.png", "type": "texture", "group": "extras", "optional": true },
+  { "id": "atlas.missing", "path": "nope.atlas", "type": "atlas", "group": "extras", "optional": true },
+  { "id": "data.missing", "path": "nope.json", "type": "json", "group": "extras", "optional": true },
+  { "id": "font.missing", "path": "nope.fnt", "type": "font", "group": "extras", "optional": true },
+  { "id": "tex.required", "path": "gone.png", "type": "texture", "group": "broken" },
+  { "id": "sfx.required", "path": "gone.wav", "type": "sound", "group": "broken" }
+] }

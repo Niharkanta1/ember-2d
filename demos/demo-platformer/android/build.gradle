@@ -26,6 +26,8 @@ android {
         main {
             // libGDX native libraries, extracted by copyAndroidNatives below.
             jniLibs.srcDirs += [layout.buildDirectory.dir('gdx-natives').get().asFile]
+            // Demo assets, shared with the desktop launcher (F-008).
+            assets.srcDirs += [rootProject.file('demos/demo-platformer/core/assets')]
         }
     }
 }

@@ -1,6 +1,7 @@
 package dev.ember2d.app;
 
 import com.badlogic.gdx.ApplicationListener;
+import dev.ember2d.assets.internal.GdxAssets;
 import dev.ember2d.core.Log;
 import dev.ember2d.core.PublicApi;
 import dev.ember2d.core.internal.GameLoop;
@@ -9,6 +10,7 @@ import dev.ember2d.event.AppResumed;
 import dev.ember2d.event.AppSuspended;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * The single entry point of an Ember2D game (F-001): a libGDX {@link ApplicationListener} that boots the
@@ -25,14 +27,24 @@ import java.util.Objects;
 public class EmberGame implements ApplicationListener {
 
     private static final Log LOG = Log.get("core");
+    /** The asset group loaded at boot (F-008). */
+    static final String GLOBAL_GROUP = "global";
 
     private final EngineConfig config;
+    private final Function<EngineConfig, GdxAssets> assetsFactory;
+    private GdxAssets assets;
     private AppState state = AppState.CREATED;
     private EngineContext context;
     private GameLoop loop;
 
     public EmberGame(EngineConfig config) {
+        this(config, c -> GdxAssets.load(c.assetManifest));
+    }
+
+    /** For tests: supplies the asset service instead of reading the manifest from the game's assets. */
+    EmberGame(EngineConfig config, Function<EngineConfig, GdxAssets> assetsFactory) {
         this.config = Objects.requireNonNull(config, "config");
+        this.assetsFactory = Objects.requireNonNull(assetsFactory, "assetsFactory");
     }
 
     /** Adds game services to the context. Called once during {@code create()}. */
@@ -62,10 +74,22 @@ public class EmberGame implements ApplicationListener {
         config.validate();
         LOG.info("Starting Ember2D: " + config);
         EngineContext.Builder builder = new EngineContext.Builder(config);
-        configureContext(builder);
-        context = builder.build();
+        assets = assetsFactory.apply(config);
+        try {
+            builder.assets(assets);
+            configureContext(builder);
+            context = builder.build();
+            if (assets.manifest().group(GLOBAL_GROUP) != null) {
+                assets.loadGroup(GLOBAL_GROUP).finish();
+            }
+        } catch (RuntimeException e) {
+            assets.dispose();
+            assets = null;
+            context = null;
+            throw e;
+        }
         EnginePhaseRunner phases = new EnginePhaseRunner(context.timers(), context.tweens(), builder.eventBus(),
-                phase -> { });
+                assets::update, phase -> { });
         loop = new GameLoop(new GdxClock(), builder.timeState(), phases, config.maxCatchUpSteps);
         state = AppState.RUNNING;
         if (config.devMode) {
@@ -133,6 +157,7 @@ public class EmberGame implements ApplicationListener {
             return; // never started: nothing to release
         }
         List<RuntimeException> failures = context.disposeServices();
+        assets.dispose();   // engine-owned; after the game's services (reverse boot order)
         LOG.info(failures.isEmpty() ? "Shut down" : "Shut down with " + failures.size() + " disposal failure(s)");
     }
 

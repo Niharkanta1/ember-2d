@@ -13,7 +13,7 @@ import java.util.Objects;
  * The engine's work in each phase, around the game's systems (F-002, F-019):
  *
  * <ul>
- *   <li>{@code INPUT}: start the event frame, then systems.</li>
+ *   <li>{@code INPUT}: advance asset loading, start the event frame, then systems.</li>
  *   <li>{@code FIXED}: systems, then flush queued events (once per fixed step).</li>
  *   <li>{@code UPDATE}: timers, tweens, systems, then flush.</li>
  *   <li>{@code LATE}: systems, then flush.</li>
@@ -28,18 +28,21 @@ final class EnginePhaseRunner implements PhaseRunner {
     private final Tweens tweens;
     private final DefaultEventBus events;
     private final PhaseRunner systems;
+    private final Runnable assetLoading;
 
-    EnginePhaseRunner(Timers timers, Tweens tweens, DefaultEventBus events, PhaseRunner systems) {
+    EnginePhaseRunner(Timers timers, Tweens tweens, DefaultEventBus events, Runnable assetLoading, PhaseRunner systems) {
         this.timers = Objects.requireNonNull(timers, "timers");
         this.tweens = Objects.requireNonNull(tweens, "tweens");
         this.events = Objects.requireNonNull(events, "events");
         this.systems = Objects.requireNonNull(systems, "systems");
+        this.assetLoading = Objects.requireNonNull(assetLoading, "assetLoading");
     }
 
     @Override
     public void run(Phase phase) {
         switch (phase) {
             case INPUT -> {
+                assetLoading.run();
                 events.beginFrame();
                 systems.run(phase);
             }

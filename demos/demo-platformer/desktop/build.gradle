@@ -12,6 +12,13 @@ dependencies {
     implementation project(':ember-desktop')
 }
 
+// Demo assets (shared with Android) are served from the classpath on desktop (F-008).
+sourceSets {
+    main {
+        resources.srcDir rootProject.file('demos/demo-platformer/core/assets')
+    }
+}
+
 application {
     mainClass = 'dev.ember2d.demo.platformer.desktop.DesktopLauncher'
     if (System.getProperty('os.name').toLowerCase().contains('mac')) {

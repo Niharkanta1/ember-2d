@@ -39,8 +39,8 @@ public final class EngineConfig {
     /** Enables dev features: debug logging, boot timing, hot reload and dev tools hooks (later phases). */
     public boolean devMode = false;
 
-    /** Asset manifest path inside the game's assets. */
-    public String assetManifest = "assets/manifest.json";
+    /** Asset manifest path relative to the assets root (F-008). */
+    public String assetManifest = "manifest.json";
 
     /**
      * Checks every field and throws one exception listing all problems.

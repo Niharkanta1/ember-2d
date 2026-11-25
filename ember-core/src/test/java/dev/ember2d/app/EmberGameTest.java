@@ -8,6 +8,9 @@ import dev.ember2d.core.LogConfig;
 import dev.ember2d.core.LogLevel;
 import dev.ember2d.core.LogSink;
 import dev.ember2d.core.Time;
+import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
+import dev.ember2d.assets.internal.AssetManifest;
+import dev.ember2d.assets.internal.GdxAssets;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
@@ -83,9 +86,14 @@ class EmberGameTest {
         LogConfig.resetToDefaults();
     }
 
+    /** A game with an empty manifest, so no libGDX file access is needed. */
+    static EmberGame testGame(EngineConfig config) {
+        return new EmberGame(config, c -> new GdxAssets(AssetManifest.empty("test"), new InternalFileHandleResolver()));
+    }
+
     private EmberGame gameWith(RecordingService... services) {
         EngineConfig config = new EngineConfig();
-        return new EmberGame(config) {
+        return new EmberGame(config, c -> new GdxAssets(AssetManifest.empty("test"), new InternalFileHandleResolver())) {
             @Override
             protected void configureContext(EngineContext.Builder builder) {
                 for (RecordingService service : services) {
@@ -116,7 +124,7 @@ class EmberGameTest {
     void contextExposesTimeWithConfiguredFixedStep() {
         EngineConfig config = new EngineConfig();
         config.fixedStep = 1f / 30f;
-        EmberGame game = new EmberGame(config);
+        EmberGame game = testGame(config);
         game.create();
 
         Time time = game.context().time();
@@ -259,7 +267,7 @@ class EmberGameTest {
     void invalidConfigFailsCreateAndLeavesGameUnstarted() {
         EngineConfig config = new EngineConfig();
         config.virtualWidth = 0;
-        EmberGame game = new EmberGame(config);
+        EmberGame game = testGame(config);
 
         assertThatThrownBy(game::create).isInstanceOf(EngineConfigException.class).hasMessageContaining("virtualWidth");
         assertThat(game.state()).isEqualTo(AppState.CREATED);
@@ -271,11 +279,11 @@ class EmberGameTest {
     void bootTimeIsLoggedInDevModeOnly() {
         EngineConfig dev = new EngineConfig();
         dev.devMode = true;
-        new EmberGame(dev).create();
+        testGame(dev).create();
         assertThat(logLines).anyMatch(line -> line.matches("INFO Boot took \\d+ ms"));
 
         logLines.clear();
-        new EmberGame(new EngineConfig()).create();
+        testGame(new EngineConfig()).create();
         assertThat(logLines).noneMatch(line -> line.startsWith("INFO Boot took"));
     }
 }

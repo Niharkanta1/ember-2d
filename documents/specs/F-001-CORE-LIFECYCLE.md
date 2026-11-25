@@ -38,7 +38,7 @@ public final class EngineConfig {
     public float fixedStep = 1f / 60f;
     public int maxCatchUpSteps = 5;
     public boolean devMode = false;                      // enables hot reload, dev tools hooks
-    public String assetManifest = "assets/manifest.json";
+    public String assetManifest = "manifest.json";        // relative to the assets root (changed in I-050)
     public Supplier<Scene> firstScene;
     public void validate();                              // throws EngineConfigException
 }
@@ -121,7 +121,7 @@ The Android launcher (`ember-android`, F-022) builds the same `EngineConfig` (us
 - A repeated suspend or resume is ignored and logged at debug level (backends report them twice, e.g. LWJGL3 calls `pause()` on close while minimised). Calls before `create()` or after `dispose()` throw `IllegalStateException`.
 - Registered services that implement `AppLifecycleListener` receive callbacks automatically, in registration order; services that implement libGDX `Disposable` are disposed in reverse order. A failing listener or disposal is logged and does not stop the others.
 - A frame exception is logged and rethrown in dev and release; in release the platform crash handler writes the crash log (desktop `CrashLog`). The fatal error screen arrives with the renderer (I-060).
-- Loading `EngineConfig` from `ember.json` moves to I-050, because file access is only allowed in `ember.assets`.
+- Loading `EngineConfig` from `ember.json` is deferred until a game needs it (re-deferred in I-050); file access is only allowed in `ember.assets`.
 
 ## Risks/open questions
 - None open for I-010.

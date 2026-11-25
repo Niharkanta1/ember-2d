@@ -1,6 +1,7 @@
 package dev.ember2d.app;
 
 import com.badlogic.gdx.utils.Disposable;
+import dev.ember2d.assets.Assets;
 import dev.ember2d.core.Log;
 import dev.ember2d.core.Phase;
 import dev.ember2d.core.PublicApi;
@@ -41,16 +42,18 @@ public final class EngineContext {
     private final Timers timers;
     private final Tweens tweens;
     private final DefaultEventBus events;
+    private final Assets assets;
     private final Map<Class<?>, Object> services;
     private final List<Object> instancesInOrder;
 
     private EngineContext(EngineConfig config, TimeState time, Timers timers, Tweens tweens, DefaultEventBus events,
-            Map<Class<?>, Object> services) {
+            Assets assets, Map<Class<?>, Object> services) {
         this.config = config;
         this.time = time;
         this.timers = timers;
         this.tweens = tweens;
         this.events = events;
+        this.assets = assets;
         this.services = Collections.unmodifiableMap(new LinkedHashMap<>(services));
         Set<Object> seen = Collections.newSetFromMap(new IdentityHashMap<>());
         List<Object> ordered = new ArrayList<>();
@@ -85,6 +88,18 @@ public final class EngineContext {
     /** The event bus: immediate and queued events (F-019). */
     public EventBus events() {
         return events;
+    }
+
+    /**
+     * Assets by logical ID (F-008).
+     *
+     * @throws IllegalStateException in a context built without an asset service (tests)
+     */
+    public Assets assets() {
+        if (assets == null) {
+            throw new IllegalStateException("This EngineContext has no asset service; set one with Builder.assets(...)");
+        }
+        return assets;
     }
 
     /**
@@ -144,6 +159,7 @@ public final class EngineContext {
         private final Timers timers;
         private final Tweens tweens;
         private final DefaultEventBus events;
+        private Assets assets;
         private final Map<Class<?>, Object> services = new LinkedHashMap<>();
 
         public Builder(EngineConfig config) {
@@ -157,6 +173,12 @@ public final class EngineContext {
         /** The time the context will expose; the engine drives it from the game loop. */
         TimeState timeState() {
             return time;
+        }
+
+        /** Sets the asset service; the engine sets its own, tests may set a fake. */
+        public Builder assets(Assets assets) {
+            this.assets = Objects.requireNonNull(assets, "assets");
+            return this;
         }
 
         /** The engine's event bus implementation, flushed by the engine at the flush points. */
@@ -185,7 +207,7 @@ public final class EngineContext {
         }
 
         public EngineContext build() {
-            return new EngineContext(config, time, timers, tweens, events, services);
+            return new EngineContext(config, time, timers, tweens, events, assets, services);
         }
     }
 }

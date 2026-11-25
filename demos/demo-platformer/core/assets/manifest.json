@@ -1,0 +1,3 @@
+{ "version": 1, "assets": [
+  { "id": "tex.player", "path": "gfx/player-placeholder.png", "type": "texture", "group": "global" }
+] }
