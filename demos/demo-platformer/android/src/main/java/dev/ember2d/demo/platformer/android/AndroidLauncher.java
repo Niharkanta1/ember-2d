@@ -9,6 +9,8 @@ public class AndroidLauncher extends EmberAndroidLauncher {
 
     @Override
     protected EngineConfig config(boolean devMode) {
-        return PlatformerDemo.config(devMode);
+        EngineConfig config = PlatformerDemo.config(devMode);
+        config.debugOverlayVisibleAtStart = devMode;   // phones have no F3 key
+        return config;
     }
 }

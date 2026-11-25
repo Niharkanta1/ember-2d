@@ -2,11 +2,14 @@ package dev.ember2d.app;
 
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import dev.ember2d.assets.internal.GdxAssets;
 import dev.ember2d.core.Log;
 import dev.ember2d.core.PublicApi;
 import dev.ember2d.core.internal.GameLoop;
 import dev.ember2d.core.internal.GdxClock;
+import dev.ember2d.debug.DebugOverlay;
+import dev.ember2d.debug.internal.GdxDebugCanvas;
 import dev.ember2d.event.AppResumed;
 import dev.ember2d.event.AppSuspended;
 import dev.ember2d.render.internal.GdxRenderer;
@@ -36,6 +39,7 @@ public class EmberGame implements ApplicationListener {
     private final Function<EngineConfig, GdxAssets> assetsFactory;
     private GdxAssets assets;
     private GdxRenderer renderer;
+    private GdxDebugCanvas debugCanvas;
     private AppState state = AppState.CREATED;
     private EngineContext context;
     private GameLoop loop;
@@ -131,13 +135,24 @@ public class EmberGame implements ApplicationListener {
         if (state != AppState.RUNNING) {
             return;
         }
+        DebugOverlay debug = context.debug();
+        if (debug.isAvailable() && Gdx.input != null && Gdx.input.isKeyJustPressed(Input.Keys.F3)) {
+            debug.toggle();   // becomes an input action with I-100
+        }
+        long start = System.nanoTime();
         try {
             loop.frame();
         } catch (RuntimeException e) {
             // Dev and release both rethrow: in release the platform crash handler writes the crash log
-            // (desktop CrashLog). A fatal error screen arrives with the renderer (I-060).
+            // (desktop CrashLog). A fatal error screen (F-001) is not implemented yet.
             LOG.error("Uncaught exception in frame", e);
             throw e;
+        }
+        if (debug.isVisible()) {
+            Scene scene = context.scenes().current();
+            debug.recordFrame(context.time().unscaledDelta(), System.nanoTime() - start, context.time().fixedTick(),
+                    context.time().droppedFixedSteps(), scene == null ? 0 : scene.worldInternal().entityCount(),
+                    renderer == null ? 0 : renderer.renderCallsLastFrame());
         }
     }
 
@@ -180,6 +195,9 @@ public class EmberGame implements ApplicationListener {
         }
         context.scenes().exitAll();
         List<RuntimeException> failures = context.disposeServices();
+        if (debugCanvas != null) {
+            debugCanvas.dispose();
+        }
         if (renderer != null) {
             renderer.dispose();   // engine-owned; after the game's services (reverse boot order)
         }
@@ -194,8 +212,21 @@ public class EmberGame implements ApplicationListener {
     }
 
     private void endRender() {
-        if (renderer != null) {
-            renderer.endFrame();
+        if (renderer == null) {
+            return;
+        }
+        DebugOverlay debug = context.debug();
+        if (debug.isVisible() && debugCanvas == null) {
+            debugCanvas = new GdxDebugCanvas(renderer.batch());   // created on first use: zero cost until shown
+        }
+        if (debug.isVisible()) {
+            renderer.batch().end();
+            debug.renderWorld(debugCanvas, renderer.worldCamera().combined);
+            renderer.batch().begin();
+        }
+        renderer.endFrame();
+        if (debug.isVisible()) {
+            debug.renderPanel(debugCanvas, renderer.screenWidth(), renderer.screenHeight());
         }
     }
 

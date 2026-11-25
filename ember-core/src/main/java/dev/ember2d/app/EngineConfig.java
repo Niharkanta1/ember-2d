@@ -48,6 +48,12 @@ public final class EngineConfig {
     /** Colour behind the world (inside the letterbox; the bars are black). */
     public final Color backgroundColor = new Color(Color.BLACK);
 
+    /** Allows the debug overlay (F3) in release builds; it is always available in dev mode (F-014). */
+    public boolean debugOverlayInRelease = false;
+
+    /** Shows the debug overlay from the start (useful on phones, which have no F3 key). */
+    public boolean debugOverlayVisibleAtStart = false;
+
     /** The scene started at boot (F-010); null starts no scene. */
     public Supplier<Scene> firstScene;
 

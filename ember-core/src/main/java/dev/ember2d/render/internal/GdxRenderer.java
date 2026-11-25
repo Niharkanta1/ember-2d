@@ -59,6 +59,7 @@ public final class GdxRenderer implements Renderer, Disposable {
     private ScreenLayout layout;
     private int screenWidth;
     private int screenHeight;
+    private int renderCallsLastFrame;
 
     public GdxRenderer(int virtualWidth, int virtualHeight, float pixelsPerUnit, RenderMode mode, Color background,
             Time time, Batch batch, RenderTarget target) {
@@ -102,6 +103,9 @@ public final class GdxRenderer implements Renderer, Disposable {
 
     /** Applies the camera rig and starts the world pass; the batch is begun when this returns. */
     public void beginFrame() {
+        if (batch instanceof SpriteBatch sprites) {
+            renderCallsLastFrame = -sprites.totalRenderCalls;   // completed in endFrame
+        }
         rig.update(time.delta());
         float x = rig.position.x + rig.shakeOffset().x;
         float y = rig.position.y + rig.shakeOffset().y;
@@ -140,19 +144,36 @@ public final class GdxRenderer implements Renderer, Disposable {
     public void endFrame() {
         batch.end();
         GL20 gl = Gdx.gl;
-        if (target == null) {
+        if (target != null) {
+            target.end();
             gl.glViewport(0, 0, screenWidth, screenHeight);
-            return;
+            gl.glClearColor(0f, 0f, 0f, 1f);
+            gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+            batch.setColor(Color.WHITE);
+            batch.setProjectionMatrix(screenProjection);
+            batch.begin();
+            batch.draw(target.region(), layout.x(), layout.y(), layout.width(), layout.height());
+            batch.end();
         }
-        target.end();
         gl.glViewport(0, 0, screenWidth, screenHeight);
-        gl.glClearColor(0f, 0f, 0f, 1f);
-        gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        batch.setColor(Color.WHITE);
-        batch.setProjectionMatrix(screenProjection);
-        batch.begin();
-        batch.draw(target.region(), layout.x(), layout.y(), layout.width(), layout.height());
-        batch.end();
+        if (batch instanceof SpriteBatch sprites) {
+            renderCallsLastFrame += sprites.totalRenderCalls;
+        }
+    }
+
+    /** Draw calls the batch issued in the last frame (0 for batches that do not count them). */
+    public int renderCallsLastFrame() {
+        return Math.max(0, renderCallsLastFrame);
+    }
+
+    /** Window width in back-buffer pixels. */
+    public int screenWidth() {
+        return screenWidth;
+    }
+
+    /** Window height in back-buffer pixels. */
+    public int screenHeight() {
+        return screenHeight;
     }
 
     /** Rounds a world coordinate to a whole virtual pixel. */

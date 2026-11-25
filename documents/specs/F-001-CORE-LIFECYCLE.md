@@ -120,7 +120,7 @@ The Android launcher (`ember-android`, F-022) builds the same `EngineConfig` (us
 - I-010 delivers the lifecycle and the service container only. Each engine service and its typed `EngineContext` accessor arrives with its own task (`time()` in I-020, `events()` in I-030, and so on); `firstScene` arrives with the scene manager (I-070).
 - A repeated suspend or resume is ignored and logged at debug level (backends report them twice, e.g. LWJGL3 calls `pause()` on close while minimised). Calls before `create()` or after `dispose()` throw `IllegalStateException`.
 - Registered services that implement `AppLifecycleListener` receive callbacks automatically, in registration order; services that implement libGDX `Disposable` are disposed in reverse order. A failing listener or disposal is logged and does not stop the others.
-- A frame exception is logged and rethrown in dev and release; in release the platform crash handler writes the crash log (desktop `CrashLog`). The fatal error screen arrives with the renderer (I-060).
+- A frame exception is logged and rethrown in dev and release; in release the platform crash handler writes the crash log (desktop `CrashLog`). The fatal error screen is not implemented yet (it needs text rendering, Phase 2).
 - Loading `EngineConfig` from `ember.json` is deferred until a game needs it (re-deferred in I-050); file access is only allowed in `ember.assets`.
 
 ## Risks/open questions
