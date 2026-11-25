@@ -12,4 +12,8 @@ dependencies {
     testFixturesApi libs.archunit
     testFixturesApi platform(libs.junit.bom)
     testFixturesApi libs.junit.jupiter.api
+
+    // Integration tests run the engine on the libGDX headless backend (CODING_GUIDELINES.md, Tests).
+    testImplementation libs.gdx.backend.headless
+    testRuntimeOnly variantOf(libs.gdx.platform) { classifier('natives-desktop') }
 }

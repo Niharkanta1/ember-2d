@@ -2,6 +2,7 @@ package dev.ember2d.demo.platformer.desktop;
 
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
+import dev.ember2d.core.EmberGame;
 import dev.ember2d.core.Log;
 import dev.ember2d.demo.platformer.PlatformerDemo;
 import dev.ember2d.desktop.CrashLog;
@@ -38,7 +39,7 @@ public final class DesktopLauncher {
         configuration.setForegroundFPS(Lwjgl3ApplicationConfiguration.getDisplayMode().refreshRate + 1);
         configuration.setWindowedMode(1280, 720);
         try {
-            new Lwjgl3Application(new PlatformerDemo(), configuration);
+            new Lwjgl3Application(new EmberGame(PlatformerDemo.config(devMode)), configuration);
         } finally {
             Log.get("launcher").info("Exited");
             DesktopLogging.shutdown();

@@ -1,6 +1,6 @@
 # F-019 — Events and EngineContext
 
-- Status: Draft — expanded to template depth; becomes Ready when the API sketch is approved in I-010/I-030
+- Status: `EngineContext` part Ready (approved in I-010, 2026-11-25: `config()`, `service()`, `findService()`, `Builder.register()`; typed accessors arrive with each service). `EventBus` part: expanded, API awaiting approval in I-030
 - Phase: 1
 - Module / package: `ember-core` / `ember.event`, `ember.core`
 - Depends on: F-001, F-002

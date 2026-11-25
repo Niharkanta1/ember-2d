@@ -1,28 +1,22 @@
 package dev.ember2d.demo.platformer;
 
-import com.badlogic.gdx.ApplicationAdapter;
-import com.badlogic.gdx.utils.ScreenUtils;
-import dev.ember2d.core.Log;
+import dev.ember2d.core.EngineConfig;
 
 /**
- * Platformer demo entry point. Phase 0: clears the screen only, to prove the build and launcher wiring.
+ * Platformer demo setup, shared by the desktop and Android launchers. Games configure Ember2D rather than
+ * subclass its loop: the launcher passes this config to {@code new EmberGame(config)}.
  */
-public class PlatformerDemo extends ApplicationAdapter {
+public final class PlatformerDemo {
 
-    private static final Log LOG = Log.get("demo");
-
-    @Override
-    public void create() {
-        LOG.info("Created");
+    private PlatformerDemo() {
     }
 
-    @Override
-    public void render() {
-        ScreenUtils.clear(0.08f, 0.06f, 0.10f, 1f);
-    }
-
-    @Override
-    public void dispose() {
-        LOG.info("Disposed");
+    /** The demo's engine configuration. */
+    public static EngineConfig config(boolean devMode) {
+        EngineConfig config = new EngineConfig();
+        config.virtualWidth = 320;
+        config.virtualHeight = 180;
+        config.devMode = devMode;
+        return config;
     }
 }

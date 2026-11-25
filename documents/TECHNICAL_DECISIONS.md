@@ -34,7 +34,7 @@ Third-party dependencies must be listed here before use. Each sits behind one sm
 
 | Dependency | Used by | Purpose | Adapter |
 | --- | --- | --- | --- |
-| libGDX 1.14.x (core, LWJGL3, Android backend, freetype) | all | Platform | — (foundation) |
+| libGDX 1.14.x (core, LWJGL3, Android backend, freetype; headless backend for tests) | all | Platform | — (foundation) |
 | Android Gradle plugin, Android SDK | `ember-android`, demo launchers | Android builds | — (build only) |
 | gdx-box2d (classic v2 extension) | `ember-box2d` | Optional rigid bodies | `ember-box2d` API |
 | imgui-java | `ember-devtools` | Dev tool panels (desktop) | `ember-devtools` |

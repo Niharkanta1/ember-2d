@@ -2,7 +2,7 @@
 
 This chapter covers what Phase 0 delivers: building Ember2D, running the platformer demo, logging, the architecture rules that keep the code base in shape, and packaging a desktop release. Later chapters cover the engine itself.
 
-> Status: written at the Phase 0 gate (2026-11-25) from the code at that point. Awaiting developer review.
+> Status: approved by the developer at the Phase 0 gate (2026-11-25). Updated for I-010: the demo now starts through `EmberGame`.
 
 ## 1. What you get in Phase 0
 - A Gradle multi-module build: `ember-core`, `ember-desktop`, `ember-android`, `ember-devtools`, `ember-box2d`, five kits under `kits/`, and the platformer demo under `demos/demo-platformer/` (`core` + `desktop`). Most modules are still empty placeholders; the module layout is final (see `PROJECT_STRUCTURE.md`).
@@ -52,7 +52,7 @@ The launcher is `demos/demo-platformer/desktop/src/main/java/dev/ember2d/demo/pl
 1. `StartupHelper.startNewJvmIfRequired()` — restarts the JVM with `-XstartOnFirstThread` on macOS (required by LWJGL3) and avoids a crash on Windows user names with non-Latin characters.
 2. `DesktopLogging.configure(devMode, "platformer-demo")` — log levels and the dev log file.
 3. `CrashLog.install(...)` — release builds only.
-4. `new Lwjgl3Application(new PlatformerDemo(), configuration)` — blocks until the window closes.
+4. `new Lwjgl3Application(new EmberGame(PlatformerDemo.config(devMode)), configuration)` — the game is configured, not subclassed; blocks until the window closes.
 5. `DesktopLogging.shutdown()` — closes the dev log file.
 
 ## 5. Logging
@@ -61,12 +61,11 @@ Get a logger once per class, by category, and keep it in a field:
 ```java
 import dev.ember2d.core.Log;
 
-public class PlatformerDemo extends ApplicationAdapter {
-    private static final Log LOG = Log.get("demo");
+public final class LevelLoader {
+    private static final Log LOG = Log.get("levels");
 
-    @Override
-    public void create() {
-        LOG.info("Created");
+    public void load(String levelId) {
+        LOG.info("Loading " + levelId);
     }
 }
 ```
