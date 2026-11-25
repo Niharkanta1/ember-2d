@@ -17,6 +17,8 @@
 ## Android safety (ADR-015, ADR-019)
 Applies to `ember-core`, all kits and demo `core` code. Desktop-only modules (`ember-desktop`, `ember-devtools`) are exempt.
 - Use only Java library APIs available on the minimum Android API level (with core library desugaring). Not allowed: `java.nio.file`, `java.awt`, `javax.*`, `ProcessBuilder`, `java.lang.management`, `System.exit`.
+- The build checks this: `tools/android-api-check` lints the shared sources as Android code (minSdk 23, desugaring) and fails on calls that do not exist there, for example `String.lines()` (API 33) or `Class.isRecord()` (API 34). Desugared methods such as `String.isBlank()`, `List.of()` and `Stream.toList()` are fine (S-04, I-016).
+- Do not rely on class or package names of app classes at run time: R8 renames and moves them in release builds (`getPackage()` can be null). Record `toString()` is for debugging only; it shows minified names in release (S-04).
 - File access only through `Gdx.files`, and only inside `ember.assets` and `ember.save`.
 - No threads except documented asset-loading threads.
 - Reflection only through the component registry in `ember.data` (so R8 keep rules can be generated). Do not look up classes by name anywhere else.

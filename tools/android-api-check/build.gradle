@@ -1,0 +1,45 @@
+plugins {
+    alias(libs.plugins.android.library)
+}
+
+description = 'Android API guard (I-016): lints the shared Java sources as Android code against minSdk.'
+
+// The engine, kits and game code are plain Java modules, and Android Lint's NewApi check only runs on Android
+// modules. This build-only module compiles their main sources as Android code (minSdk 23, with desugaring), so lint
+// flags Java library calls that do not exist on old Android, such as String.lines() or Class.isRecord() (S-04).
+// Desktop-only modules (ember-desktop, ember-devtools) may use any Java API and are not included.
+def sharedSourceDirs = [rootProject.file('ember-core/src/main/java')] +
+        (rootProject.file('kits').listFiles() ?: []).collect { new File(it, 'src/main/java') } +
+        (rootProject.file('demos').listFiles() ?: []).collect { new File(it, 'core/src/main/java') }
+
+android {
+    namespace = 'dev.ember2d.apicheck'
+    compileSdk = libs.versions.androidCompileSdk.get().toInteger()
+
+    defaultConfig {
+        minSdk = libs.versions.androidMinSdk.get().toInteger()
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+        coreLibraryDesugaringEnabled = true
+    }
+
+    sourceSets {
+        main {
+            java.srcDirs = sharedSourceDirs.findAll { it.directory }
+        }
+    }
+
+    lint {
+        checkOnly += ['NewApi']
+        error += ['NewApi']
+        abortOnError = true
+    }
+}
+
+dependencies {
+    implementation libs.gdx.core
+    coreLibraryDesugaring libs.android.desugar
+}

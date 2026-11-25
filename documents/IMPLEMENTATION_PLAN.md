@@ -35,6 +35,7 @@ Time-boxed throwaway prototypes (`templates/SPIKE_TEMPLATE.md`). Code is deleted
 ### Phase 1 — Runtime core
 - **I-010 App lifecycle and EngineContext** (F-001, F-019)
 - **I-015 Android launcher and smoke build** — `ember-android`, minimum API level decision, debug APK in CI, suspend/resume wiring (F-022, F-020)
+- **I-016 Android API guard** — `tools/android-api-check` lints shared sources against minSdk in every build (follow-up of S-04; ADR-015)
 - **I-020 Time and loop** — fixed step, catch-up limit, interpolation alpha, pause, time scale (F-002)
 - **I-025 Timers, tweens, state-machine helper** (F-002)
 - **I-030 Event bus** — immediate and queued delivery, scoped subscriptions (F-019)

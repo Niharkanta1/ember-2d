@@ -34,3 +34,6 @@ include 'kits:kit-novel'
 include 'demos:demo-platformer:core'
 include 'demos:demo-platformer:desktop'
 include 'demos:demo-platformer:android'
+
+// Build tools
+include 'tools:android-api-check'   // Android API guard (I-016)

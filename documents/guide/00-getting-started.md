@@ -215,6 +215,7 @@ Release builds (signed AAB, R8) come in Phase 3 (I-255).
 | Symptom | Cause | Fix |
 | --- | --- | --- |
 | `Failed to find Build Tools revision 36.0.0` | Android build-tools missing | `sdkmanager "build-tools;36.0.0"` |
+| `Call requires API level NN (current min is 23) [NewApi]` from `:tools:android-api-check:lint` | shared code calls a Java method that old Android lacks (e.g. `String.lines()`) | use an alternative that exists on API 23 (see `CODING_GUIDELINES.md`, Android safety) |
 | `requires ... compile against version 36 or later` | Android platform 36 missing | `sdkmanager "platforms;android-36"` |
 | `SDK location not found` | neither `ANDROID_HOME` nor `local.properties` set | set one of them |
 | Compile error about a Java API that exists in your JDK | code is compiled with `--release 17` | use a Java 17 API (Android safety) |

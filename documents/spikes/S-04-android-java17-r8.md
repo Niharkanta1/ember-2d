@@ -54,6 +54,8 @@ The real component registry and rule generation; signed release builds and the A
 - R8 repackages classes, so `getPackage()` returns null and class names change; code must not build class names from packages or rely on them at run time.
 
 ## Consequences (proposed; each needs approval)
+Status: 2 (lint part) and 5 done in I-016; the minified smoke test of 2 and items 1, 3, 4 are open (I-130, I-255).
+
 1. **Component registry (I-130):** generate `-keep class X { <init>(); <fields>; }` for every registered component into the release build's rules, and test prefab/JSON loading in a minified build (F-010 acceptance already asks for this). Components stay plain classes, never records accessed by reflection (`Class.isRecord` is API 34) — matches F-003.
 2. **Guard against Java APIs missing on API 23** in `ember-core`, kits and demo cores. Android lint does not check plain Java modules, so propose an architecture-rule denylist of known-missing methods (`String.lines`, `String.indent`, `String.transform`, `Class.isRecord`, `Class.getRecordComponents`, `Class.isSealed`, `Class.getPermittedSubclasses`, …), plus running a minified demo smoke test on the API 23 emulator before releases. A small task (for example I-016) or part of I-255.
 3. **Release logs and errors (I-255):** keep the R8 mapping file with every release build (for retrace), and consider `-keepnames` for `Scene` and `EntitySystem` subclasses so engine log lines stay readable.
