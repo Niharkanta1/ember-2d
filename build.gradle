@@ -1,4 +1,5 @@
 plugins {
+    id 'base'
     alias(libs.plugins.android.library) apply false
 }
 
@@ -37,5 +38,79 @@ subprojects {
         tasks.withType(Test).configureEach {
             useJUnitPlatform()
         }
+    }
+}
+
+// ----------------------------------------------------------------------------------------------------
+// Module dependency rules 6-8 (documents/ARCHITECTURE.md). ArchUnit sees one module at a time, so the
+// allowed graph between Gradle modules is checked here. Values are regular expressions of project paths.
+// A module that declares project dependencies but has no entry here fails the check.
+// ----------------------------------------------------------------------------------------------------
+def platformModules = [':ember-core']
+def sharedKits = [':kits:kit-common', ':kits:kit-bullets']
+def allowedModuleDependencies = [
+        (':ember-core')             : [],
+        (':ember-desktop')          : platformModules,
+        (':ember-android')          : platformModules,
+        (':ember-devtools')         : platformModules,
+        (':ember-box2d')            : platformModules,
+        (':kits:kit-common')        : platformModules,
+        (':kits:kit-bullets')       : platformModules + [':kits:kit-common'],
+        (':kits:kit-platformer')    : platformModules + sharedKits,
+        (':kits:kit-topdown')       : platformModules + sharedKits,
+        (':kits:kit-novel')         : platformModules + sharedKits,
+        // Demos: shared game code uses the engine, kits and optional modules; launchers add their platform.
+        (':demos:[^:]+:core')       : platformModules + [':kits:[^:]+', ':ember-box2d', ':ember-spine'],
+        (':demos:([^:]+):desktop')  : [':demos:$1:core', ':ember-desktop', ':ember-devtools'],
+        (':demos:([^:]+):android')  : [':demos:$1:core', ':ember-android'],
+]
+
+def declaredModuleDependencies = [:]
+gradle.projectsEvaluated {
+    subprojects.each { p ->
+        def deps = p.configurations.collectMany { c ->
+            c.dependencies.withType(ProjectDependency).collect { it.path }
+        } as Set
+        deps.remove(p.path)
+        declaredModuleDependencies[p.path] = deps.sort()
+    }
+}
+
+def verifyModuleDependencies = tasks.register('verifyModuleDependencies') {
+    group = 'verification'
+    description = 'Checks that modules depend only on the modules allowed by ARCHITECTURE.md (rules 6-8).'
+    doLast {
+        def violations = []
+        declaredModuleDependencies.each { String path, List<String> deps ->
+            def entry = allowedModuleDependencies.find { pattern, allowed -> path ==~ pattern }
+            if (entry == null) {
+                if (!deps.isEmpty()) {
+                    violations << "${path} is not listed in allowedModuleDependencies (root build.gradle)"
+                }
+                return
+            }
+            def matcher = path =~ entry.key
+            matcher.matches()
+            def allowed = entry.value.collect { String rule ->
+                matcher.groupCount() > 0 ? rule.replace('$1', matcher.group(1)) : rule
+            }
+            deps.findAll { dep -> !allowed.any { dep ==~ it } }.each { dep ->
+                violations << "${path} must not depend on ${dep} (allowed: ${allowed})"
+            }
+        }
+        if (!violations.isEmpty()) {
+            throw new GradleException('Module dependency rules violated (ARCHITECTURE.md, rules 6-8):\n  '
+                    + violations.join('\n  '))
+        }
+        logger.lifecycle("Module dependencies OK for ${declaredModuleDependencies.size()} projects.")
+    }
+}
+
+tasks.named('check') {
+    dependsOn verifyModuleDependencies
+}
+subprojects {
+    tasks.matching { it.name == 'check' }.configureEach {
+        dependsOn verifyModuleDependencies
     }
 }

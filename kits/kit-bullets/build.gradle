@@ -5,6 +5,7 @@ plugins {
 description = 'Ember2D shared kit: data-oriented bullets and patterns (F-024).'
 
 dependencies {
+    testImplementation testFixtures(project(':ember-core'))
     api project(':ember-core')
     api project(':kits:kit-common')
 }

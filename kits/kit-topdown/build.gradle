@@ -5,6 +5,7 @@ plugins {
 description = 'Ember2D genre kit: top-down movement, shooter and rpg packages (F-016, F-017).'
 
 dependencies {
+    testImplementation testFixtures(project(':ember-core'))
     api project(':kits:kit-common')
     api project(':kits:kit-bullets')
 }

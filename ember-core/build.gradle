@@ -1,9 +1,15 @@
 plugins {
     id 'java-library'
+    id 'java-test-fixtures'
 }
 
 description = 'Ember2D engine: all engine packages. Android-safe Java only (ADR-015).'
 
 dependencies {
     api libs.gdx.core
+
+    // Shared architecture rules (EmberArchitectureRules), reused by the kits' and demos' architecture tests.
+    testFixturesApi libs.archunit
+    testFixturesApi platform(libs.junit.bom)
+    testFixturesApi libs.junit.jupiter.api
 }
