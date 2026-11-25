@@ -1,8 +1,8 @@
 # F-010 — Scenes, Data and Prefabs
 
-- Status: Draft
+- Status: Scene lifecycle Ready (expanded and approved in I-070, 2026-11-26; see "Scene lifecycle (I-070)"); transitions and loading screens (I-240), carrying entities, scene data files, prefabs and data (Phase 2): Draft
 - Phase: 1 (scene lifecycle), 2 (JSON prefabs and Tiled spawning), 3 (transitions, preloading)
-- Module / package: `ember-core` / `ember.scene`, `ember.data`
+- Module / package: `ember-core` / `ember.app` (`Scene`, `SceneManager`; ADR-022), `ember.scene` (scene data, transitions: later), `ember.data`
 - Depends on: F-001, F-003, F-008, F-009, F-019
 - Tasks: I-070, I-112, I-240
 
@@ -39,6 +39,32 @@ A clear runtime scene model, data-driven level composition, and reusable entity 
 
 **Data**
 - All Ember2D JSON carries `version`; `ember.data` runs registered migrations on load and validates required fields.
+
+## Scene lifecycle (I-070)
+**API sketch** (`ember.app`, ADR-022):
+```java
+@PublicApi public abstract class Scene {
+    protected abstract void enter(EngineContext context);   // build entities and systems in world()
+    protected void exit() {}
+    protected void update(float delta) {}                   // UPDATE, after the world's systems; scaled delta
+    protected String assetGroup() { return null; }          // loaded before enter, unloaded after exit
+    protected final World world();  protected final EngineContext context();
+    protected final Timers timers();  protected final Tweens tweens();   // scene-scoped
+}
+@PublicApi public final class SceneManager {                // context.scenes()
+    public void push(Scene scene);  public void pop();  public void replace(Scene scene);
+    public Scene current();  public int depth();
+}
+// EngineConfig.firstScene: Supplier<Scene> (null starts no scene)
+```
+**Behaviour**
+- `push`, `pop` and `replace` take effect at the start of the next frame (before `INPUT` systems); changes requested while changes are applied (for example in `enter`) wait one more frame.
+- Enter: load the scene's asset group (blocking in part 1; a loading screen comes with I-240), create its `World`, open its event scope (`context.events().on(...)` subscriptions belong to the scene), call `enter`. If `enter` throws, the scene is released and the error propagates.
+- Exit: call `exit`, clear its world, close its event scope, cancel its timers and tweens, unload its asset group unless another scene in the stack uses the same group.
+- Only the top scene runs; a scene below keeps its world and subscriptions but its systems, timers and `update` stop until it is on top again. Overlay scenes (a pause menu drawn over a running level) are decided with the pause menu (Phase 3).
+- Per frame for the top scene: its world runs every phase; in `UPDATE` its timers and tweens advance first (like the global ones), then its world's systems, then `update(delta)`.
+- Boot: `EmberGame` enters `firstScene` during `create()`, so a broken first scene fails at boot. Shutdown: scenes exit top first, before game services are disposed.
+- Errors: `pop()` that would leave no scene throws (use `replace`); a scene instance already in the stack or waiting to start throws.
 
 ## Non-goals
 - Nested prefabs and prefab variants (defer until a demo needs them).

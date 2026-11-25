@@ -5,6 +5,7 @@ import dev.ember2d.core.PublicApi;
 import dev.ember2d.render.RenderMode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Startup configuration of an {@link EmberGame}. Set the fields before passing the config to the game; it is
@@ -46,6 +47,9 @@ public final class EngineConfig {
 
     /** Colour behind the world (inside the letterbox; the bars are black). */
     public final Color backgroundColor = new Color(Color.BLACK);
+
+    /** The scene started at boot (F-010); null starts no scene. */
+    public Supplier<Scene> firstScene;
 
     /** Asset manifest path relative to the assets root (F-008). */
     public String assetManifest = "manifest.json";

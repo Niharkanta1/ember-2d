@@ -101,8 +101,13 @@ public class EmberGame implements ApplicationListener {
             throw e;
         }
         EnginePhaseRunner phases = new EnginePhaseRunner(context.timers(), context.tweens(), builder.eventBus(),
-                assets::update, this::beginRender, this::endRender, phase -> { });
+                assets::update, this::beginRender, this::endRender, context.scenes()::runPhase);
         loop = new GameLoop(new GdxClock(), builder.timeState(), phases, config.maxCatchUpSteps);
+        if (config.firstScene != null) {
+            context.scenes().push(Objects.requireNonNull(config.firstScene.get(), "EngineConfig.firstScene returned null"));
+            context.scenes().applyPending();   // enter now, so a broken first scene fails at boot
+        }
+        loop.resetAccumulator();   // the first frame is long (boot); do not catch up on it
         state = AppState.RUNNING;
         if (config.devMode) {
             LOG.info("Boot took " + (System.nanoTime() - start) / 1_000_000 + " ms");
@@ -173,6 +178,7 @@ public class EmberGame implements ApplicationListener {
         if (previous == AppState.CREATED) {
             return; // never started: nothing to release
         }
+        context.scenes().exitAll();
         List<RuntimeException> failures = context.disposeServices();
         if (renderer != null) {
             renderer.dispose();   // engine-owned; after the game's services (reverse boot order)

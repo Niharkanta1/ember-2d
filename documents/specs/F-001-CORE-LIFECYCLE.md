@@ -39,7 +39,7 @@ public final class EngineConfig {
     public int maxCatchUpSteps = 5;
     public boolean devMode = false;                      // enables hot reload, dev tools hooks
     public String assetManifest = "manifest.json";        // relative to the assets root (changed in I-050)
-    public Supplier<Scene> firstScene;
+    public Supplier<Scene> firstScene;                   // added in I-070 (Scene is in ember.app)
     public void validate();                              // throws EngineConfigException
 }
 

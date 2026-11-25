@@ -11,7 +11,7 @@ Specifications define feature scope, behaviour, API boundaries and acceptance cr
 | F-019 | Events and EngineContext | 1 | `ember.event`, `ember.app` | Ready |
 | F-004 | Rendering, camera, text | 1, 2, 4 | `ember.render`, `ember.camera` | Part 1 Ready; text, look-ahead, parallax, UI, safe area Draft |
 | F-008 | Assets and hot reload | 1, 2, 3 | `ember.assets` | Part 1 Ready; hot reload and preloading Draft |
-| F-010 | Scenes, data, prefabs, component registry | 1, 2, 3 | `ember.scene`, `ember.data` | Draft |
+| F-010 | Scenes, data, prefabs, component registry | 1, 2, 3 | `ember.app`, `ember.scene`, `ember.data` | Scene lifecycle Ready; rest Draft |
 | F-014 | Debug overlay and particles | 1, 6 | `ember.debug`, `ember.particles` | Draft |
 | F-022 | Android platform and touch input | 1, 2, 3 | `ember-android`, `ember.input` | Launcher Ready; rest Draft |
 | F-005 | Input actions | 2, 3, 6 | `ember.input` | Draft |

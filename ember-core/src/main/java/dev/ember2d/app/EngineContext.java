@@ -45,11 +45,12 @@ public final class EngineContext {
     private final DefaultEventBus events;
     private final Assets assets;
     private final Renderer renderer;
+    private final SceneManager scenes;
     private final Map<Class<?>, Object> services;
     private final List<Object> instancesInOrder;
 
     private EngineContext(EngineConfig config, TimeState time, Timers timers, Tweens tweens, DefaultEventBus events,
-            Assets assets, Renderer renderer, Map<Class<?>, Object> services) {
+            Assets assets, Renderer renderer, SceneManager scenes, Map<Class<?>, Object> services) {
         this.config = config;
         this.time = time;
         this.timers = timers;
@@ -57,6 +58,7 @@ public final class EngineContext {
         this.events = events;
         this.assets = assets;
         this.renderer = renderer;
+        this.scenes = scenes;
         this.services = Collections.unmodifiableMap(new LinkedHashMap<>(services));
         Set<Object> seen = Collections.newSetFromMap(new IdentityHashMap<>());
         List<Object> ordered = new ArrayList<>();
@@ -118,6 +120,11 @@ public final class EngineContext {
         return renderer;
     }
 
+    /** The scene stack (F-010). */
+    public SceneManager scenes() {
+        return scenes;
+    }
+
     /**
      * Returns the service registered for a type.
      *
@@ -177,6 +184,7 @@ public final class EngineContext {
         private final DefaultEventBus events;
         private Assets assets;
         private Renderer renderer;
+        private final SceneManager scenes;
         private final Map<Class<?>, Object> services = new LinkedHashMap<>();
 
         public Builder(EngineConfig config) {
@@ -185,6 +193,7 @@ public final class EngineContext {
             this.timers = new Timers(time);
             this.tweens = new Tweens(time);
             this.events = new DefaultEventBus(config.devMode);
+            this.scenes = new SceneManager(time, events, config.devMode);
         }
 
         /** The time the context will expose; the engine drives it from the game loop. */
@@ -230,7 +239,10 @@ public final class EngineContext {
         }
 
         public EngineContext build() {
-            return new EngineContext(config, time, timers, tweens, events, assets, renderer, services);
+            EngineContext context = new EngineContext(config, time, timers, tweens, events, assets, renderer, scenes,
+                    services);
+            scenes.attach(context);
+            return context;
         }
     }
 }

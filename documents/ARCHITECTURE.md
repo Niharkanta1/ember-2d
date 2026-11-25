@@ -58,7 +58,7 @@ Base package `dev.ember2d` (chosen in I-000). Package names in the documents are
 
 | Package | Responsibility | Spec |
 | --- | --- | --- |
-| `ember.app` | Composition root: `EmberGame` (app lifecycle), `EngineConfig`, `EngineContext` (ADR-022) | F-001, F-019 |
+| `ember.app` | Composition root: `EmberGame` (app lifecycle), `EngineConfig`, `EngineContext`, `Scene`, `SceneManager` (ADR-022) | F-001, F-019, F-010 |
 | `ember.core` | Logging, game loop, time, fixed step, phases, timers, tweens, state-machine helper, `@PublicApi` | F-002 |
 | `ember.event` | Event bus: immediate and queued events | F-019 |
 | `ember.ecs` | Entities, components, systems, families, phases | F-003 |
@@ -69,7 +69,7 @@ Base package `dev.ember2d` (chosen in I-000). Package names in the documents are
 | `ember.animation` | Frame clips, atlas and Aseprite import, frame events, animation state machine | F-007 |
 | `ember.collision` | Kinematic actors and solids, tile collision, one-way, spatial hash, triggers, queries | F-006 |
 | `ember.tilemap` | Tiled map loading, rendering, tile-to-collision mapping, entity placement | F-009 |
-| `ember.scene` | Scene lifecycle, scene stack, transitions, per-scene asset groups | F-010 |
+| `ember.scene` | Scene data (level sidecar files) and transitions; the scene lifecycle itself is in `ember.app` (ADR-022) | F-010 |
 | `ember.data` | Component registry, JSON schemas, prefabs, validation, version migration | F-010 |
 | `ember.audio` | Music and SFX playback and volumes | F-011 |
 | `ember.ui` | Scene2D.ui integration, skin, HUD/menu/dialogue widgets, on-screen controls | F-012, F-022 |
