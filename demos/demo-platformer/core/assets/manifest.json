@@ -4,5 +4,7 @@
   { "id": "map.demo", "path": "maps/demo-level.tmx", "type": "map", "group": "global" },
   { "id": "player", "path": "prefabs/player.json", "type": "prefab", "group": "global" },
   { "id": "enemy/patroller", "path": "prefabs/enemy/patroller.json", "type": "prefab", "group": "global" },
-  { "id": "camera", "path": "prefabs/camera.json", "type": "prefab", "group": "global" }
+  { "id": "camera", "path": "prefabs/camera.json", "type": "prefab", "group": "global" },
+  { "id": "platform/moving", "path": "prefabs/platform/moving.json", "type": "prefab", "group": "global" },
+  { "id": "zone/tint", "path": "prefabs/zone/tint.json", "type": "prefab", "group": "global" }
 ] }

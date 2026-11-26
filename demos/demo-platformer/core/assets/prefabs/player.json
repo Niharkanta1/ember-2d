@@ -9,10 +9,18 @@
    ],
    "z": 2
   },
+  "Collider": {
+   "box": {
+    "x": -0.375,
+    "y": 0,
+    "width": 0.75,
+    "height": 1
+   }
+  },
+  "Actor": {},
   "PlayerControl": {
    "speed": 8,
-   "minY": 2,
-   "maxY": 9
+   "jumpSpeed": 17
   }
  }
 }

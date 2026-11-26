@@ -10,10 +10,19 @@
    "tint": "#99E699",
    "z": 1
   },
+  "Collider": {
+   "box": {
+    "x": -0.375,
+    "y": 0,
+    "width": 0.75,
+    "height": 1
+   }
+  },
+  "Actor": {},
   "Patrol": {
    "speed": 6,
-   "minX": 6,
-   "maxX": 30
+   "minX": 4,
+   "maxX": 13
   }
  }
 }

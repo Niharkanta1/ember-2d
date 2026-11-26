@@ -55,7 +55,7 @@
   <object id="3" name="patroller_2" template="patroller.tx" x="416" y="160">
    <properties>
     <property name="Patrol.speed" type="float" value="3"/>
-    <property name="Patrol.minX" type="float" value="24"/>
+    <property name="Patrol.minX" type="float" value="19"/>
     <property name="Patrol.maxX" type="float" value="36"/>
     <property name="Sprite.tint" type="color" value="#ffffe6a0"/>
    </properties>
@@ -64,6 +64,8 @@
    <properties><property name="target" type="object" value="1"/></properties>
    <point/>
   </object>
+  <object id="5" name="platform" type="platform/moving" x="208" y="144"><point/></object>
+  <object id="6" name="glow_zone" type="zone/tint" x="352" y="160"><point/></object>
  </objectgroup>
  <layer id="4" name="front" width="40" height="12">
   <properties><property name="renderLayer" value="foreground"/></properties>

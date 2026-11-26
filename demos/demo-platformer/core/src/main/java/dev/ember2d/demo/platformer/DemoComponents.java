@@ -11,6 +11,7 @@ public final class DemoComponents implements ComponentSetup {
     public void register(ComponentRegistry registry) {
         registry.register(Patrol.class, Patrol::new)
                 .register(PlayerControl.class, PlayerControl::new)
-                .register(CameraFollow.class, CameraFollow::new);
+                .register(CameraFollow.class, CameraFollow::new)
+                .register(MovingPlatform.class, MovingPlatform::new);
     }
 }

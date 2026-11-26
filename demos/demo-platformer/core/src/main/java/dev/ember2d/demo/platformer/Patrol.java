@@ -1,6 +1,6 @@
 package dev.ember2d.demo.platformer;
 
-/** Moves an entity back and forth along x between two limits (Phase 1 motion check). */
+/** Walks back and forth between two limits under gravity, turning at walls (Phase 1 motion check, Phase 2 actor). */
 public final class Patrol {
     /** World units per second. */
     public float speed = 6f;
@@ -8,4 +8,7 @@ public final class Patrol {
     public float maxX = 12f;
     /** +1 right, -1 left. */
     public float direction = 1f;
+    public float gravity = 40f;
+    /** Current vertical speed (runtime). */
+    public float vy;
 }

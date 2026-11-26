@@ -1,0 +1,33 @@
+{
+ "version": 1,
+ "components": {
+  "Transform": {
+   "scale": [
+    3,
+    0.5
+   ]
+  },
+  "Sprite": {
+   "regionId": "tex.player",
+   "origin": [
+    8,
+    0
+   ],
+   "tint": "#B08050",
+   "z": 0
+  },
+  "Collider": {
+   "box": {
+    "x": -1.5,
+    "y": 0,
+    "width": 3,
+    "height": 0.5
+   }
+  },
+  "Solid": {},
+  "MovingPlatform": {
+   "speed": 2,
+   "distance": 6
+  }
+ }
+}

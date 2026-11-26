@@ -1,44 +1,47 @@
 package dev.ember2d.demo.platformer;
 
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import dev.ember2d.collision.Actor;
+import dev.ember2d.collision.Collision;
+import dev.ember2d.collision.Direction;
+import dev.ember2d.collision.MoveResult;
 import dev.ember2d.core.Phase;
 import dev.ember2d.ecs.EntitySystem;
 import dev.ember2d.ecs.Transform;
 import dev.ember2d.ecs.World;
 import dev.ember2d.input.Input;
 
-/** Fixed-step movement for {@link PlayerControl}: the {@code move} axis, or towards a tapped target. */
+/** Fixed-step platformer movement for {@link PlayerControl}: walk, gravity, jump, drop through one-way platforms. */
 public final class PlayerControlSystem extends EntitySystem {
 
+    private static final int DROP_TICKS = 6;
+
+    private final Collision collision;
     private final Input input;
     private final Vector2 move = new Vector2();
 
-    public PlayerControlSystem(World world, Input input) {
-        super(Phase.FIXED, world.family(Transform.class, PlayerControl.class));
+    public PlayerControlSystem(World world, Collision collision, Input input) {
+        super(Phase.FIXED, world.family(Transform.class, PlayerControl.class, Actor.class));
+        this.collision = collision;
         this.input = input;
     }
 
     @Override
     protected void process(int entity, float delta) {
-        Transform transform = world().get(entity, Transform.class);
-        PlayerControl control = world().get(entity, PlayerControl.class);
+        PlayerControl body = world().get(entity, PlayerControl.class);
         input.axis2("move", move);
-        if (!move.isZero()) {
-            control.hasTarget = false;   // keys win over a tapped target
-        } else if (control.hasTarget) {
-            control.target.y = MathUtils.clamp(control.target.y, control.minY, control.maxY);   // reachable
-            move.set(control.target).sub(transform.position);
-            float step = control.speed * delta;
-            if (move.len() <= step) {
-                transform.position.set(control.target);
-                control.hasTarget = false;
-                move.setZero();
+        boolean grounded = collision.isTouching(entity, Direction.DOWN);
+        if (input.justPressed("jump") && grounded) {
+            if (move.y < -0.5f) {
+                world().get(entity, Actor.class).dropThroughTicks = DROP_TICKS;
             } else {
-                move.nor();
+                body.vy = body.jumpSpeed;
             }
         }
-        transform.position.mulAdd(move, control.speed * delta);
-        transform.position.y = MathUtils.clamp(transform.position.y, control.minY, control.maxY);
+        body.vy = Math.max(body.vy - body.gravity * delta, -body.maxFall);
+        MoveResult r = collision.moveAndSlide(entity, Math.signum(move.x) * body.speed * delta, body.vy * delta);
+        if (r.hitY) {
+            body.vy = 0f;
+        }
     }
 }

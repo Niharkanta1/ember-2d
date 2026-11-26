@@ -2,6 +2,9 @@ package dev.ember2d.data;
 
 import com.badlogic.gdx.utils.reflect.ClassReflection;
 import com.badlogic.gdx.utils.reflect.Field;
+import dev.ember2d.collision.Actor;
+import dev.ember2d.collision.Collider;
+import dev.ember2d.collision.Solid;
 import dev.ember2d.core.PublicApi;
 import dev.ember2d.ecs.Transform;
 import dev.ember2d.render.Sprite;
@@ -16,8 +19,8 @@ import java.util.function.Supplier;
 
 /**
  * Every component type usable from data, with its JSON name (F-010): the single source for prefabs, Tiled overrides,
- * the dev-tools inspector, the Tiled type generator and generated R8 keep rules. {@code Transform} and {@code Sprite}
- * are registered from the start. Components are created with their factory (no reflective construction); their public
+ * the dev-tools inspector, the Tiled type generator and generated R8 keep rules. The engine components
+ * ({@code Transform}, {@code Sprite}, {@code Collider}, {@code Actor}, {@code Solid}) are registered from the start. Components are created with their factory (no reflective construction); their public
  * fields of supported types are found once per class.
  */
 @PublicApi
@@ -67,10 +70,13 @@ public final class ComponentRegistry {
     private final Map<String, Type> byName = new LinkedHashMap<>();
     private final Map<Class<?>, Type> byClass = new LinkedHashMap<>();
 
-    /** A registry with the engine components ({@code Transform}, {@code Sprite}). */
+    /** A registry with the engine components. */
     public ComponentRegistry() {
         register(Transform.class, Transform::new);
         register(Sprite.class, Sprite::new);
+        register(Collider.class, Collider::new);
+        register(Actor.class, Actor::new);
+        register(Solid.class, Solid::new);
     }
 
     /** Registers a component under its simple class name. Returns this. */
