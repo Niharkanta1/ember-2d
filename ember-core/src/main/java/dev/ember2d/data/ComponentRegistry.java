@@ -10,6 +10,7 @@ import dev.ember2d.collision.Solid;
 import dev.ember2d.core.PublicApi;
 import dev.ember2d.ecs.Transform;
 import dev.ember2d.render.Sprite;
+import dev.ember2d.render.Text;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -76,6 +77,7 @@ public final class ComponentRegistry {
     public ComponentRegistry() {
         register(Transform.class, Transform::new);
         register(Sprite.class, Sprite::new);
+        register(Text.class, Text::new);
         register(Collider.class, Collider::new);
         register(Actor.class, Actor::new);
         register(Solid.class, Solid::new);

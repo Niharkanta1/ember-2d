@@ -26,8 +26,8 @@ import java.util.Objects;
  * the renderer's layer order, sorted per layer, at the interpolated transform. In the pixel-perfect modes draw
  * positions are snapped to whole virtual pixels. Sorting and drawing do not allocate per frame.
  *
- * <p>Other content (tile map layers) joins the same layer order through {@link #addLayerContent}: in each layer it is
- * drawn before the layer's sprites, in registration order.
+ * <p>Other content joins the same layer order: {@link #addLayerContent} (tile map layers) is drawn before a layer's
+ * sprites, {@link #addLayerOverlay} (text) after them, each in registration order.
  */
 @PublicApi
 public final class SpriteRenderSystem extends EntitySystem {
@@ -43,6 +43,7 @@ public final class SpriteRenderSystem extends EntitySystem {
     private final ObjectSet<String> warnedLayers = new ObjectSet<>();
     private final Vector2 position = new Vector2();
     private final Array<LayerContent> contents = new Array<>(true, 2, LayerContent[]::new);
+    private final Array<LayerContent> overlays = new Array<>(true, 2, LayerContent[]::new);
     private List<RenderLayer> layers;
     private int fallbackLayer;
     private boolean warnedMissingRegion;
@@ -65,6 +66,19 @@ public final class SpriteRenderSystem extends EntitySystem {
     /** Removes content added with {@link #addLayerContent}. */
     public void removeLayerContent(LayerContent content) {
         contents.removeValue(content, true);
+    }
+
+    /** Adds content drawn after the sprites of each layer, such as text (no effect if already added). */
+    public void addLayerOverlay(LayerContent overlay) {
+        Objects.requireNonNull(overlay, "overlay");
+        if (!overlays.contains(overlay, true)) {
+            overlays.add(overlay);
+        }
+    }
+
+    /** Removes an overlay added with {@link #addLayerOverlay}. */
+    public void removeLayerOverlay(LayerContent overlay) {
+        overlays.removeValue(overlay, true);
     }
 
     @Override
@@ -112,6 +126,10 @@ public final class SpriteRenderSystem extends EntitySystem {
             }
             for (int i = 0; i < bucket.size; i++) {
                 draw(batch, bucket.get(i));
+            }
+            for (int c = 0; c < overlays.size; c++) {
+                batch.setColor(Color.WHITE);
+                overlays.items[c].drawLayer(layerName, batch);
             }
         }
         batch.setColor(Color.WHITE);

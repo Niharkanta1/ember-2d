@@ -40,7 +40,9 @@ public final class AssetManifest {
         /** An animation clip set JSON file (F-007). */
         CLIPS("clips", JsonValue.class),
         /** An animation state machine definition (F-007). */
-        ASM("asm", JsonValue.class);
+        ASM("asm", JsonValue.class),
+        /** A TrueType or OpenType font rendered to a bitmap font when loaded (F-004, I-140). */
+        FREETYPE("freetype", BitmapFont.class);
 
         final String manifestName;
         final Class<?> assetClass;
@@ -68,8 +70,32 @@ public final class AssetManifest {
         }
     }
 
-    /** One manifest entry. */
-    public record Entry(String id, String path, Type type, List<String> groups, boolean optional) {
+    /** One manifest entry; {@code font} holds the font options of {@code font} and {@code freetype} entries. */
+    public record Entry(String id, String path, Type type, List<String> groups, boolean optional, FontOptions font) {
+
+        public Entry(String id, String path, Type type, List<String> groups, boolean optional) {
+            this(id, path, type, groups, optional, null);
+        }
+
+        /**
+         * The {@code AssetManager} key: the path, except for FreeType fonts, where several entries may render the same
+         * file at different sizes (the key ends in {@code .ttf} so the FreeType loader handles it).
+         */
+        public String key() {
+            return type == Type.FREETYPE ? "ember-freetype/" + id + ".ttf" : path;
+        }
+    }
+
+    /**
+     * Font options of a manifest entry (F-004, I-140). For {@code font} entries only {@code markup} applies. Colours
+     * are hex strings ({@code #RRGGBB} or {@code #RRGGBBAA}); {@code characters} null means libGDX's default set.
+     */
+    public record FontOptions(int size, boolean mono, String color, float borderWidth, String borderColor,
+            int shadowOffsetX, int shadowOffsetY, String shadowColor, String characters, boolean markup) {
+
+        /** Defaults: 16 px, anti-aliased, white, no border or shadow, default characters, no markup. */
+        public static final FontOptions DEFAULTS = new FontOptions(16, false, "#ffffff", 0f, "#000000", 0, 0,
+                "#00000080", null, false);
     }
 
     private final String source;
@@ -163,6 +189,7 @@ public final class AssetManifest {
         if (optionalValue != null && !optionalValue.isBoolean()) {
             problems.add(where + ": \"optional\" must be true or false");
         }
+        FontOptions font = fontOptions(item.get("font"), type, path, where, problems);
         if (type == Type.MAP && path != null && !path.endsWith(".tmx") && !path.endsWith(".tmj")) {
             problems.add(where + ": a map must be a .tmx or .tmj file (was " + path + ")");
         }
@@ -171,8 +198,98 @@ public final class AssetManifest {
             return;
         }
         if (id != null && path != null && type != null && groups != null) {
-            entries.put(id, new Entry(id, path, type, groups, optionalValue != null && optionalValue.asBoolean()));
+            entries.put(id, new Entry(id, path, type, groups, optionalValue != null && optionalValue.asBoolean(), font));
         }
+    }
+
+    private static final List<String> FONT_FIELDS = List.of("size", "mono", "color", "borderWidth", "borderColor",
+            "shadowOffsetX", "shadowOffsetY", "shadowColor", "characters", "markup");
+
+    private static FontOptions fontOptions(JsonValue json, Type type, String path, String where,
+            List<String> problems) {
+        if (type == Type.FREETYPE && path != null && !path.endsWith(".ttf") && !path.endsWith(".otf")) {
+            problems.add(where + ": a freetype font must be a .ttf or .otf file (was " + path + ")");
+        }
+        if (json == null) {
+            return type == Type.FREETYPE || type == Type.FONT ? FontOptions.DEFAULTS : null;
+        }
+        if (type != Type.FREETYPE && type != Type.FONT) {
+            problems.add(where + ": \"font\" options are only for font and freetype entries");
+            return null;
+        }
+        if (!json.isObject()) {
+            problems.add(where + ": \"font\" must be an object");
+            return FontOptions.DEFAULTS;
+        }
+        FontOptions d = FontOptions.DEFAULTS;
+        for (JsonValue f = json.child; f != null; f = f.next) {
+            if (!FONT_FIELDS.contains(f.name)) {
+                problems.add(where + ": font." + f.name + ": unknown field (expected " + String.join(", ", FONT_FIELDS)
+                        + ")");
+            } else if (type == Type.FONT && !f.name.equals("markup")) {
+                problems.add(where + ": font." + f.name + ": only \"markup\" applies to a bitmap font");
+            }
+        }
+        int size = json.has("size") ? whole(json.get("size"), 1, where + ": font.size", problems, d.size()) : d.size();
+        boolean mono = bool(json.get("mono"), where + ": font.mono", problems, d.mono());
+        String color = colour(json.get("color"), where + ": font.color", problems, d.color());
+        float border = d.borderWidth();
+        JsonValue bw = json.get("borderWidth");
+        if (bw != null) {
+            if (!bw.isNumber() || bw.asFloat() < 0f) {
+                problems.add(where + ": font.borderWidth: must be a number >= 0");
+            } else {
+                border = bw.asFloat();
+            }
+        }
+        String borderColor = colour(json.get("borderColor"), where + ": font.borderColor", problems, d.borderColor());
+        int sx = json.has("shadowOffsetX")
+                ? whole(json.get("shadowOffsetX"), Integer.MIN_VALUE, where + ": font.shadowOffsetX", problems, 0) : 0;
+        int sy = json.has("shadowOffsetY")
+                ? whole(json.get("shadowOffsetY"), Integer.MIN_VALUE, where + ": font.shadowOffsetY", problems, 0) : 0;
+        String shadowColor = colour(json.get("shadowColor"), where + ": font.shadowColor", problems, d.shadowColor());
+        String characters = null;
+        JsonValue ch = json.get("characters");
+        if (ch != null) {
+            if (!ch.isString() || ch.asString().isEmpty()) {
+                problems.add(where + ": font.characters: must be \"default\" or the characters to include");
+            } else if (!ch.asString().equals("default")) {
+                characters = ch.asString();
+            }
+        }
+        boolean markup = bool(json.get("markup"), where + ": font.markup", problems, d.markup());
+        return new FontOptions(size, mono, color, border, borderColor, sx, sy, shadowColor, characters, markup);
+    }
+
+    private static int whole(JsonValue v, int min, String where, List<String> problems, int fallback) {
+        if (!v.isLong() || v.asLong() < min) {
+            problems.add(where + ": must be a whole number" + (min == 1 ? " > 0" : ""));
+            return fallback;
+        }
+        return v.asInt();
+    }
+
+    private static boolean bool(JsonValue v, String where, List<String> problems, boolean fallback) {
+        if (v == null) {
+            return fallback;
+        }
+        if (!v.isBoolean()) {
+            problems.add(where + ": must be true or false");
+            return fallback;
+        }
+        return v.asBoolean();
+    }
+
+    private static String colour(JsonValue v, String where, List<String> problems, String fallback) {
+        if (v == null) {
+            return fallback;
+        }
+        String s = v.isString() ? v.asString() : "";
+        if (!s.matches("#?[0-9a-fA-F]{6}([0-9a-fA-F]{2})?")) {
+            problems.add(where + ": must be a colour \"#RRGGBB\" or \"#RRGGBBAA\"");
+            return fallback;
+        }
+        return s;
     }
 
     private static String text(JsonValue item, String field) {

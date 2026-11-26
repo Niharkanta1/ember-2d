@@ -41,5 +41,6 @@ android {
 
 dependencies {
     implementation libs.gdx.core
+    implementation libs.gdx.freetype
     coreLibraryDesugaring libs.android.desugar
 }

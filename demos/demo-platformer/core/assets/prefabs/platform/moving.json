@@ -28,6 +28,15 @@
   "MovingPlatform": {
    "speed": 2,
    "distance": 6
+  },
+  "Text": {
+   "font": "font.pixel",
+   "text": "ride me!",
+   "align": "CENTER",
+   "offset": [
+    0,
+    0.75
+   ]
   }
  }
 }

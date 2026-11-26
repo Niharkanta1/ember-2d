@@ -53,7 +53,7 @@ public final class GdxAssets implements Assets, Disposable {
             }
             int loaded = 0;
             for (AssetManifest.Entry entry : queued) {
-                if (manager.isLoaded(entry.path(), entry.type().assetClass())) {
+                if (manager.isLoaded(entry.key(), entry.type().assetClass())) {
                     loaded++;
                 }
             }
@@ -68,7 +68,7 @@ public final class GdxAssets implements Assets, Disposable {
         @Override
         public void finish() {
             for (AssetManifest.Entry entry : queued) {
-                manager.finishLoadingAsset(entry.path());
+                manager.finishLoadingAsset(entry.key());
             }
         }
     }
@@ -92,6 +92,7 @@ public final class GdxAssets implements Assets, Disposable {
         manager.setLoader(JsonValue.class, new JsonValueLoader(resolver));
         manager.setLoader(TiledMap.class, ".tmx", new MapLoaders.Tmx(resolver));
         manager.setLoader(TiledMap.class, ".tmj", new MapLoaders.Tmj(resolver));
+        FontLoading.register(manager, resolver);
     }
 
     /**
@@ -143,11 +144,15 @@ public final class GdxAssets implements Assets, Disposable {
         if (fallback != null) {
             return type.cast(fallback);
         }
-        if (!manager.isLoaded(entry.path(), entry.type().assetClass())) {
+        if (!manager.isLoaded(entry.key(), entry.type().assetClass())) {
             throw new IllegalStateException("Asset \"" + id + "\" is not loaded; load its group first: "
                     + (entry.groups().size() == 1 ? "\"" + entry.groups().get(0) + "\"" : "one of " + entry.groups()));
         }
-        return type.cast(manager.get(entry.path(), entry.type().assetClass()));
+        Object asset = manager.get(entry.key(), entry.type().assetClass());
+        if (asset instanceof BitmapFont font && entry.font() != null && entry.font().markup()) {
+            font.getData().markupEnabled = true;   // colour tags such as [RED]...[] (F-004)
+        }
+        return type.cast(asset);
     }
 
     @Override
@@ -211,6 +216,8 @@ public final class GdxAssets implements Assets, Disposable {
         for (AssetManifest.Entry entry : present) {
             if (entry.type() == AssetManifest.Type.MAP) {
                 manager.load(entry.path(), TiledMap.class, MapLoaders.parameters(tiledProject));
+            } else if (entry.type() == AssetManifest.Type.FREETYPE) {
+                manager.load(entry.key(), BitmapFont.class, FontLoading.parameters(entry.path(), entry.font()));
             } else {
                 manager.load(entry.path(), entry.type().assetClass());
             }
@@ -228,8 +235,8 @@ public final class GdxAssets implements Assets, Disposable {
             return;
         }
         for (AssetManifest.Entry entry : load.queued) {
-            if (manager.contains(entry.path())) {
-                manager.unload(entry.path());   // decrements the reference count; shared assets stay loaded
+            if (manager.contains(entry.key())) {
+                manager.unload(entry.key());   // decrements the reference count; shared assets stay loaded
             }
         }
         regions.clear();
@@ -239,7 +246,7 @@ public final class GdxAssets implements Assets, Disposable {
     @Override
     public boolean isLoaded(String id) {
         AssetManifest.Entry entry = manifest.find(id);
-        return entry != null && (fallbacks.containsKey(id) || manager.isLoaded(entry.path(), entry.type().assetClass()));
+        return entry != null && (fallbacks.containsKey(id) || manager.isLoaded(entry.key(), entry.type().assetClass()));
     }
 
     @Override
@@ -287,6 +294,7 @@ public final class GdxAssets implements Assets, Disposable {
             case MUSIC -> new NoOpMusic();
             case JSON -> new JsonValue(JsonValue.ValueType.object);
             case MAP -> new TiledMap();
+            case FREETYPE -> fallbackFont();
             case PREFAB, CLIPS, ASM -> new JsonValue(JsonValue.ValueType.object);
         };
     }

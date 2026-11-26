@@ -88,7 +88,7 @@ class PrefabLibraryTest {
 
     @Test
     void registryListsComponentsAndTheirSettableFields() {
-        assertThat(registry.names()).containsExactly("Transform", "Sprite", "Collider", "Actor", "Solid", "Animator",
+        assertThat(registry.names()).containsExactly("Transform", "Sprite", "Text", "Collider", "Actor", "Solid", "Animator",
                 "AnimationStateMachine", "Kitchen", "Walker", "Mover", "Health", "Coin");
         assertThat(registry.types()).contains(Transform.class, Sprite.class, Kitchen.class);
         assertThat(registry.fields("Kitchen")).extracting(FieldInfo::name)
@@ -140,6 +140,29 @@ class PrefabLibraryTest {
         assertThat(t.previousRotation).isEqualTo(30f);
         assertThat(t.scale).isEqualTo(new Vector2(2f, 3f));
         assertThat(spawned).containsExactly(new EntitySpawned(e, "kitchen"));
+    }
+
+    @Test
+    void textComponentFromJsonWithOnlyItsPublicFields() {
+        assertThat(registry.fields("Text")).extracting(FieldInfo::name)
+                .containsExactly("font", "text", "color", "scale", "align", "wrapWidth", "offset", "layer");
+        assets.put("sign", """
+                { "version": 1, "components": {
+                  "Text": { "font": "font.pixel", "text": "hello", "color": "#ffcc00", "align": "CENTER",
+                    "wrapWidth": 4, "offset": [0, 1.5], "layer": "foreground", "scale": 2 } } }
+                """);
+
+        int e = prefabs.spawn(world, "sign", 0f, 0f, Map.of("Text.text", "jump!"));
+
+        dev.ember2d.render.Text t = world.get(e, dev.ember2d.render.Text.class);
+        assertThat(t.font).isEqualTo("font.pixel");
+        assertThat(t.text).as("override").isEqualTo("jump!");
+        assertThat(t.color.toString()).isEqualTo("ffcc00ff");
+        assertThat(t.align).isEqualTo(dev.ember2d.render.TextAlign.CENTER);
+        assertThat(t.wrapWidth).isEqualTo(4f);
+        assertThat(t.offset).isEqualTo(new Vector2(0f, 1.5f));
+        assertThat(t.layer).isEqualTo("foreground");
+        assertThat(t.scale).isEqualTo(2f);
     }
 
     @Test
@@ -216,7 +239,7 @@ class PrefabLibraryTest {
         assertThat(e).hasMessageStartingWith("Invalid prefab \"broken\"");
         assertThat(e.problems()).containsExactly(
                 "prefabs/broken.json: unknown field \"extra\" (expected version, components)",
-                "prefabs/broken.json: unknown component \"Ghost\" (registered: [Transform, Sprite, Collider, Actor, "
+                "prefabs/broken.json: unknown component \"Ghost\" (registered: [Transform, Sprite, Text, Collider, Actor, "
                         + "Solid, Animator, AnimationStateMachine, Kitchen, Walker, Mover, Health, Coin])",
                 "prefabs/broken.json: Kitchen.i: expected a whole number for int, got 1.5",
                 "prefabs/broken.json: Kitchen: unknown field \"nope\" of Kitchen (fields: [i, l, f, d, b, s, mode, "

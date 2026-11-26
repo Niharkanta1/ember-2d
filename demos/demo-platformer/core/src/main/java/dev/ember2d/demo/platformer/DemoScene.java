@@ -28,6 +28,7 @@ import dev.ember2d.render.RenderLayer;
 import dev.ember2d.render.SortMode;
 import dev.ember2d.render.Sprite;
 import dev.ember2d.render.SpriteRenderSystem;
+import dev.ember2d.render.TextRenderer;
 import dev.ember2d.tilemap.TileMap;
 import dev.ember2d.tilemap.TileMapRenderer;
 import java.util.Map;
@@ -45,6 +46,8 @@ import java.util.Map;
  *   <li>Animation (I-130, I-135): the player's state machine (anim/hero.asm.json) picks idle, run (faster the
  *       faster you move), jump, fall and a short land squash from a sprite sheet; the player faces its walking
  *       direction; patrollers play run; the run clip's footstep frame events are logged in dev builds.</li>
+ *   <li>Text (I-140): a sign near the start (prefab {@code prop/sign}, its text a Tiled property) and a label riding
+ *       the moving platform, in a pixel font rendered from a TrueType file (FreeType).</li>
  *   <li>Input (I-100, I-105): {@code pause} (P, double tap) pauses game time; {@code menu} (Escape, Android back,
  *       long press) opens a menu context in which the same keys move a cursor and {@code ui_back} closes it.</li>
  *   <li>On-screen controls (I-122, touch screens or desktop {@code --touch-controls}): a floating joystick on the
@@ -110,6 +113,7 @@ final class DemoScene extends Scene {
         SpriteRenderSystem sprites = new SpriteRenderSystem(world, context.renderer(), context.assets(), context.time());
         world.addSystem(sprites);
         new TileMapRenderer(map, context.renderer(), context.time()).attachTo(sprites);
+        new TextRenderer(world, context.renderer(), context.assets(), context.time()).attachTo(sprites);
         world.addSystem(new CollisionDebugSystem(world, collision, context.debug(), context.renderer()));
 
         context.events().on(InputContextChanged.class, e -> LOG.info("Input context: " + e.top()));

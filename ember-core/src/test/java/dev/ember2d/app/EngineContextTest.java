@@ -94,7 +94,7 @@ class EngineContextTest {
         config.components = registry -> registry.register(Bolt.class, Bolt::new);
         EngineContext.Builder builder = new EngineContext.Builder(config);
 
-        assertThat(builder.components().names()).containsExactly("Transform", "Sprite", "Collider", "Actor", "Solid", "Animator", "AnimationStateMachine", "Bolt");
+        assertThat(builder.components().names()).containsExactly("Transform", "Sprite", "Text", "Collider", "Actor", "Solid", "Animator", "AnimationStateMachine", "Bolt");
         EngineContext context = builder.build();
         assertThatThrownBy(context::prefabs).isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("no asset service");

@@ -1,0 +1,30 @@
+{
+ "version": 1,
+ "components": {
+  "Transform": {
+   "scale": [
+    0.25,
+    1
+   ]
+  },
+  "Sprite": {
+   "regionId": "tex.player",
+   "origin": [
+    8,
+    0
+   ],
+   "tint": "#8A5A30",
+   "z": -1
+  },
+  "Text": {
+   "font": "font.pixel",
+   "text": "sign",
+   "align": "CENTER",
+   "offset": [
+    0,
+    1.25
+   ],
+   "color": "#FFF2CC"
+  }
+ }
+}

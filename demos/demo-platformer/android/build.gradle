@@ -81,6 +81,7 @@ dependencies {
     coreLibraryDesugaring libs.android.desugar
     nativeAbis.each { abi ->
         gdxNatives variantOf(libs.gdx.platform) { classifier("natives-${abi}") }
+        gdxNatives variantOf(libs.gdx.freetype.platform) { classifier("natives-${abi}") }   // FreeType fonts (I-140)
     }
 }
 

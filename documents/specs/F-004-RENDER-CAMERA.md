@@ -1,6 +1,6 @@
 # F-004 — Rendering, Camera and Text
 
-- Status: Part 1 Ready (sprites, layers and sorting, pixel-perfect pipeline, camera follow/dead-zone/bounds/zoom/shake, resize, context loss: expanded and approved in I-060, 2026-11-26); text (Phase 2), look-ahead, scrolling and parallax (Phases 2/4), UI layer (I-210), safe area (I-225), debug draw hook (I-080): Draft
+- Status: Part 1 Ready (sprites, layers and sorting, pixel-perfect pipeline, camera follow/dead-zone/bounds/zoom/shake, resize, context loss: expanded and approved in I-060, 2026-11-26); text Ready (I-140: expanded and approved 2026-11-26, see "Text (I-140)"); look-ahead, scrolling and parallax (Phases 2/4), UI layer (I-210), safe area (I-225), debug draw hook (I-080): Draft
 - Phase: 1 (sprites, layers, camera, pixel-perfect), 2 (text), 4 (Y-sort)
 - Module / package: `ember-core` / `ember.render`, `ember.camera`
 - Depends on: F-002, F-003, F-008
@@ -94,6 +94,93 @@ int cam = world.create();
 world.add(cam, new CameraFollow()).target = world.ref(player);
 world.addSystem(new CameraFollowSystem(world, ctx.renderer().camera(), ctx.time()));
 ```
+
+## Text (I-140)
+Status: Ready (expanded for I-140 and approved 2026-11-26; see "Decisions in I-140" for how it was built).
+
+**Fonts are assets.**
+- **Bitmap fonts:** stay manifest entries of type `font` (`.fnt` + page images).
+- **FreeType fonts (new type `freetype`):** a `.ttf` or `.otf` entry rendered to a bitmap font when its group loads, through libGDX's FreeType loaders (`gdx-freetype`, already in the dependency register).
+- **Rendering options:** an optional `font` object on the entry:
+
+```json
+{ "id": "font.ui", "path": "fonts/PressStart2P.ttf", "type": "freetype", "group": "global",
+  "font": { "size": 8, "mono": true, "color": "#ffffff", "borderWidth": 1, "borderColor": "#000000",
+            "shadowOffsetX": 0, "shadowOffsetY": 0, "characters": "default", "markup": false } }
+```
+
+- **Font options:**
+  - `size` is in pixels (virtual pixels for world text).
+  - `mono: true` turns off anti-aliasing for pixel fonts.
+  - `characters` is `"default"` (libGDX's default set) or an explicit string.
+  - `markup` enables libGDX colour tags (`[RED]...[]`). It is also accepted on `font` entries.
+- **Validation:** unknown fields, size ≤ 0, and bad colours fail with the manifest entry and field. A missing optional font falls back to libGDX's built-in font, as before.
+- **Platforms:** FreeType needs native libraries. Desktop gets `gdx-freetype-platform:natives-desktop`; the Android launcher module extracts the ABI natives like the core ones (`copyAndroidNatives`).
+
+**`Text` component and `TextRenderSystem`.**
+- **Fields:** `Text` has `font` (asset ID), `text`, `color`, `scale` (1 = the font's pixel size), `align` (`LEFT`, `CENTER`, `RIGHT`), `wrapWidth` (world units; 0 = no wrapping), `offset` (world units from the entity's `Transform`) and `layer` (render layer, default `world`).
+- **Drawing:** world text is drawn in world units: one font pixel is one virtual pixel (`1 / pixelsPerUnit`). In the pixel-perfect modes the position snaps to whole virtual pixels, so pixel fonts stay crisp.
+- **Placement:** `TextRenderSystem` (`RENDER`) draws every entity with a `Transform` and a `Text` at its interpolated position. The anchor is the text's **baseline-left** for `LEFT`, baseline-centre for `CENTER`, and so on.
+- **Prefabs:** `Text` is an engine component, so prefabs and Tiled objects can carry it; a sign's text can be a Tiled property, `Text.text`.
+- **Layer order:**
+  - Text joins the render layers through a new `SpriteRenderSystem.addLayerOverlay(LayerContent)`: overlays draw **after** the sprites of a layer, while `addLayerContent` (tile maps) draws before them.
+  - Text is therefore above the sprites of its layer and below later layers. No z-sorting between text and sprites inside one layer.
+- **Caching:** the laid-out glyphs are cached per entity and rebuilt only when the text, font, scale, alignment or wrap width changes, so unchanged text allocates nothing per frame.
+
+**Immediate drawing.** `TextDraw.draw(batch, font, text, x, y, align, wrapWidth)` draws a line in world units inside a render system or layer content, for debug labels and one-off text, through a reused layout.
+
+**Not in I-140:**
+- HUD and menu text in screen space (the UI layer, Scene2D, I-220)
+- signed-distance-field fonts
+- right-to-left and complex scripts
+- per-character effects
+- localisation (later)
+
+## API sketch (I-140)
+```java
+package dev.ember2d.render;
+@PublicApi public enum TextAlign { LEFT, CENTER, RIGHT }
+@PublicApi public final class Text {                      // component
+    public String font; public String text = "";
+    public final Color color = new Color(Color.WHITE); public float scale = 1f;
+    public TextAlign align = TextAlign.LEFT; public float wrapWidth; public final Vector2 offset = new Vector2();
+    public String layer = "world";
+}
+@PublicApi public final class TextRenderer implements LayerContent {   // built as a layer overlay, not a system
+    public TextRenderer(World world, Renderer renderer, Assets assets, Time time);
+    public TextRenderer attachTo(SpriteRenderSystem sprites);   // registers itself as a layer overlay
+}
+@PublicApi public final class TextDraw {
+    public static void draw(Batch batch, BitmapFont font, CharSequence text, float x, float y, TextAlign align,
+                            float wrapWidth, float pixelsPerUnit);
+}
+// SpriteRenderSystem gains: public void addLayerOverlay(LayerContent overlay); removeLayerOverlay(...)
+// Assets: get(id, BitmapFont.class) works for both "font" and "freetype" entries.
+```
+
+## Tests (I-140)
+- **Manifest:** `freetype` entries with every option, validation errors, and `markup` on `font` entries.
+- **Loading (headless):** a test `.ttf` loads through the asset service into a `BitmapFont` of the asked size, with `mono` and a border; a bitmap `.fnt` too.
+- **Text rendering (recording batch):**
+  - glyphs are drawn at the snapped baseline position in world units
+  - left, centre and right alignment
+  - wrapping
+  - `offset`
+  - layer order: text after the sprites of its layer and before the next layer's tiles and sprites
+  - no glyph re-layout when nothing changed
+- **`Text` from prefabs and Tiled:** a `Text.text` override.
+- **Demo:** a wooden sign near the start (a Tiled object, prefab `prop/sign`, text from a Tiled property) and a small "jump!" label above the moving platform, in a pixel font. You check desktop; I check the emulator (Android FreeType natives in the minified build).
+
+## Decisions in I-140
+- **`TextRenderer`, not `TextRenderSystem`.** Text is drawn only inside the sprite system's layer loop, so it is a `LayerContent` overlay like `TileMapRenderer`, not an `EntitySystem`. A `RENDER` system would have nothing to do on its own and would need a second registration. Usage: `new TextRenderer(world, renderer, assets, time).attachTo(sprites)`.
+- **FreeType entries are keyed by ID.** One `.ttf` can back several entries at different sizes, so a `freetype` entry is loaded under the key `ember-freetype/<id>.ttf` (`AssetManifest.Entry.key()`), with the real path in the loader parameter. `font` and other entries keep their path as the key.
+- **Font option defaults:** size 16, white, no border or shadow, `characters` `"default"`, `markup` false, nearest filtering (pixel fonts stay crisp under the integer scale). Shadow offsets are whole pixels. On `font` (bitmap) entries only `markup` is accepted.
+- **Colour is part of the layout cache key** (libGDX bakes the colour into the glyph vertices), together with text, font, scale, alignment and wrap width.
+- **Snapping:** the anchor (position + offset, then shifted to the baseline by the cap height) is snapped to whole virtual pixels in the pixel-perfect modes, not each glyph; with integer-sized fonts every glyph then lands on whole pixels (tested).
+- **Wrapping:** with `wrapWidth` > 0 the box is placed so the anchor is its left edge, centre or right edge by `align`; without it libGDX aligns around the anchor itself.
+- **Unknown layer:** warned once per name and drawn on `world` (or the first layer), as for sprites.
+- **Tests:** `.fnt` loading was already covered by the asset tests; `markup` on a `font` entry is covered by validation only (accepted; other options rejected).
+- **Demo:** the moving platform's label reads "ride me!" instead of "jump!"; the sign's post is the placeholder texture tinted brown and its text floats above it (no sign art yet).
 
 ## Acceptance criteria
 Part 1 (I-060) covers layer/z order, Y sort, pixel-perfect scaling, camera behaviour, resize, disposal and Android context loss; text and the safe area come later. The no-jitter check at 60/144 Hz is done visually with the demo in I-070.
