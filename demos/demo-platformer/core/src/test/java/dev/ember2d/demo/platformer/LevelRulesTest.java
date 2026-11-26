@@ -72,7 +72,6 @@ class LevelRulesTest {
     final Collision collision = new Collision(world, events);
     final TileGrid grid = new TileGrid(40, 10, 1f, 1f);
     final List<Object> published = new ArrayList<>();
-    int restarts;
     LevelSystem level;
     int player;
 
@@ -84,7 +83,7 @@ class LevelRulesTest {
         events.onGlobal(LevelCompleted.class, published::add);
         world.addSystem(new PlatformerSystem(world, collision, script.input(), events));
         world.addSystem(new CollisionSystem(world, collision));
-        level = new LevelSystem(world, collision, events, () -> restarts++);
+        level = new LevelSystem(world, collision, events);
         world.addSystem(level);
         player = player(3f, 1f);
     }
@@ -194,28 +193,23 @@ class LevelRulesTest {
     }
 
     @Test
-    void theGoalShowsTheResultAndRestartsTheLevel() {
+    void theGoalEndsTheLevelAndStopsThePlayer() {
         ticks(2);
-        Goal goal = new Goal();
-        goal.restartSeconds = 0.5f;
-        int g = trigger(goal, 6f, 1f, 2f, 2.5f);
+        trigger(new Goal(), 6f, 1f, 2f, 2.5f);
         script.moveX = 1f;
         int i = 0;
         while (!level.complete() && i++ < 300) {
             tick();
         }
         assertThat(level.complete()).isTrue();
-        assertThat(world.get(g, dev.ember2d.render.Text.class).text).startsWith("Level complete!\n0:0")
-                .endsWith(" - 0 deaths");
-        assertThat(published).anyMatch(e -> e instanceof LevelCompleted);
+        assertThat(published).filteredOn(e -> e instanceof LevelCompleted).singleElement()
+                .satisfies(e -> assertThat(((LevelCompleted) e).deaths()).isZero());
         assertThat(body().locked).isTrue();
-
-        ticks(29);
-        assertThat(restarts).isZero();
-        ticks(2);
-        assertThat(restarts).isEqualTo(1);
-        ticks(30);
-        assertThat(restarts).as("once").isEqualTo(1);
+        float time = level.levelTime();
+        float x = position().x;
+        ticks(60);
+        assertThat(level.levelTime()).as("the clock stops").isEqualTo(time);
+        assertThat(position().x).as("the player stays").isCloseTo(x, within(0.2f));
     }
 
     @Test

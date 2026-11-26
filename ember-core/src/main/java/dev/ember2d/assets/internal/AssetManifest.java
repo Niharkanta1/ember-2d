@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.JsonWriter;
@@ -42,7 +43,9 @@ public final class AssetManifest {
         /** An animation state machine definition (F-007). */
         ASM("asm", JsonValue.class),
         /** A TrueType or OpenType font rendered to a bitmap font when loaded (F-004, I-140). */
-        FREETYPE("freetype", BitmapFont.class);
+        FREETYPE("freetype", BitmapFont.class),
+        /** A Scene2D skin: a .json file with its .atlas next to it (F-012, I-220). */
+        SKIN("skin", Skin.class);
 
         final String manifestName;
         final Class<?> assetClass;

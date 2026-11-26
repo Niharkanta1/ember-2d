@@ -18,15 +18,13 @@ import dev.ember2d.kit.platformer.Patroller;
 import dev.ember2d.kit.platformer.PlatformerBody;
 import dev.ember2d.event.EventBus;
 import dev.ember2d.render.Sprite;
-import dev.ember2d.render.Text;
-import dev.ember2d.render.TextAlign;
 import java.util.Locale;
 
 /**
  * The rules of the demo level (F-015, I-170), after collision in the fixed step: enemies hurt on contact and are
  * defeated by landing on them, hazards hurt, a hurt player respawns at the last checkpoint after a short hit animation
- * and then blinks while invulnerable, falling out of the map counts as hurt, and the goal shows the time and deaths and
- * restarts the level.
+ * and then blinks while invulnerable, falling out of the map counts as hurt, and the goal ends the level: the player
+ * stops and {@link LevelCompleted} is published (the scene shows the results, I-220).
  */
 public final class LevelSystem extends EntitySystem {
 
@@ -37,12 +35,8 @@ public final class LevelSystem extends EntitySystem {
     static final float BLINK_SECONDS = 0.1f;
     /** Below this height (world units) the player has fallen out of the map. */
     static final float FALL_LIMIT = -2f;
-    /** Font of the result text. */
-    static final String FONT = "font.pixel";
-
     private final Collision collision;
     private final EventBus events;
-    private final Runnable restart;
     private final Family enemies;
     private final Family checkpoints;
     private final Vector2 respawn = new Vector2();
@@ -54,18 +48,12 @@ public final class LevelSystem extends EntitySystem {
     private float invulnerable;
     private float levelTime;
     private int deaths;
-    private float goalTimer = -1f;
-    private float restartAfter;
-    private boolean restarted;
+    private boolean complete;
 
-    /**
-     * @param restart called once, the given seconds after the goal is reached (the scene restarts the level)
-     */
-    public LevelSystem(World world, Collision collision, EventBus events, Runnable restart) {
+    public LevelSystem(World world, Collision collision, EventBus events) {
         super(Phase.FIXED, world.family(Transform.class, PlatformerBody.class));
         this.collision = collision;
         this.events = events;
-        this.restart = restart;
         this.enemies = world.family(Enemy.class);
         this.checkpoints = world.family(Checkpoint.class, Animator.class);
         events.on(TriggerEntered.class, this::triggerEntered);
@@ -83,7 +71,7 @@ public final class LevelSystem extends EntitySystem {
 
     /** Whether the goal was reached. */
     public boolean complete() {
-        return goalTimer >= 0f;
+        return complete;
     }
 
     /** Where the player respawns. */
@@ -101,14 +89,9 @@ public final class LevelSystem extends EntitySystem {
         }
         updateEnemies(delta);
         updateCheckpoints();
-        if (complete()) {
+        if (complete) {
             body.locked = true;
             body.vx = 0f;
-            goalTimer += delta;
-            if (goalTimer >= restartAfter && !restarted) {
-                restarted = true;
-                restart.run();
-            }
             return;
         }
         levelTime += delta;
@@ -237,25 +220,19 @@ public final class LevelSystem extends EntitySystem {
         }
         Goal goal = world().get(e.trigger(), Goal.class);
         if (goal != null && !complete() && hurtTimer <= 0f) {
-            reachGoal(player, e.trigger(), goal);
+            reachGoal(player, e.trigger());
         }
     }
 
-    private void reachGoal(int player, int entity, Goal goal) {
+    private void reachGoal(int player, int entity) {
         PlatformerBody body = world().get(player, PlatformerBody.class);
         body.locked = true;
         body.vx = 0f;
-        goalTimer = 0f;
-        restartAfter = goal.restartSeconds;
+        complete = true;
         Animator animator = world().get(entity, Animator.class);
         if (animator != null) {
             animator.play("goal_pressed");
         }
-        Text text = world().has(entity, Text.class) ? world().get(entity, Text.class) : world().add(entity, new Text());
-        text.font = FONT;
-        text.align = TextAlign.CENTER;
-        text.offset.set(0f, 4.5f);
-        text.text = "Level complete!\n" + clock(levelTime) + " - " + deaths + (deaths == 1 ? " death" : " deaths");
         events.publish(new LevelCompleted(levelTime, deaths));
     }
 

@@ -9,7 +9,9 @@ import dev.ember2d.core.Tweens;
 import dev.ember2d.core.internal.TimeState;
 import dev.ember2d.ecs.World;
 import dev.ember2d.event.internal.DefaultEventBus;
+import dev.ember2d.ui.Ui;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 /**
  * The scene stack (F-010), available as {@code context.scenes()}. Only the top scene runs. {@link #push},
@@ -36,7 +38,8 @@ public final class SceneManager {
     private final Array<Change> pending = new Array<>(true, 4);
     private EngineContext context;
     private int plannedDepth;
-    private Scene broken;   // dev builds: a scene whose restart failed, retried by the next restart()
+    private Scene broken;
+    private Supplier<Ui> uiFactory;   // dev builds: a scene whose restart failed, retried by the next restart()
 
     SceneManager(TimeState time, DefaultEventBus events, boolean devMode) {
         this.time = time;
@@ -85,6 +88,24 @@ public final class SceneManager {
             throw new IllegalStateException("restart() needs a current scene");
         }
         pending.add(new Change(Op.RESTART, null));
+    }
+
+    /** Engine: how scenes create their UI (none without a renderer). */
+    void setUiFactory(Supplier<Ui> factory) {
+        this.uiFactory = factory;
+    }
+
+    Ui createUi() {
+        if (uiFactory == null) {
+            throw new IllegalStateException("Scene UI needs a renderer (none on headless backends or in test contexts)");
+        }
+        return uiFactory.get();
+    }
+
+    /** The current scene's UI, or null when it has none. */
+    Ui currentUi() {
+        Scene scene = current();
+        return scene == null ? null : scene.ui;
     }
 
     /** Whether {@link #restart()} has a scene to restart. */
@@ -221,6 +242,10 @@ public final class SceneManager {
     }
 
     private void release(Scene scene, boolean keepGroup) {
+        if (scene.ui != null) {
+            scene.ui.dispose();
+            scene.ui = null;
+        }
         scene.worldInternal().clear();
         events.closeScope(scene.eventScope);
         scene.timersInternal().cancelAll();

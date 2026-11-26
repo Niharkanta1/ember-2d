@@ -1,7 +1,5 @@
 package dev.ember2d.demo.platformer;
 
-/** A trigger that ends the level when the player touches it (F-015, I-170). */
+/** A trigger that ends the level when the player touches it (F-015, I-170; the scene shows the results, I-220). */
 public final class Goal {
-    /** Seconds the result stays on screen before the level restarts. */
-    public float restartSeconds = 4f;
 }

@@ -25,10 +25,19 @@ public final class TextDraw {
      */
     public static void draw(Batch batch, BitmapFont font, CharSequence text, float x, float y, TextAlign align,
             float wrapWidth, float pixelsPerUnit) {
+        float oldScaleX = font.getData().scaleX;
+        float oldScaleY = font.getData().scaleY;
+        boolean oldInteger = font.usesIntegerPositions();
         font.setUseIntegerPositions(false);
         font.getData().setScale(1f / pixelsPerUnit);
-        LAYOUT.setText(font, text, 0, text.length(), font.getColor(), wrapWidth, align(align), wrapWidth > 0f, null);
-        font.draw(batch, LAYOUT, boxX(x, align, wrapWidth), y + font.getCapHeight());
+        try {
+            LAYOUT.setText(font, text, 0, text.length(), font.getColor(), wrapWidth, align(align), wrapWidth > 0f,
+                    null);
+            font.draw(batch, LAYOUT, boxX(x, align, wrapWidth), y + font.getCapHeight());
+        } finally {
+            font.getData().setScale(oldScaleX, oldScaleY);   // the font is shared with the UI
+            font.setUseIntegerPositions(oldInteger);
+        }
     }
 
     static int align(TextAlign align) {

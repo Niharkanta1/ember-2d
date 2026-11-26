@@ -4,6 +4,8 @@ import com.badlogic.gdx.Application;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.JsonValue;
 import dev.ember2d.assets.internal.AssetManifest;
 import dev.ember2d.assets.internal.GdxAssets;
@@ -20,6 +22,9 @@ import dev.ember2d.event.AppSuspended;
 import dev.ember2d.input.InputBindings;
 import dev.ember2d.input.internal.DefaultInput;
 import dev.ember2d.render.internal.GdxRenderer;
+import dev.ember2d.render.internal.ScreenLayout;
+import dev.ember2d.ui.Ui;
+import dev.ember2d.ui.UiMode;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
@@ -118,6 +123,10 @@ public class EmberGame implements ApplicationListener {
             context = null;
             throw e;
         }
+        if (renderer != null) {
+            DefaultInput uiInput = builder.inputState();
+            context.scenes().setUiFactory(() -> new Ui(renderer.batch(), uiInput));
+        }
         if (context.audio() instanceof GdxAudio engineAudio) {
             audio = engineAudio;
             for (AssetManifest.Entry entry : assets.manifest().entries()) {
@@ -147,7 +156,8 @@ public class EmberGame implements ApplicationListener {
                     && Gdx.app.getType() != Application.ApplicationType.iOS);
         }
         if (Gdx.input != null) {
-            Gdx.input.setInputProcessor(input.source());
+            // The top scene's UI gets pointer and key events first; what it does not handle goes to the game (F-012).
+            Gdx.input.setInputProcessor(new InputMultiplexer(new UiInputRouter(context.scenes()), input.source()));
             Gdx.input.setCatchKey(Input.Keys.BACK, input.bindings().binds("BACK"));
         }
         if (config.devMode && config.assetWatcher != null) {
@@ -338,6 +348,7 @@ public class EmberGame implements ApplicationListener {
             renderer.batch().begin();
         }
         renderer.endFrame();
+        drawUi();
         if (debug.isVisible()) {
             debug.renderPanel(debugCanvas, renderer.screenWidth(), renderer.screenHeight());
         }
@@ -348,6 +359,31 @@ public class EmberGame implements ApplicationListener {
             }
             controlsOverlay.draw(input.touchControls(), renderer.batch(), Gdx.graphics.getWidth(),
                     Gdx.graphics.getHeight());
+        }
+    }
+
+    /** The top scene's UI, if it has one: laid out, advanced on real time and drawn above the world (F-012). */
+    private void drawUi() {
+        Ui ui = context.scenes().currentUi();
+        if (ui == null) {
+            return;
+        }
+        layoutUi(ui, config, renderer.layout(), renderer.screenWidth(), renderer.screenHeight());
+        ui.act(context.time().unscaledDelta());
+        renderer.batch().setColor(Color.WHITE);
+        ui.draw();
+    }
+
+    /**
+     * {@link UiMode#VIRTUAL}: the world's virtual size in the world's screen rectangle (same integer scale, same bars).
+     * {@link UiMode#SCREEN}: the whole window in screen pixels divided by {@code uiScale}.
+     */
+    static void layoutUi(Ui ui, EngineConfig config, ScreenLayout layout, int screenWidth, int screenHeight) {
+        if (config.uiMode == UiMode.VIRTUAL) {
+            ui.layout(layout.worldWidth(), layout.worldHeight(), layout.x(), layout.y(), layout.width(),
+                    layout.height());
+        } else {
+            ui.layout(screenWidth / config.uiScale, screenHeight / config.uiScale, 0, 0, screenWidth, screenHeight);
         }
     }
 

@@ -6,6 +6,7 @@ import dev.ember2d.core.Timers;
 import dev.ember2d.core.Tweens;
 import dev.ember2d.ecs.World;
 import dev.ember2d.event.internal.DefaultEventBus;
+import dev.ember2d.ui.Ui;
 
 /**
  * One screen of a game: a level, a menu, a cutscene (F-010). A scene owns a {@link World}, its own timers and tweens,
@@ -30,6 +31,7 @@ public abstract class Scene {
     private Timers timers;
     private Tweens tweens;
     DefaultEventBus.Scope eventScope;
+    Ui ui;
 
     /** Builds the scene: entities, systems, subscriptions. Its asset group is already loaded. */
     protected abstract void enter(EngineContext context);
@@ -65,6 +67,19 @@ public abstract class Scene {
     protected final EngineContext context() {
         requireActive();
         return context;
+    }
+
+    /**
+     * The scene's UI (F-012): a Scene2D stage above the world, created on first use and disposed when the scene exits.
+     *
+     * @throws IllegalStateException without a renderer (headless backends, test contexts)
+     */
+    protected final Ui ui() {
+        requireActive();
+        if (ui == null) {
+            ui = context.scenes().createUi();
+        }
+        return ui;
     }
 
     /** Timers that run while this scene is the current scene and are cancelled when it exits. */

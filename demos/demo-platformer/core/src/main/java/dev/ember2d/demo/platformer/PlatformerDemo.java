@@ -17,7 +17,7 @@ public final class PlatformerDemo {
         config.virtualWidth = 320;
         config.virtualHeight = 180;
         config.backgroundColor.set(0.08f, 0.06f, 0.10f, 1f);
-        config.firstScene = DemoScene::new;
+        config.firstScene = MenuScene::new;   // main menu, then level 1 (I-220)
         config.inputBindings = "input";
         config.components = new DemoComponents();
         config.devMode = devMode;

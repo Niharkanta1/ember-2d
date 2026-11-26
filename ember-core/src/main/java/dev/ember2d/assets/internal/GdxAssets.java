@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.JsonValue;
@@ -498,6 +499,7 @@ public final class GdxAssets implements Assets, Disposable {
             case JSON -> new JsonValue(JsonValue.ValueType.object);
             case MAP -> new TiledMap();
             case FREETYPE -> fallbackFont();
+            case SKIN -> new Skin();
             case PREFAB, CLIPS, ASM -> new JsonValue(JsonValue.ValueType.object);
         };
     }

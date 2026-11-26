@@ -5,6 +5,7 @@ import dev.ember2d.core.PublicApi;
 import dev.ember2d.render.RenderMode;
 import dev.ember2d.data.ComponentSetup;
 import dev.ember2d.assets.AssetWatcher;
+import dev.ember2d.ui.UiMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -80,6 +81,12 @@ public final class EngineConfig {
      */
     public ComponentSetup components = null;
 
+    /** How the UI is laid out (F-012): in virtual pixels like the world (default), or in screen pixels. */
+    public UiMode uiMode = UiMode.VIRTUAL;
+
+    /** {@link UiMode#SCREEN} only: screen pixels per UI unit (2 makes everything twice as big). */
+    public float uiScale = 1f;
+
     /** When the on-screen controls of the bindings file are shown (F-022, I-122). */
     public TouchControlsMode touchControls = TouchControlsMode.AUTO;
 
@@ -131,6 +138,12 @@ public final class EngineConfig {
         }
         if (tiledProject != null && tiledProject.isBlank()) {
             problems.add("tiledProject must be null or a path (was " + quote(tiledProject) + ")");
+        }
+        if (uiMode == null) {
+            problems.add("uiMode must be set (was null)");
+        }
+        if (!(uiScale > 0f) || Float.isInfinite(uiScale)) {
+            problems.add("uiScale must be a finite number > 0 (was " + uiScale + ")");
         }
         if (assetsDir != null && assetsDir.isBlank()) {
             problems.add("assetsDir must be null or an absolute folder (was " + quote(assetsDir) + ")");

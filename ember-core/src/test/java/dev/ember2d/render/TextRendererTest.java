@@ -151,6 +151,16 @@ class TextRendererTest {
     }
 
     @Test
+    void theSharedFontKeepsItsScaleForTheUi() {
+        font.getData().setScale(1f);
+        font.setUseIntegerPositions(true);
+        text("HELLO", 2f, 3f, TextAlign.LEFT);
+        render();
+        assertThat(font.getData().scaleX).as("restored after drawing world text").isEqualTo(1f);
+        assertThat(font.usesIntegerPositions()).isTrue();
+    }
+
+    @Test
     void layoutIsReusedUntilSomethingChanges() {
         int e = text("score 10", 0f, 0f, TextAlign.LEFT);
         Text t = world.get(e, Text.class);

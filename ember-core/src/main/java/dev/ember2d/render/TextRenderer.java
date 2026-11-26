@@ -75,8 +75,21 @@ public final class TextRenderer implements LayerContent {
         BitmapFont font = text.resolved;
         float ppu = renderer.pixelsPerUnit();
         float scale = text.scale / ppu;
+        // The font is shared (UI labels use it too): change its scale only while drawing world text, then restore it.
+        float oldScaleX = font.getData().scaleX;
+        float oldScaleY = font.getData().scaleY;
+        boolean oldInteger = font.usesIntegerPositions();
         font.setUseIntegerPositions(false);
         font.getData().setScale(scale);
+        try {
+            drawScaled(batch, entity, text, font, ppu, scale);
+        } finally {
+            font.getData().setScale(oldScaleX, oldScaleY);
+            font.setUseIntegerPositions(oldInteger);
+        }
+    }
+
+    private void drawScaled(Batch batch, int entity, Text text, BitmapFont font, float ppu, float scale) {
         float colour = text.color.toFloatBits();
         if (font != text.laidFont || !text.text.equals(text.laidText) || scale != text.laidScale
                 || text.align != text.laidAlign || text.wrapWidth != text.laidWrap || colour != text.laidColor) {
