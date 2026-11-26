@@ -160,4 +160,19 @@ class AnimationLibraryTest {
         assertThatThrownBy(() -> library.clipSet("anim.none")).isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("not in the asset manifest");
     }
+
+    @Test
+    void reloadReplacesAClipSetAndABadReloadKeepsTheOld() {
+        ClipSet before = library.clipSet("anim.good");
+        library.reload("anim.good", new com.badlogic.gdx.utils.JsonReader().parse("""
+                { "version": 1, "clips": { "only": { "sheet": "tex.strip", "frameWidth": 32, "frameHeight": 32 } } }
+                """));
+        ClipSet after = library.clipSet("anim.good");
+        assertThat(after).isNotSameAs(before);
+        assertThat(after.names()).containsExactly("only");
+
+        assertThatThrownBy(() -> library.reload("anim.good", new com.badlogic.gdx.utils.JsonReader().parse(
+                "{ \"version\": 1, \"clips\": { \"x\": { } } }"))).isInstanceOf(AnimationException.class);
+        assertThat(library.clipSet("anim.good")).isSameAs(after);
+    }
 }

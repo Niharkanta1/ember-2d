@@ -1,0 +1,59 @@
+{
+ "version": 1,
+ "clipSet": "anim.hero",
+ "parameters": {
+  "grounded": "bool",
+  "speedX": "float",
+  "velY": "float",
+  "land": "trigger"
+ },
+ "initial": "idle",
+ "states": {
+  "idle": {
+   "clip": "idle"
+  },
+  "run": {
+   "clip": "run",
+   "speed": 0.125,
+   "speedParam": "speedX"
+  },
+  "jump": {
+   "clip": "jump"
+  },
+  "fall": {
+   "clip": "fall"
+  },
+  "land": {
+   "clip": "land",
+   "exitOnFinish": true
+  }
+ },
+ "transitions": [
+  {
+   "from": "*",
+   "to": "land",
+   "when": "land",
+   "priority": 5
+  },
+  {
+   "from": "idle",
+   "to": "run",
+   "when": "grounded && speedX > 0.1"
+  },
+  {
+   "from": "run",
+   "to": "idle",
+   "when": "grounded && speedX <= 0.1"
+  },
+  {
+   "from": "*",
+   "to": "jump",
+   "when": "!grounded && velY > 0"
+  },
+  {
+   "from": "*",
+   "to": "fall",
+   "when": "!grounded && velY <= 0"
+  }
+ ]
+}

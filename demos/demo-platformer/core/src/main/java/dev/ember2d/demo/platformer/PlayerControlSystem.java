@@ -1,7 +1,7 @@
 package dev.ember2d.demo.platformer;
 
 import com.badlogic.gdx.math.Vector2;
-import dev.ember2d.animation.Animator;
+import dev.ember2d.animation.AnimationStateMachine;
 import dev.ember2d.collision.Actor;
 import dev.ember2d.collision.Collision;
 import dev.ember2d.collision.Direction;
@@ -28,21 +28,22 @@ public final class PlayerControlSystem extends EntitySystem {
         this.input = input;
     }
 
-    /** Picks the clip from the movement (the animation state machine takes this over in I-135) and the facing. */
+    /** Faces the walking direction and feeds the animation state machine (anim/hero.asm.json picks the clip). */
     private void animate(int entity, PlayerControl body, float moveX) {
         if (moveX != 0f && world().has(entity, Sprite.class)) {
             world().get(entity, Sprite.class).flipX = moveX < 0f;
         }
-        if (!world().has(entity, Animator.class)) {
-            return;
+        boolean grounded = collision.isTouching(entity, Direction.DOWN);
+        if (world().has(entity, AnimationStateMachine.class)) {
+            AnimationStateMachine asm = world().get(entity, AnimationStateMachine.class);
+            asm.setBool("grounded", grounded);
+            asm.setFloat("speedX", Math.abs(Math.signum(moveX) * body.speed));
+            asm.setFloat("velY", body.vy);
+            if (grounded && !body.wasGrounded) {
+                asm.trigger("land");   // a short squash on touchdown
+            }
         }
-        String clip;
-        if (collision.isTouching(entity, Direction.DOWN)) {
-            clip = moveX != 0f ? "run" : "idle";
-        } else {
-            clip = body.vy > 0f ? "jump" : "fall";
-        }
-        world().get(entity, Animator.class).playIfNotPlaying(clip);
+        body.wasGrounded = grounded;
     }
 
     @Override

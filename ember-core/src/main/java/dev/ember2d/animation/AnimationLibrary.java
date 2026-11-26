@@ -59,6 +59,20 @@ public final class AnimationLibrary {
         return set;
     }
 
+    /**
+     * Replaces a clip set with new JSON (hot reload, I-150); animators pick it up on their next update.
+     *
+     * @throws AnimationException if the new JSON is invalid (the old clip set stays)
+     */
+    public void reload(String id, JsonValue json) {
+        List<String> problems = new ArrayList<>();
+        Map<String, Clip> clips = parse(assets.path(id), json, problems);
+        if (!problems.isEmpty()) {
+            throw new AnimationException("Invalid clip set \"" + id + "\"", problems);
+        }
+        cache.put(id, new ClipSet(id, clips));
+    }
+
     /** Adds a clip set built in memory (tests). */
     void put(ClipSet set) {
         cache.put(set.id(), set);

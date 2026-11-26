@@ -42,7 +42,7 @@ class AnimationSystemTest {
         clips.put("walk", clip("walk", PlayMode.LOOP, new float[] {0.1f, 0.2f, 0.1f}, "a", null, "c"));
         clips.put("hit", clip("hit", PlayMode.ONCE, new float[] {0.1f, 0.1f, 0.1f}, null, null, "end"));
         clips.put("bob", clip("bob", PlayMode.PINGPONG, new float[] {0.1f, 0.1f, 0.1f}, null, null, null));
-        clips.put("still", clip("still", PlayMode.PINGPONG, new float[] {0.1f}, null));
+        clips.put("still", clip("still", PlayMode.PINGPONG, new float[] {0.1f}, (String[]) null));
         library.put(new ClipSet("set", clips));
         world.addSystem(new AnimationSystem(world, library, bus));
         bus.onGlobal(AnimationEvent.class, e -> events.add(e.clip() + ":" + e.name()));

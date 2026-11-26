@@ -96,10 +96,14 @@ public final class AnimationSystem extends EntitySystem {
         if (a.clipSet == null || a.clip == null) {
             return null;
         }
-        if (a.resolved == null || !a.resolved.id().equals(a.clipSet)) {
-            a.resolved = library.clipSet(a.clipSet);
+        ClipSet set = library.clipSet(a.clipSet);
+        if (set != a.resolved) {
+            a.resolved = set;   // first use, another set, or a reloaded one
         }
-        Clip clip = a.resolved.clip(a.clip);
+        Clip clip = set.clip(a.clip);
+        if (clip != null && a.frame >= clip.frameCount()) {
+            a.restart = true;   // a reloaded clip got shorter
+        }
         if (clip == null) {
             String key = a.clipSet + "/" + a.clip;
             if (!key.equals(a.warned)) {

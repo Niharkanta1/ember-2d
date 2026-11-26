@@ -38,7 +38,9 @@ public final class AssetManifest {
         /** A prefab JSON file; its ID is the prefab ID (F-010). */
         PREFAB("prefab", JsonValue.class),
         /** An animation clip set JSON file (F-007). */
-        CLIPS("clips", JsonValue.class);
+        CLIPS("clips", JsonValue.class),
+        /** An animation state machine definition (F-007). */
+        ASM("asm", JsonValue.class);
 
         final String manifestName;
         final Class<?> assetClass;

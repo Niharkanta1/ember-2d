@@ -25,6 +25,9 @@
   "Animator": {
    "clipSet": "anim.hero",
    "clip": "idle"
+  },
+  "AnimationStateMachine": {
+   "definition": "asm.hero"
   }
  }
 }

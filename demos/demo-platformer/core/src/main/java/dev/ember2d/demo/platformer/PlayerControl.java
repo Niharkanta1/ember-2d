@@ -11,4 +11,6 @@ public final class PlayerControl {
     public float maxFall = 25f;
     /** Current vertical speed (runtime). */
     public float vy;
+    /** Whether the player stood on something after the last step (runtime, for the land trigger). */
+    public boolean wasGrounded = true;
 }

@@ -45,6 +45,17 @@
     24,
     24
    ]
+  },
+  "land": {
+   "sheet": "tex.hero_sheet",
+   "frameWidth": 16,
+   "frameHeight": 16,
+   "frames": [
+    25,
+    25
+   ],
+   "frameDuration": 0.12,
+   "mode": "once"
   }
  }
 }
