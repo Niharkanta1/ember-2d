@@ -12,6 +12,10 @@ public final class DemoComponents implements ComponentSetup {
         registry.register(Patrol.class, Patrol::new)
                 .register(PlayerControl.class, PlayerControl::new)
                 .register(CameraFollow.class, CameraFollow::new)
-                .register(MovingPlatform.class, MovingPlatform::new);
+                .register(MovingPlatform.class, MovingPlatform::new)
+                .register(Enemy.class, Enemy::new)
+                .register(Hazard.class, Hazard::new)
+                .register(Checkpoint.class, Checkpoint::new)
+                .register(Goal.class, Goal::new);
     }
 }

@@ -1,0 +1,9 @@
+Demo art (I-170)
+
+The character, enemy, trap, checkpoint, terrain and background images in gfx/frog, gfx/pig, gfx/level,
+maps/terrain.png and maps/background.png are from the "Pixel Adventure" asset pack by Pixel Frog
+(https://pixelfrog-assets.itch.io/pixel-adventure-1), copied unchanged except for file names from the
+developer's copy of the pack. Use follows the licence on the pack's page, which the developer confirmed
+allows including them in this project.
+
+The font in fonts/ is Press Start 2P (SIL Open Font License, see fonts/OFL.txt).

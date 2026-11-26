@@ -1,0 +1,57 @@
+{
+ "version": 1,
+ "defaults": {
+  "frameDuration": 0.05
+ },
+ "clips": {
+  "checkpoint_empty": {
+   "sheet": "tex.checkpoint_empty",
+   "frameWidth": 64,
+   "frameHeight": 64,
+   "frames": [
+    0,
+    0
+   ]
+  },
+  "checkpoint_out": {
+   "sheet": "tex.checkpoint_out",
+   "frameWidth": 64,
+   "frameHeight": 64,
+   "frames": [
+    0,
+    25
+   ],
+   "frameDuration": 0.03,
+   "mode": "once"
+  },
+  "checkpoint_idle": {
+   "sheet": "tex.checkpoint_idle",
+   "frameWidth": 64,
+   "frameHeight": 64,
+   "frames": [
+    0,
+    9
+   ]
+  },
+  "goal_idle": {
+   "sheet": "tex.goal_idle",
+   "frameWidth": 64,
+   "frameHeight": 64,
+   "frames": [
+    0,
+    0
+   ]
+  },
+  "goal_pressed": {
+   "sheet": "tex.goal_pressed",
+   "frameWidth": 64,
+   "frameHeight": 64,
+   "frames": [
+    0,
+    7
+   ],
+   "frameDuration": 0.06,
+   "mode": "once"
+  }
+ }
+}

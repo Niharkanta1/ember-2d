@@ -1,0 +1,59 @@
+{
+ "version": 1,
+ "defaults": {
+  "frameDuration": 0.05
+ },
+ "clips": {
+  "idle": {
+   "sheet": "tex.frog_idle",
+   "frameWidth": 32,
+   "frameHeight": 32,
+   "frames": [
+    0,
+    10
+   ]
+  },
+  "run": {
+   "sheet": "tex.frog_run",
+   "frameWidth": 32,
+   "frameHeight": 32,
+   "frames": [
+    0,
+    11
+   ],
+   "events": {
+    "2": "step",
+    "8": "step"
+   }
+  },
+  "jump": {
+   "sheet": "tex.frog_jump",
+   "frameWidth": 32,
+   "frameHeight": 32,
+   "frames": [
+    0,
+    0
+   ]
+  },
+  "fall": {
+   "sheet": "tex.frog_fall",
+   "frameWidth": 32,
+   "frameHeight": 32,
+   "frames": [
+    0,
+    0
+   ]
+  },
+  "hit": {
+   "sheet": "tex.frog_hit",
+   "frameWidth": 32,
+   "frameHeight": 32,
+   "frames": [
+    0,
+    6
+   ],
+   "frameDuration": 0.06,
+   "mode": "once"
+  }
+ }
+}

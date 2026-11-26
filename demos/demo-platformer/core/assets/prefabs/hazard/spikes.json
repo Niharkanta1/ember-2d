@@ -1,0 +1,23 @@
+{
+ "version": 1,
+ "components": {
+  "Sprite": {
+   "regionId": "tex.spikes",
+   "origin": [
+    8,
+    0
+   ],
+   "z": 0
+  },
+  "Collider": {
+   "box": {
+    "x": -0.4,
+    "y": 0,
+    "width": 0.8,
+    "height": 0.4
+   },
+   "trigger": true
+  },
+  "Hazard": {}
+ }
+}

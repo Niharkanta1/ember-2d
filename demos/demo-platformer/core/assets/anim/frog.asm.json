@@ -1,11 +1,11 @@
 {
  "version": 1,
- "clipSet": "anim.hero",
+ "clipSet": "anim.frog",
  "parameters": {
   "grounded": "bool",
   "speedX": "float",
   "velY": "float",
-  "land": "trigger"
+  "hit": "trigger"
  },
  "initial": "idle",
  "states": {
@@ -23,27 +23,27 @@
   "fall": {
    "clip": "fall"
   },
-  "land": {
-   "clip": "land",
+  "hit": {
+   "clip": "hit",
    "exitOnFinish": true
   }
  },
  "transitions": [
   {
    "from": "*",
-   "to": "land",
-   "when": "land",
-   "priority": 5
+   "to": "hit",
+   "when": "hit",
+   "priority": 10
   },
   {
    "from": "idle",
    "to": "run",
-   "when": "grounded && speedX > 0.1"
+   "when": "grounded && speedX > 0.5"
   },
   {
    "from": "run",
    "to": "idle",
-   "when": "grounded && speedX <= 0.1"
+   "when": "grounded && speedX <= 0.5"
   },
   {
    "from": "*",
@@ -54,6 +54,16 @@
    "from": "*",
    "to": "fall",
    "when": "!grounded && velY <= 0"
+  },
+  {
+   "from": "jump",
+   "to": "idle",
+   "when": "grounded"
+  },
+  {
+   "from": "fall",
+   "to": "idle",
+   "when": "grounded"
   }
  ]
 }

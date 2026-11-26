@@ -1,42 +1,26 @@
 {
  "version": 1,
  "components": {
-  "Transform": {
-   "scale": [
-    3,
-    0.5
-   ]
-  },
   "Sprite": {
-   "regionId": "tex.player",
+   "regionId": "tex.platform",
    "origin": [
-    8,
+    16,
     0
    ],
-   "tint": "#B08050",
    "z": 0
   },
   "Collider": {
    "box": {
-    "x": -1.5,
+    "x": -1,
     "y": 0,
-    "width": 3,
+    "width": 2,
     "height": 0.5
    }
   },
   "Solid": {},
   "MovingPlatform": {
-   "speed": 2,
-   "distance": 6
-  },
-  "Text": {
-   "font": "font.pixel",
-   "text": "ride me!",
-   "align": "CENTER",
-   "offset": [
-    0,
-    0.75
-   ]
+   "speed": 2.5,
+   "distance": 10
   }
  }
 }

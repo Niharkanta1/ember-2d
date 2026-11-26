@@ -1,0 +1,27 @@
+{
+ "version": 1,
+ "components": {
+  "Sprite": {
+   "regionId": "tex.checkpoint_empty",
+   "origin": [
+    23,
+    0
+   ],
+   "z": -1
+  },
+  "Collider": {
+   "box": {
+    "x": -0.75,
+    "y": 0,
+    "width": 1.5,
+    "height": 3
+   },
+   "trigger": true
+  },
+  "Checkpoint": {},
+  "Animator": {
+   "clipSet": "anim.level",
+   "clip": "checkpoint_empty"
+  }
+ }
+}

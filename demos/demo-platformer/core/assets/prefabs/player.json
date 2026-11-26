@@ -2,32 +2,29 @@
  "version": 1,
  "components": {
   "Sprite": {
-   "regionId": "tex.player",
+   "regionId": "tex.frog_jump",
    "origin": [
-    8,
+    16,
     0
    ],
    "z": 2
   },
   "Collider": {
    "box": {
-    "x": -0.375,
+    "x": -0.4375,
     "y": 0,
-    "width": 0.75,
-    "height": 1
+    "width": 0.875,
+    "height": 1.375
    }
   },
   "Actor": {},
-  "PlayerControl": {
-   "speed": 8,
-   "jumpSpeed": 17
-  },
+  "PlayerControl": {},
   "Animator": {
-   "clipSet": "anim.hero",
+   "clipSet": "anim.frog",
    "clip": "idle"
   },
   "AnimationStateMachine": {
-   "definition": "asm.hero"
+   "definition": "asm.frog"
   }
  }
 }

@@ -22,6 +22,12 @@ public final class PatrolSystem extends EntitySystem {
     @Override
     protected void process(int entity, float delta) {
         Patrol patrol = world().get(entity, Patrol.class);
+        if (patrol.range > 0f && !patrol.limitsSet) {
+            float start = world().get(entity, Transform.class).position.x;
+            patrol.minX = start - patrol.range;
+            patrol.maxX = start + patrol.range;
+            patrol.limitsSet = true;
+        }
         patrol.vy -= patrol.gravity * delta;
         MoveResult r = collision.moveAndSlide(entity, patrol.direction * patrol.speed * delta, patrol.vy * delta);
         if (r.hitY) {
@@ -32,7 +38,8 @@ public final class PatrolSystem extends EntitySystem {
             patrol.direction = -patrol.direction;
         }
         if (world().has(entity, Sprite.class)) {
-            world().get(entity, Sprite.class).flipX = patrol.direction < 0;   // face the walking direction
+            boolean left = patrol.direction < 0;
+            world().get(entity, Sprite.class).flipX = patrol.artFacesLeft != left;   // face the walking direction
         }
     }
 }

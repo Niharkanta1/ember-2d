@@ -1,0 +1,32 @@
+{
+ "version": 1,
+ "components": {
+  "Sprite": {
+   "regionId": "tex.pig_walk",
+   "origin": [
+    18,
+    0
+   ],
+   "z": 1
+  },
+  "Collider": {
+   "box": {
+    "x": -0.75,
+    "y": 0,
+    "width": 1.5,
+    "height": 1.5
+   }
+  },
+  "Actor": {},
+  "Patrol": {
+   "speed": 2.5,
+   "range": 3,
+   "artFacesLeft": true
+  },
+  "Enemy": {},
+  "Animator": {
+   "clipSet": "anim.pig",
+   "clip": "walk"
+  }
+ }
+}
