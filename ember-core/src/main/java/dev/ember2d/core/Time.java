@@ -47,6 +47,12 @@ public interface Time {
 
     void setPaused(boolean paused);
 
+    /**
+     * While paused, the next frame runs exactly one fixed step, and {@code UPDATE} sees that step's delta (dev tools:
+     * step one tick, F-018). Ignored while running.
+     */
+    void step();
+
     /** Fixed steps discarded because a frame needed more than the catch-up limit; a debug counter. */
     long droppedFixedSteps();
 }

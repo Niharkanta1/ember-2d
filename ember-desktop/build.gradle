@@ -7,6 +7,8 @@ description = 'Ember2D desktop platform: LWJGL3 launcher support.'
 dependencies {
     api project(':ember-core')
     api libs.gdx.backend.lwjgl3
+    // Every desktop build runs LWJGL 3.4.1, the version the dev tools' imgui-java needs (I-160, S-01).
+    api platform(libs.lwjgl.bom)
     runtimeOnly variantOf(libs.gdx.platform) { classifier('natives-desktop') }
     runtimeOnly variantOf(libs.gdx.freetype.platform) { classifier('natives-desktop') }
 }

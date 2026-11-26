@@ -102,6 +102,12 @@ public final class SceneManager {
         return stack.isEmpty() ? null : stack.peek();
     }
 
+    /** The current scene's world, or null when no scene runs (dev tools, F-018). */
+    public World currentWorld() {
+        Scene scene = current();
+        return scene == null ? null : scene.worldInternal();
+    }
+
     /** Number of scenes in the stack. */
     public int depth() {
         return stack.size;

@@ -4,6 +4,9 @@ import com.badlogic.gdx.utils.ObjectFloatMap;
 import com.badlogic.gdx.utils.ObjectMap;
 import dev.ember2d.animation.AsmDefinition.ParamType;
 import dev.ember2d.core.PublicApi;
+import java.util.LinkedHashMap;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * Picks the entity's animation from parameters (F-007, I-135): game code sets parameters, the {@link AsmSystem}
@@ -68,6 +71,21 @@ public final class AnimationStateMachine {
         return lastTransition;
     }
 
+    /**
+     * Parameter names and types ({@code "bool"}, {@code "float"}, {@code "int"}, {@code "trigger"}) of the bound
+     * definition, in definition order; empty before the first update (dev tools, F-018).
+     */
+    public Map<String, String> parameterTypes() {
+        if (bound == null) {
+            return Map.of();
+        }
+        Map<String, String> out = new LinkedHashMap<>();
+        for (Map.Entry<String, ParamType> e : bound.parameters().entrySet()) {
+            out.put(e.getKey(), e.getValue().name().toLowerCase(Locale.ROOT));
+        }
+        return out;
+    }
+
     private void set(String param, ParamType type, float value) {
         if (bound != null) {
             check(param, type, bound);
@@ -92,8 +110,8 @@ public final class AnimationStateMachine {
         }
         if (actual != type) {
             throw new IllegalArgumentException("Parameter \"" + param + "\" of state machine \"" + def.id() + "\" is a "
-                    + actual.name().toLowerCase(java.util.Locale.ROOT) + ", not a "
-                    + type.name().toLowerCase(java.util.Locale.ROOT));
+                    + actual.name().toLowerCase(Locale.ROOT) + ", not a "
+                    + type.name().toLowerCase(Locale.ROOT));
         }
     }
 }

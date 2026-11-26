@@ -20,6 +20,7 @@ public final class TimeState implements Time {
     private long fixedTick;
     private float timeScale = 1f;
     private boolean paused;
+    private boolean stepRequested;
     private long droppedFixedSteps;
 
     public TimeState(float fixedDelta) {
@@ -86,6 +87,9 @@ public final class TimeState implements Time {
     @Override
     public void setPaused(boolean paused) {
         this.paused = paused;
+        if (!paused) {
+            stepRequested = false;
+        }
     }
 
     @Override
@@ -114,5 +118,19 @@ public final class TimeState implements Time {
 
     void setAlpha(float alpha) {
         this.alpha = alpha;
+    }
+
+    @Override
+    public void step() {
+        if (paused) {
+            stepRequested = true;
+        }
+    }
+
+    /** Game loop: takes a pending {@link #step()} request. */
+    public boolean takeStep() {
+        boolean requested = stepRequested;
+        stepRequested = false;
+        return requested;
     }
 }

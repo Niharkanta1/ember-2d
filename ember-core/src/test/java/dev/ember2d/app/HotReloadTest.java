@@ -70,6 +70,7 @@ class HotReloadTest {
             worldSeen = world();
             world().add(world().create(), Transform.class);
             context.events().on(AssetReloaded.class, e -> log.add("event " + e.id()));
+            context.events().on(dev.ember2d.assets.AssetReloadFailed.class, e -> log.add("failed " + e.id()));
         }
 
         @Override
@@ -187,5 +188,16 @@ class HotReloadTest {
 
         assertThat(assets.generation()).isZero();
         assertThat(scene.log).containsExactly("enter");
+    }
+
+    @Test
+    void aRejectedFileIsPublished() {
+        file("data.json").writeString("{ broken", false, "UTF-8");
+        watcher.change("data.json");
+
+        loop.frame();
+
+        assertThat(scene.log).containsExactly("enter", "failed data");
+        assertThat(assets.generation()).isZero();
     }
 }

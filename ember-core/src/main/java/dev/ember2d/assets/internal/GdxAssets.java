@@ -18,6 +18,7 @@ import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.ObjectSet;
 import dev.ember2d.assets.AssetLoadException;
+import dev.ember2d.assets.AssetReloadFailed;
 import dev.ember2d.assets.AssetReloaded;
 import dev.ember2d.assets.Assets;
 import dev.ember2d.assets.AsyncLoad;
@@ -26,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * The engine's {@link Assets} over libGDX {@link AssetManager} (F-008). The engine calls {@link #update()} at the
@@ -348,6 +350,11 @@ public final class GdxAssets implements Assets, Disposable {
      * @return one event per replaced entry
      */
     public List<AssetReloaded> reload(Collection<AssetManifest.Entry> entries) {
+        return reload(entries, failure -> { });
+    }
+
+    /** As {@link #reload(Collection)}, reporting each rejected new version. */
+    public List<AssetReloaded> reload(Collection<AssetManifest.Entry> entries, Consumer<AssetReloadFailed> failures) {
         List<AssetManifest.Entry> ok = new ArrayList<>();
         for (AssetManifest.Entry entry : entries) {
             String problem = check(entry);
@@ -356,6 +363,7 @@ public final class GdxAssets implements Assets, Disposable {
             } else {
                 LOG.error("Hot reload of " + entry.id() + " failed; keeping the old version: " + entry.path() + ": "
                         + problem);
+                failures.accept(new AssetReloadFailed(entry.id(), entry.path(), problem));
             }
         }
         if (ok.isEmpty()) {
@@ -424,6 +432,15 @@ public final class GdxAssets implements Assets, Disposable {
     public String path(String id) {
         AssetManifest.Entry entry = manifest.find(id);
         return entry == null ? id : entry.path();
+    }
+
+    @Override
+    public List<String> ids() {
+        List<String> ids = new ArrayList<>();
+        for (AssetManifest.Entry entry : manifest.entries()) {
+            ids.add(entry.id());
+        }
+        return ids;
     }
 
     @Override

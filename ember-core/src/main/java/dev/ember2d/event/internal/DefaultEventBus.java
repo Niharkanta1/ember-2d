@@ -33,6 +33,10 @@ public final class DefaultEventBus implements EventBus {
         }
     }
 
+    /** Handler list key of the monitors (never an event type). */
+    private static final class MonitorKey {
+    }
+
     private final class Handler implements Subscription {
         final Class<?> type;
         final Consumer<Object> consumer;
@@ -87,6 +91,13 @@ public final class DefaultEventBus implements EventBus {
     @Override
     public <E> Subscription onGlobal(Class<E> type, Consumer<E> handler) {
         return register(type, handler, null);
+    }
+
+    @Override
+    public Subscription monitor(Consumer<Object> monitor) {
+        @SuppressWarnings({"unchecked", "rawtypes"})
+        Class<Object> key = (Class) MonitorKey.class;
+        return register(key, monitor, null);
     }
 
     @Override
@@ -177,6 +188,23 @@ public final class DefaultEventBus implements EventBus {
     }
 
     private void deliver(Object event) {
+        SnapshotArray<Handler> monitors = handlers.get(MonitorKey.class);
+        if (monitors != null && monitors.size > 0) {
+            Handler[] items = monitors.begin();
+            try {
+                for (int i = 0, n = monitors.size; i < n; i++) {
+                    if (!items[i].cancelled) {
+                        try {
+                            items[i].consumer.accept(event);
+                        } catch (RuntimeException e) {
+                            LOG.error("Event monitor failed for " + event.getClass().getName(), e);
+                        }
+                    }
+                }
+            } finally {
+                monitors.end();
+            }
+        }
         SnapshotArray<Handler> list = handlers.get(event.getClass());
         if (list == null) {
             return;

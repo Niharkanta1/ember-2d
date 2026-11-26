@@ -201,4 +201,21 @@ class GameLoopTest {
         assertThatThrownBy(() -> new TimeState(0f)).isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> new GameLoop(clock, time, phases::add, 0)).isInstanceOf(IllegalArgumentException.class);
     }
+
+    @Test
+    void stepRunsExactlyOneFixedStepWhilePausedAndNothingWhileRunning() {
+        time.setPaused(true);
+        assertThat(frame(FIXED_NANOS * 3)).as("paused").isZero();
+
+        time.step();
+        assertThat(frame(FIXED_NANOS * 3)).as("one step").isEqualTo(1);
+        assertThat(time.fixedTick()).isEqualTo(1);
+        assertThat(time.delta()).isGreaterThan(0f);
+        assertThat(frame(FIXED_NANOS * 3)).as("only once").isZero();
+
+        time.setPaused(false);
+        time.step();   // ignored while running
+        assertThat(frame(FIXED_NANOS)).isEqualTo(1);
+        assertThat(frame(FIXED_NANOS)).isEqualTo(1);
+    }
 }

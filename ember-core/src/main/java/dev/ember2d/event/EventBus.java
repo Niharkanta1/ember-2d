@@ -38,4 +38,10 @@ public interface EventBus {
 
     /** Delivers an event at the next flush point. */
     void queue(Object event);
+
+    /**
+     * Sees every event as it is delivered (published, or queued and flushed), before its handlers, until cancelled.
+     * For dev tools (event log, F-018); a failing monitor is logged and does not stop delivery.
+     */
+    Subscription monitor(Consumer<Object> monitor);
 }

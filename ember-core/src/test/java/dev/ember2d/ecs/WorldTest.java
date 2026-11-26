@@ -250,4 +250,31 @@ class WorldTest {
         }
         assertThat(index).isZero();
     }
+
+    @Test
+    void entitiesComponentsAndTagsCanBeListed() {
+        World w = new World(false);
+        int a = w.create();
+        int b = w.create();
+        w.add(a, Transform.class);
+        w.add(b, Transform.class);
+        w.registerComponent(StringBuilder.class, StringBuilder::new);
+        StringBuilder extra = w.add(b, StringBuilder.class);
+        w.tag(b, "enemy");
+        w.tag(b, "boss");
+        w.destroy(a);
+
+        IntArray ids = new IntArray();
+        w.entities(ids);
+        assertThat(ids.toArray()).containsExactly(b);
+        List<Object> comps = new ArrayList<>();
+        w.components(b, comps);
+        assertThat(comps).hasSize(2).contains(extra).anyMatch(c -> c instanceof Transform);
+        List<Object> none = new ArrayList<>();
+        w.components(a, none);
+        assertThat(none).as("dead").isEmpty();
+        List<String> tags = new ArrayList<>();
+        w.tags(b, tags);
+        assertThat(tags).containsExactlyInAnyOrder("enemy", "boss");
+    }
 }

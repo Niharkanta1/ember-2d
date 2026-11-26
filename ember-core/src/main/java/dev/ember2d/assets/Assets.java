@@ -2,6 +2,7 @@ package dev.ember2d.assets;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import dev.ember2d.core.PublicApi;
+import java.util.List;
 
 /**
  * Assets by logical ID (F-008), available as {@code context.assets()}. IDs, paths, types and groups come from
@@ -50,6 +51,11 @@ public interface Assets {
      */
     default int generation() {
         return 0;
+    }
+
+    /** Every manifest ID, in manifest order (dev tools, F-018). */
+    default List<String> ids() {
+        return List.of();
     }
 
     /** The file path of an asset ID, for messages; the ID itself if the manifest does not list it. */

@@ -6,4 +6,11 @@ description = 'Ember2D developer tools (desktop dev builds only).'
 
 dependencies {
     api project(':ember-core')
+    api libs.gdx.backend.lwjgl3     // ImGui attaches to the LWJGL3 window (I-160)
+    api platform(libs.lwjgl.bom)    // LWJGL 3.4.1, as every desktop build (S-01)
+    api libs.imgui.binding
+    implementation libs.imgui.lwjgl3
+    runtimeOnly libs.imgui.natives.windows
+    runtimeOnly libs.imgui.natives.linux
+    runtimeOnly libs.imgui.natives.macos
 }

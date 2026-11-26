@@ -141,4 +141,18 @@ class HotReloadAssetsTest {
     private AssetManifest.Entry entry(String id) {
         return assets.manifest().find(id);
     }
+
+    @Test
+    void idsListTheManifestInOrderAndRejectedVersionsAreReported() {
+        assertThat(assets.ids()).containsExactly("data", "tex", "sheet", "map", "late");
+
+        write("data.json", "{ broken");
+        List<dev.ember2d.assets.AssetReloadFailed> failures = new java.util.ArrayList<>();
+        assets.reload(List.of(entry("data")), failures::add);
+        assertThat(failures).singleElement().satisfies(f -> {
+            assertThat(f.id()).isEqualTo("data");
+            assertThat(f.path()).isEqualTo("data.json");
+            assertThat(f.problem()).isNotBlank();
+        });
+    }
 }

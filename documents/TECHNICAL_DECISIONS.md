@@ -38,7 +38,8 @@ Third-party dependencies must be listed here before use. Each sits behind one sm
 | libGDX 1.14.x (core, LWJGL3, Android backend, freetype; headless backend for tests) | all | Platform | — (foundation) |
 | Android Gradle plugin, Android SDK | `ember-android`, demo launchers | Android builds | — (build only) |
 | gdx-box2d (classic v2 extension) | `ember-box2d` | Optional rigid bodies | `ember-box2d` API |
-| imgui-java | `ember-devtools` | Dev tool panels (desktop) | `ember-devtools` |
+| imgui-java 1.92.7.1 (binding, lwjgl3 backend, Windows/Linux/macOS natives) | `ember-devtools` | Dev tool panels (desktop dev builds only; never in release or Android builds, I-160) | `ember-devtools` |
+| LWJGL 3.4.1 BOM (version pin) | `ember-desktop`, `ember-devtools` | Every desktop build runs the LWJGL version imgui-java needs, so dev and release match (S-01, I-160) | — (version constraint) |
 | blade-ink | `kit-common` | Ink runtime for dialogue and novels | `DialogueRunner` |
 | gdx-ai | `kit-topdown` (`shooter`, `rpg`), optional | Pathfinding, steering, behaviour trees | Kit AI package |
 | gdx-controllers | `ember-core` (`input`), Phase 6 | Gamepad | `ember.input` |

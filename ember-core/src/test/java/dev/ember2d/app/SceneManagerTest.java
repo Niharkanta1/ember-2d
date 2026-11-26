@@ -342,4 +342,13 @@ class SceneManagerTest {
         assertThat(dev.isBroken()).isFalse();
         assertThat(log).containsExactly("enter a", "exit a", "enter a");
     }
+
+    @Test
+    void currentWorldIsTheTopScenesWorld() {
+        assertThat(scenes.currentWorld()).isNull();
+        Recorder a = new Recorder("a", null);
+        scenes.push(a);
+        frame();
+        assertThat(scenes.currentWorld()).isSameAs(a.worldSeen);
+    }
 }

@@ -12,6 +12,7 @@ import dev.ember2d.core.Log;
 import dev.ember2d.core.Phase;
 import dev.ember2d.core.PublicApi;
 import dev.ember2d.core.Time;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
@@ -176,6 +177,34 @@ public final class World {
     /** Number of live entities. */
     public int entityCount() {
         return liveEntities.size;
+    }
+
+    /** Adds every live entity to {@code out}, oldest first (dev tools, F-018). */
+    public void entities(IntArray out) {
+        out.addAll(liveEntities);
+    }
+
+    /** Adds every component of a live entity to {@code out}, in no particular order (dev tools, F-018). */
+    public void components(int entity, List<Object> out) {
+        if (!isAlive(entity)) {
+            return;
+        }
+        int index = entity & INDEX_MASK;
+        for (Store store : stores.values()) {
+            Object component = store.get(index);
+            if (component != null) {
+                out.add(component);
+            }
+        }
+    }
+
+    /** Adds every tag of an entity to {@code out} (dev tools, F-018). */
+    public void tags(int entity, List<String> out) {
+        for (ObjectMap.Entry<String, IntArray> e : entitiesByTag) {
+            if (e.value.contains(entity)) {
+                out.add(e.key);
+            }
+        }
     }
 
     // ------------------------------------------------------------------------------------------------

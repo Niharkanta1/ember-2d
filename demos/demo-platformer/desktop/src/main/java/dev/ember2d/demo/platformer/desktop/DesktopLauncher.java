@@ -1,5 +1,6 @@
 package dev.ember2d.demo.platformer.desktop;
 
+import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import dev.ember2d.app.EmberGame;
@@ -13,6 +14,7 @@ import dev.ember2d.desktop.DesktopWindow;
 import dev.ember2d.desktop.StartupHelper;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /** Launches the platformer demo on desktop (LWJGL3). */
 public final class DesktopLauncher {
@@ -23,11 +25,15 @@ public final class DesktopLauncher {
     }
 
     public static void main(String[] args) {
-        launch(args, config -> { });
+        launch(args, config -> { }, game -> game);
     }
 
-    /** Starts the game; {@code devSetup} may change the config of a dev run (the dev launcher adds hot reload). */
-    static void launch(String[] args, Consumer<EngineConfig> devSetup) {
+    /**
+     * Starts the game. In a dev run {@code devSetup} may change the config (the dev launcher adds hot reload) and
+     * {@code devWrap} may wrap the game (the dev launcher adds the dev tools).
+     */
+    static void launch(String[] args, Consumer<EngineConfig> devSetup,
+            Function<EmberGame, ApplicationListener> devWrap) {
         if (StartupHelper.startNewJvmIfRequired()) {
             return; // macOS needs -XstartOnFirstThread; also works around non-ASCII user paths on Windows.
         }
@@ -57,7 +63,7 @@ public final class DesktopLauncher {
             }
             EmberGame game = new EmberGame(config);
             configuration.setWindowListener(DesktopWindow.focusListener(game));
-            new Lwjgl3Application(game, configuration);
+            new Lwjgl3Application(devMode ? devWrap.apply(game) : game, configuration);
         } finally {
             Log.get("launcher").info("Exited");
             DesktopLogging.shutdown();

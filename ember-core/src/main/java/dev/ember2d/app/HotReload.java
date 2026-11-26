@@ -62,7 +62,7 @@ final class HotReload {
         if (entries.isEmpty()) {
             return false;
         }
-        List<AssetReloaded> reloaded = assets.reload(entries);
+        List<AssetReloaded> reloaded = assets.reload(entries, events::queue);
         boolean restart = false;
         for (AssetReloaded event : reloaded) {
             events.queue(event);

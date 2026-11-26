@@ -254,4 +254,29 @@ class DefaultEventBusTest {
         assertThatThrownBy(() -> bus.queue(null)).isInstanceOf(NullPointerException.class);
         assertThatThrownBy(() -> bus.onGlobal(Hit.class, null)).isInstanceOf(NullPointerException.class);
     }
+
+    @Test
+    void aMonitorSeesEveryDeliveredEventFirstUntilCancelled() {
+        java.util.List<Object> seen = new java.util.ArrayList<>();
+        bus.onGlobal(Hit.class, e -> received.add("hit " + e.amount()));
+        dev.ember2d.event.Subscription monitor = bus.monitor(e -> {
+            seen.add(e);
+            received.add("monitor");
+        });
+        bus.monitor(e -> {
+            throw new IllegalStateException("broken monitor");   // logged, delivery goes on
+        });
+
+        bus.publish(new Hit(1));
+        bus.queue(new Heal(2));
+        assertThat(seen).containsExactly(new Hit(1));
+        bus.flush();
+        assertThat(seen).containsExactly(new Hit(1), new Heal(2));
+        assertThat(received).containsExactly("monitor", "hit 1", "monitor");
+
+        monitor.cancel();
+        bus.publish(new Hit(3));
+        assertThat(seen).hasSize(2);
+        assertThat(monitor.isActive()).isFalse();
+    }
 }

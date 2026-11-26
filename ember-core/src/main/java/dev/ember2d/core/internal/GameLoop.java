@@ -44,6 +44,10 @@ public final class GameLoop {
         long unscaled = skipNextDelta ? 0L : Math.max(0L, Math.min(raw, MAX_FRAME_DELTA_NANOS));
         skipNextDelta = false;
         long scaled = time.paused() ? 0L : Math.round(unscaled * (double) time.timeScale());
+        boolean step = time.paused() && time.takeStep();
+        if (step) {
+            scaled = time.fixedStepNanos() - accumulatorNanos;   // exactly one fixed step this frame
+        }
         time.beginFrame(unscaled, scaled);
 
         runner.run(Phase.INPUT);
