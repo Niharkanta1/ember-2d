@@ -4,6 +4,8 @@ package dev.ember2d.demo.platformer;
 public final class Enemy {
     /** Seconds the hit clip plays before the enemy is removed. */
     public float defeatSeconds = 0.4f;
+    /** Upward speed of a player that lands on it. */
+    public float stompBounce = 12f;
     /** Defeated and waiting to be removed (runtime). */
     public boolean defeated;
     /** Seconds since it was defeated (runtime). */

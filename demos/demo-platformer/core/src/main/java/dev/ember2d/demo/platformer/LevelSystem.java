@@ -14,6 +14,8 @@ import dev.ember2d.ecs.EntitySystem;
 import dev.ember2d.ecs.Family;
 import dev.ember2d.ecs.Transform;
 import dev.ember2d.ecs.World;
+import dev.ember2d.kit.platformer.Patroller;
+import dev.ember2d.kit.platformer.PlatformerBody;
 import dev.ember2d.event.EventBus;
 import dev.ember2d.render.Sprite;
 import dev.ember2d.render.Text;
@@ -60,7 +62,7 @@ public final class LevelSystem extends EntitySystem {
      * @param restart called once, the given seconds after the goal is reached (the scene restarts the level)
      */
     public LevelSystem(World world, Collision collision, EventBus events, Runnable restart) {
-        super(Phase.FIXED, world.family(Transform.class, PlayerControl.class));
+        super(Phase.FIXED, world.family(Transform.class, PlatformerBody.class));
         this.collision = collision;
         this.events = events;
         this.restart = restart;
@@ -91,7 +93,7 @@ public final class LevelSystem extends EntitySystem {
 
     @Override
     protected void process(int player, float delta) {
-        PlayerControl body = world().get(player, PlayerControl.class);
+        PlatformerBody body = world().get(player, PlatformerBody.class);
         Transform transform = world().get(player, Transform.class);
         if (!respawnSet) {
             respawn.set(transform.position);
@@ -136,7 +138,7 @@ public final class LevelSystem extends EntitySystem {
     }
 
     /** Enemies and hazards overlapping the player, every step: standing in a hazard hurts once blinking ends. */
-    private void touch(int player, PlayerControl body, Transform transform) {
+    private void touch(int player, PlatformerBody body, Transform transform) {
         hits.clear();
         collision.overlapBox(collision.bounds(player, box), ~0, hits);
         for (int i = 0; i < hits.size; i++) {
@@ -152,7 +154,7 @@ public final class LevelSystem extends EntitySystem {
             collision.bounds(e, other);
             if (body.vy < 0f && transform.position.y >= other.y + other.height * 0.5f) {
                 defeat(e, enemy);
-                body.vy = body.stompBounce;
+                body.vy = enemy.stompBounce;
             } else if (invulnerable <= 0f) {
                 hurt(player, false);
                 return;
@@ -163,7 +165,7 @@ public final class LevelSystem extends EntitySystem {
     private void defeat(int e, Enemy enemy) {
         enemy.defeated = true;
         enemy.defeatedTime = 0f;
-        world().remove(e, Patrol.class);
+        world().remove(e, Patroller.class);
         world().remove(e, Actor.class);
         world().remove(e, Collider.class);
         Animator animator = world().get(e, Animator.class);
@@ -202,7 +204,7 @@ public final class LevelSystem extends EntitySystem {
         if (hurtTimer > 0f || complete() || (!fell && invulnerable > 0f)) {
             return;
         }
-        PlayerControl body = world().get(player, PlayerControl.class);
+        PlatformerBody body = world().get(player, PlatformerBody.class);
         deaths++;
         hurtTimer = HURT_SECONDS;
         body.locked = true;
@@ -216,7 +218,7 @@ public final class LevelSystem extends EntitySystem {
 
     private void triggerEntered(TriggerEntered e) {
         int player = e.actor();
-        if (!world().has(player, PlayerControl.class)) {
+        if (!world().has(player, PlatformerBody.class)) {
             return;   // enemies walk through triggers too
         }
         Checkpoint checkpoint = world().get(e.trigger(), Checkpoint.class);
@@ -237,7 +239,7 @@ public final class LevelSystem extends EntitySystem {
     }
 
     private void reachGoal(int player, int entity, Goal goal) {
-        PlayerControl body = world().get(player, PlayerControl.class);
+        PlatformerBody body = world().get(player, PlatformerBody.class);
         body.locked = true;
         body.vx = 0f;
         goalTimer = 0f;

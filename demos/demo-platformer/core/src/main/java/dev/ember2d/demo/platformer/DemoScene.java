@@ -22,6 +22,9 @@ import dev.ember2d.ecs.Transform;
 import dev.ember2d.ecs.World;
 import dev.ember2d.input.Input;
 import dev.ember2d.input.InputContextChanged;
+import dev.ember2d.kit.platformer.MovingPlatformSystem;
+import dev.ember2d.kit.platformer.PatrollerSystem;
+import dev.ember2d.kit.platformer.PlatformerSystem;
 import dev.ember2d.render.RenderLayer;
 import dev.ember2d.render.SortMode;
 import dev.ember2d.render.Sprite;
@@ -33,6 +36,9 @@ import dev.ember2d.tilemap.TileMapRenderer;
 /**
  * Level 1 of the platformer demo (F-015, I-170), edited in Tiled ({@code maps/level1.tmx}).
  * <ul>
+ *   <li>Movement comes from {@code kit-platformer} (I-200); level 1 uses none of its optional mechanics, which can be
+ *       switched on live in the dev tools inspector ({@code PlatformerBody}: air jumps, dash on X or Left Shift, wall
+ *       slide, wall jump).</li>
  *   <li>The player (Ninja Frog) runs with acceleration, jumps with variable height, coyote time and jump buffering, and
  *       drops through one-way planks with down + jump.</li>
  *   <li>Pigs patrol; landing on one defeats it, touching it otherwise hurts. Spikes hurt. A hurt player respawns at the
@@ -88,8 +94,8 @@ final class DemoScene extends Scene {
         world.get(world.findByName("camera"), CameraFollow.class).bounds = map.bounds(new Rectangle());
 
         world.addSystem(new MovingPlatformSystem(world, collision));   // solids first: riders see where they are
-        world.addSystem(new PatrolSystem(world, collision));
-        world.addSystem(new PlayerControlSystem(world, collision, input, context.events()));
+        world.addSystem(new PatrollerSystem(world, collision));
+        world.addSystem(new PlatformerSystem(world, collision, input, context.events()));
         world.addSystem(new CollisionSystem(world, collision));        // after all movement: hash and triggers
         world.addSystem(new LevelSystem(world, collision, context.events(), context.scenes()::restart));
         world.addSystem(new CameraFollowSystem(world, context.renderer().camera(), context.time()));

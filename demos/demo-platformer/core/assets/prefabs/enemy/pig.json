@@ -18,7 +18,7 @@
    }
   },
   "Actor": {},
-  "Patrol": {
+  "Patroller": {
    "speed": 2.5,
    "range": 3,
    "artFacesLeft": true
