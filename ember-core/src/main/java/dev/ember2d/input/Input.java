@@ -40,11 +40,37 @@ public interface Input {
     /** A 2D axis: x right, y up; length at most 1 when the axis is normalised. Returns {@code out}. */
     Vector2 axis2(String axis, Vector2 out);
 
-    /** The mouse position in world units (the renderer's camera); window pixels without a renderer. */
+    /** The mouse (pointer 0) position in world units (the renderer's camera); window pixels without a renderer. */
     Vector2 pointerWorld(Vector2 out);
 
     /** The mouse position in window pixels, y down (libGDX convention). */
     Vector2 pointerScreen(Vector2 out);
+
+    /** Number of touch pointers tracked (F-022): 5. Pointer indexes are {@code 0..maxPointers()-1}. */
+    int maxPointers();
+
+    /**
+     * True while the finger (or, on desktop, the left mouse button as pointer 0) is down. Pointer queries are frame
+     * view only: read them in {@code INPUT}, {@code UPDATE} or {@code LATE}; fixed-step code should use actions.
+     *
+     * @throws IllegalArgumentException if the pointer index is out of range
+     */
+    boolean pointerDown(int pointer);
+
+    /** True in the frame the pointer touched down. */
+    boolean pointerJustDown(int pointer);
+
+    /** True in the frame the pointer lifted (a short tap gives both {@code justDown} and {@code justUp}). */
+    boolean pointerJustUp(int pointer);
+
+    /** The last position of a touch pointer in window pixels, y down. Returns {@code out}. */
+    Vector2 pointerScreen(int pointer, Vector2 out);
+
+    /** The last position of a touch pointer in world units. Returns {@code out}. */
+    Vector2 pointerWorld(int pointer, Vector2 out);
+
+    /** World units moved this frame by the lowest-numbered dragging finger; zero when nothing drags. */
+    Vector2 dragDelta(Vector2 out);
 
     /**
      * Puts a context on top of the stack.

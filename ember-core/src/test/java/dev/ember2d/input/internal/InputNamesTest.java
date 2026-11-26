@@ -25,6 +25,9 @@ class InputNamesTest {
         assertThat(InputNames.code("NUMPAD_1")).isEqualTo(Keys.NUMPAD_1);
         assertThat(InputNames.code("MOUSE_LEFT")).isEqualTo(InputNames.MOUSE_BASE + Buttons.LEFT);
         assertThat(InputNames.code("MOUSE_FORWARD")).isEqualTo(InputNames.MOUSE_BASE + Buttons.FORWARD);
+        assertThat(InputNames.code("TAP")).isEqualTo(InputNames.TAP);
+        assertThat(InputNames.code("SWIPE_DOWN")).isEqualTo(InputNames.SWIPE_DOWN);
+        assertThat(InputNames.name(InputNames.COUNT - 1)).isEqualTo("SWIPE_DOWN");
     }
 
     @Test

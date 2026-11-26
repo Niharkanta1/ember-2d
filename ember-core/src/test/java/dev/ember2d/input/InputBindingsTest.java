@@ -94,7 +94,7 @@ class InputBindingsTest {
                 """);
 
         assertThat(e.problems()).containsExactlyInAnyOrder(
-                "input.json: extra: unknown field (expected version, contexts)",
+                "input.json: extra: unknown field (expected version, contexts, touch)",
                 "input.json: version: unsupported version 2 (expected 1)",
                 "input.json: contexts: the \"gameplay\" context is required",
                 "input.json: contexts.ui.keys: unknown field (expected actions, axes)",
@@ -107,6 +107,35 @@ class InputBindingsTest {
                 "input.json: contexts.other.axes.zoom.normalize: only 2D axes (left/right/up/down) can be normalised",
                 "input.json: contexts.other.axes.tilt.normalize: must be true or false",
                 "input.json: contexts.other.axes.bad: must be an object with negative/positive or left/right/up/down");
+    }
+
+    @Test
+    void touchThresholdsDefaultAndOverride() {
+        assertThat(parse(VALID).touch()).isEqualTo(TouchThresholds.DEFAULTS);
+        assertThat(InputBindings.empty().touch()).isEqualTo(TouchThresholds.DEFAULTS);
+
+        InputBindings b = parse("""
+                { "version": 1, "touch": { "tapSlop": 16, "longPressTime": 0.8 },
+                  "contexts": { "gameplay": { "actions": { "tap": ["TAP", "SWIPE_LEFT", "MOUSE_LEFT"] } } } }
+                """);
+
+        assertThat(b.touch()).isEqualTo(new TouchThresholds(16f, 0.3f, 0.3f, 0.8f, 48f, 0.3f));
+        assertThat(b.actionInputs("tap")).containsExactly("TAP", "SWIPE_LEFT", "MOUSE_LEFT");
+    }
+
+    @Test
+    void invalidTouchThresholdsAreReported() {
+        assertThat(invalid("""
+                { "version": 1, "touch": { "tapSlop": 0, "tapTime": "fast", "pinch": 1 },
+                  "contexts": { "gameplay": { } } }
+                """).problems()).containsExactly(
+                "input.json: touch.tapSlop: must be a number > 0",
+                "input.json: touch.tapTime: must be a number > 0",
+                "input.json: touch.pinch: unknown field (expected tapSlop, tapTime, doubleTapTime, longPressTime, "
+                        + "swipeDistance, swipeTime)");
+        assertThat(invalid("""
+                { "version": 1, "touch": [], "contexts": { "gameplay": { } } }
+                """).problems()).hasSize(1).first().asString().startsWith("input.json: touch: must be an object");
     }
 
     @Test

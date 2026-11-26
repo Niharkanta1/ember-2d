@@ -1,5 +1,6 @@
 package dev.ember2d.app;
 
+import com.badlogic.gdx.Application;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -112,6 +113,14 @@ public class EmberGame implements ApplicationListener {
         DefaultInput input = builder.inputState();
         if (renderer != null) {
             input.setScreenToWorld(renderer::screenToWorld);
+        }
+        if (Gdx.graphics != null) {
+            input.setDensity(Gdx.graphics.getDensity());   // touch thresholds are in dp
+        }
+        if (Gdx.app != null) {
+            // On Android every finger is reported as mouse button 0: fingers must not drive MOUSE_* bindings.
+            input.source().setMouseButtons(Gdx.app.getType() != Application.ApplicationType.Android
+                    && Gdx.app.getType() != Application.ApplicationType.iOS);
         }
         if (Gdx.input != null) {
             Gdx.input.setInputProcessor(input.source());

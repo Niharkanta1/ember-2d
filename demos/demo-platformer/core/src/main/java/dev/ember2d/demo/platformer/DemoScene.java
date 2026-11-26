@@ -15,9 +15,10 @@ import dev.ember2d.render.SpriteRenderSystem;
 
 /**
  * Demo scene. Phase 1: a sprite patrols left and right while fixed markers show the camera scrolling; motion must look
- * smooth at 60 Hz and 144 Hz. Phase 2 input check: the player sprite moves with the {@code move} axis (arrows/WASD),
- * {@code pause} (P) pauses game time, {@code menu} (Escape, Android back) opens a menu context in which the same keys
- * move a cursor and {@code ui_back} closes it again.
+ * smooth at 60 Hz and 144 Hz. Phase 2 input check: the player sprite moves with the {@code move} axis (arrows/WASD)
+ * or walks to a tapped point ({@code tap}: touch or mouse click), {@code pause} (P, double tap) pauses game time,
+ * {@code menu} (Escape, Android back, long press) opens a menu context in which the same keys move a cursor and
+ * {@code ui_back} (Escape, back, tap) closes it again.
  */
 final class DemoScene extends Scene {
 
@@ -30,6 +31,7 @@ final class DemoScene extends Scene {
     private Transform cursor;
     private Sprite playerSprite;
     private Transform playerTransform;
+    private PlayerControl playerControl;
 
     @Override
     protected void enter(EngineContext context) {
@@ -63,7 +65,7 @@ final class DemoScene extends Scene {
         playerSprite.regionId = "tex.player";
         playerSprite.origin.set(8f, 0f);   // anchor at the feet, centred
         playerSprite.z = 2f;
-        world.add(player, new PlayerControl());
+        playerControl = world.add(player, new PlayerControl());
 
         int menuCursor = world.create();
         world.setName(menuCursor, "menu cursor");
@@ -96,7 +98,12 @@ final class DemoScene extends Scene {
                 playerSprite.tint.a = paused ? 0.5f : 1f;
                 LOG.info(paused ? "Paused" : "Running");
             }
+            if (input.justPressed("tap")) {
+                input.pointerWorld(0, playerControl.target);
+                playerControl.hasTarget = true;
+            }
             if (input.justPressed("menu")) {
+                playerControl.hasTarget = false;
                 input.pushContext("ui");
                 cursor.teleport(playerTransform.position.x, playerTransform.position.y + 2f);
                 cursorSprite.tint.a = 1f;

@@ -27,6 +27,13 @@ public final class DefaultInput implements Input {
     private final Time time;
     private final EventBus events;
     private final GdxInputSource source = new GdxInputSource();
+    private final TouchTracker touch = new TouchTracker();
+    private final TouchTracker.Sink touchSink = this::touchInput;
+    private final Vector2 dragA = new Vector2();
+    private final Vector2 dragB = new Vector2();
+    private float density = 1f;
+    private boolean keyboardCaptured;
+    private boolean pointerCaptured;
     private ScreenToWorld screenToWorld;
     private InputCapture capture;
     private InputBindings bindings;
@@ -83,6 +90,8 @@ public final class DefaultInput implements Input {
     /** Replaces the bindings; resets all state and the context stack (called at boot). */
     public void setBindings(InputBindings bindings) {
         this.bindings = Objects.requireNonNull(bindings, "bindings");
+        touch.configure(bindings.touch(), density);
+        touch.releaseAll();
         contexts = bindings.contexts();
         contextIndex.clear();
         for (int i = 0; i < contexts.size(); i++) {
@@ -153,6 +162,12 @@ public final class DefaultInput implements Input {
         inFixedStep = false;
     }
 
+    /** Sets the screen density (dp to pixels) used for touch thresholds; values <= 0 mean 1. */
+    public void setDensity(float density) {
+        this.density = density > 0f ? density : 1f;
+        touch.configure(bindings.touch(), this.density);
+    }
+
     /** Sets how window pixels map to world units; {@code null} keeps window pixels. */
     public void setScreenToWorld(ScreenToWorld screenToWorld) {
         this.screenToWorld = screenToWorld;
@@ -166,20 +181,22 @@ public final class DefaultInput implements Input {
         Arrays.fill(frameReleased, false);
         if (releasePending) {
             releasePending = false;
+            touch.releaseAll();
             for (int code = 0; code < InputNames.COUNT; code++) {
                 if (physicalDown[code]) {
                     apply(code, false, false, false);
                 }
             }
         }
-        boolean keyboardCaptured = capture != null && capture.capturesKeyboard();
-        boolean pointerCaptured = capture != null && capture.capturesPointer();
+        keyboardCaptured = capture != null && capture.capturesKeyboard();
+        pointerCaptured = capture != null && capture.capturesPointer();
         IntArray recorded = source.events();
         for (int i = 0; i < recorded.size; i++) {
             int event = recorded.items[i];
             apply(event >>> 1, (event & 1) == 1, keyboardCaptured, pointerCaptured);
         }
         recorded.clear();
+        touch.process(source.touches(), time.unscaledElapsed(), pointerCaptured, touchSink);
         float delta = time.delta();
         for (int a = 0; a < actionDown.length; a++) {
             if (actionDown[a] && !framePressed[a]) {
@@ -249,15 +266,55 @@ public final class DefaultInput implements Input {
 
     @Override
     public Vector2 pointerWorld(Vector2 out) {
-        if (screenToWorld == null) {
-            return out.set(source.pointerX(), source.pointerY());
-        }
-        return screenToWorld.toWorld(source.pointerX(), source.pointerY(), out);
+        return toWorld(source.pointerX(), source.pointerY(), out);
     }
 
     @Override
     public Vector2 pointerScreen(Vector2 out) {
         return out.set(source.pointerX(), source.pointerY());
+    }
+
+    @Override
+    public int maxPointers() {
+        return GdxInputSource.MAX_POINTERS;
+    }
+
+    @Override
+    public boolean pointerDown(int pointer) {
+        return touch.down(pointer(pointer));
+    }
+
+    @Override
+    public boolean pointerJustDown(int pointer) {
+        return touch.justDown(pointer(pointer));
+    }
+
+    @Override
+    public boolean pointerJustUp(int pointer) {
+        return touch.justUp(pointer(pointer));
+    }
+
+    @Override
+    public Vector2 pointerScreen(int pointer, Vector2 out) {
+        int p = pointer(pointer);
+        return out.set(touch.x(p), touch.y(p));
+    }
+
+    @Override
+    public Vector2 pointerWorld(int pointer, Vector2 out) {
+        int p = pointer(pointer);
+        return toWorld(touch.x(p), touch.y(p), out);
+    }
+
+    @Override
+    public Vector2 dragDelta(Vector2 out) {
+        int p = touch.dragPointer();
+        if (p < 0) {
+            return out.setZero();
+        }
+        toWorld(touch.x(p), touch.y(p), dragA);
+        toWorld(touch.previousX(p), touch.previousY(p), dragB);
+        return out.set(dragA).sub(dragB);
     }
 
     @Override
@@ -300,6 +357,22 @@ public final class DefaultInput implements Input {
     }
 
     // ---- internals ----
+
+    private void touchInput(int code, boolean down) {
+        apply(code, down, keyboardCaptured, pointerCaptured);
+    }
+
+    private Vector2 toWorld(float x, float y, Vector2 out) {
+        return screenToWorld == null ? out.set(x, y) : screenToWorld.toWorld(x, y, out);
+    }
+
+    private static int pointer(int pointer) {
+        if (pointer < 0 || pointer >= GdxInputSource.MAX_POINTERS) {
+            throw new IllegalArgumentException("Pointer index must be 0.." + (GdxInputSource.MAX_POINTERS - 1)
+                    + " (was " + pointer + ")");
+        }
+        return pointer;
+    }
 
     private void apply(int code, boolean down, boolean keyboardCaptured, boolean pointerCaptured) {
         if (down) {

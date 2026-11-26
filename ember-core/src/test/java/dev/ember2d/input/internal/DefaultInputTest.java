@@ -350,8 +350,11 @@ class DefaultInputTest {
     private void pressAndRelease(int i) {
         if (i % 2 == 0) {
             keys.keyDown(Keys.SPACE);
+            keys.touchDown(10, 10, 1, Buttons.LEFT);   // a finger: gesture recognition runs too
         } else {
             keys.keyUp(Keys.SPACE);
+            keys.touchDragged(12, 11, 1);
+            keys.touchUp(12, 11, 1, Buttons.LEFT);
         }
     }
 }

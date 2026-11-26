@@ -1,8 +1,8 @@
 { "version": 1,
   "contexts": {
     "gameplay": {
-      "actions": { "pause": ["P"], "menu": ["ESCAPE", "BACK"] },
+      "actions": { "pause": ["P", "DOUBLE_TAP"], "menu": ["ESCAPE", "BACK", "LONG_PRESS"], "tap": ["TAP"] },
       "axes": { "move": { "left": ["LEFT", "A"], "right": ["RIGHT", "D"], "up": ["UP", "W"], "down": ["DOWN", "S"] } } },
     "ui": {
-      "actions": { "ui_back": ["ESCAPE", "BACK"] },
+      "actions": { "ui_back": ["ESCAPE", "BACK", "TAP"] },
       "axes": { "ui_nav": { "left": ["LEFT", "A"], "right": ["RIGHT", "D"], "up": ["UP", "W"], "down": ["DOWN", "S"] } } } } }
