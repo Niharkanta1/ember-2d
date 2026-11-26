@@ -22,6 +22,8 @@ final class MenuScene extends Scene {
 
     private Input input;
     private Table panel;
+    private Label title;
+    private Image frog;
 
     @Override
     protected void enter(EngineContext context) {
@@ -30,15 +32,13 @@ final class MenuScene extends Scene {
         context.audio().playMusic("music.level", 0.5f);
         Ui ui = ui();
         DemoUi.useSkin(ui, context.assets());
-        Table root = ui.root();
-        root.setBackground(new TiledDrawable(new TextureRegion(context.assets().get("tex.background", Texture.class))));
-        root.add(new Label("Ember2D Platformer", ui.skin(), "title")).padBottom(6f).row();
-        TextureRegion frog = new TextureRegion(context.assets().get("tex.frog_idle", Texture.class), 0, 0, 32, 32);
-        root.add(new Image(frog)).size(32f, 32f).padBottom(6f).row();
+        ui.root().setBackground(new TiledDrawable(new TextureRegion(context.assets().get("tex.background",
+                Texture.class))));
+        title = new Label("Ember2D Platformer", ui.skin(), "title");
+        frog = new Image(new TextureRegion(context.assets().get("tex.frog_idle", Texture.class), 0, 0, 32, 32));
         panel = new Table(ui.skin());
         panel.setBackground("panel");
         panel.pad(8f, 10f, 8f, 10f);
-        root.add(panel).minWidth(130f);
         showMain(context, ui);
     }
 
@@ -54,11 +54,24 @@ final class MenuScene extends Scene {
         }
         panel.clearChildren();
         panel.add(menu).growX();
+        layout(ui, true);
+    }
+
+    /** The title and frog over the panel, or the panel alone (the settings need the room on small screens). */
+    private void layout(Ui ui, boolean header) {
+        Table root = ui.root();
+        root.clearChildren();
+        if (header) {
+            root.add(title).padBottom(6f).row();
+            root.add(frog).size(32f, 32f).padBottom(6f).row();
+        }
+        root.add(panel).minWidth(130f);
     }
 
     private void showSettings(EngineContext context, Ui ui) {
-        DemoUi.show(panel, "Settings", DemoUi.settings(ui, context.audio(), context.input(),
+        DemoUi.show(panel, "Settings", DemoUi.settings(ui, context,
                 () -> showMain(context, ui), () -> showSettings(context, ui)));
+        layout(ui, false);
     }
 
     @Override

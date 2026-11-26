@@ -27,6 +27,7 @@ import dev.ember2d.kit.platformer.Jumped;
 import dev.ember2d.kit.platformer.MovingPlatformSystem;
 import dev.ember2d.kit.platformer.PatrollerSystem;
 import dev.ember2d.kit.platformer.PlatformerBody;
+import dev.ember2d.save.SaveData;
 import dev.ember2d.kit.platformer.PlatformerSystem;
 import dev.ember2d.render.RenderLayer;
 import dev.ember2d.render.SortMode;
@@ -70,6 +71,9 @@ final class DemoScene extends Scene {
     private HudCounter time;
     private HudCounter deaths;
     private Table pausePanel;
+    /** Global-data key of level 1's best time in seconds (I-230). */
+    static final String BEST_TIME_KEY = "best.level1";
+
     private boolean paused;
     private boolean dashShown = true;
 
@@ -172,7 +176,7 @@ final class DemoScene extends Scene {
     }
 
     private void showPauseSettings() {
-        DemoUi.show(pausePanel, "Settings", DemoUi.settings(ui(), context().audio(), input, this::showPauseMenu,
+        DemoUi.show(pausePanel, "Settings", DemoUi.settings(ui(), context(), this::showPauseMenu,
                 this::showPauseSettings));
     }
 
@@ -200,7 +204,18 @@ final class DemoScene extends Scene {
         DemoUi.show(panel, "Level complete!", menu);
         Table stats = new Table(ui.skin());
         stats.add(new Label("Time   " + LevelSystem.clock(e.seconds()), ui.skin())).left().row();
-        stats.add(new Label("Deaths " + e.deaths(), ui.skin())).left();
+        stats.add(new Label("Deaths " + e.deaths(), ui.skin())).left().row();
+        // The best time is global data: kept across runs, not tied to a save slot (I-230).
+        SaveData global = context().saves().global();
+        float best = global.getFloat(BEST_TIME_KEY, Float.MAX_VALUE);
+        if (e.seconds() < best) {
+            global.set(BEST_TIME_KEY, e.seconds());
+            context().saves().flush();
+            stats.add(new Label(best == Float.MAX_VALUE ? "First clear!" : "New best!", ui.skin(), "title"))
+                    .left().padTop(2f);
+        } else {
+            stats.add(new Label("Best   " + LevelSystem.clock(best), ui.skin())).left();
+        }
         panel.getCells().get(0).padBottom(4f);
         panel.row();
         panel.add(stats).padTop(6f);

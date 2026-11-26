@@ -24,6 +24,9 @@ import dev.ember2d.event.AppSuspended;
 import dev.ember2d.input.InputBindings;
 import dev.ember2d.input.internal.DefaultInput;
 import dev.ember2d.render.internal.GdxRenderer;
+import dev.ember2d.save.SaveStore;
+import dev.ember2d.save.internal.FileSaveStore;
+import dev.ember2d.save.internal.SaveFolders;
 import dev.ember2d.render.internal.ScreenLayout;
 import dev.ember2d.ui.Insets;
 import dev.ember2d.ui.Ui;
@@ -110,12 +113,14 @@ public class EmberGame implements ApplicationListener {
             if (renderer != null) {
                 builder.renderer(renderer);
             }
+            builder.saves(createSaveStore());   // a game may replace it in configureContext
             configureContext(builder);
             context = builder.build();
             if (assets.manifest().group(GLOBAL_GROUP) != null) {
                 assets.loadGroup(GLOBAL_GROUP).finish();
             }
             loadInputBindings(builder.inputState());
+            EngineSettings.apply(context);   // stored volumes, controls and keys, before the first scene (I-230)
         } catch (RuntimeException e) {
             if (renderer != null) {
                 renderer.dispose();
@@ -242,6 +247,16 @@ public class EmberGame implements ApplicationListener {
         }
         context.forEachLifecycleListener("onSuspend", AppLifecycleListener::onSuspend);
         context.events().publish(new AppSuspended());
+        try {
+            EngineSettings.capture(context);   // Android may kill a suspended app: write settings and saves now
+            if (context.saves() instanceof FileSaveStore store) {
+                store.onSuspend();
+            } else {
+                context.saves().flush();
+            }
+        } catch (RuntimeException e) {
+            LOG.error("Saving on suspend failed", e);
+        }
     }
 
     @Override
@@ -272,6 +287,11 @@ public class EmberGame implements ApplicationListener {
             return; // never started: nothing to release
         }
         context.scenes().exitAll();
+        try {
+            context.saveSettings();
+        } catch (RuntimeException e) {
+            LOG.error("Saving settings at shutdown failed", e);
+        }
         if (audio != null) {
             audio.stopAll();
         }
@@ -293,6 +313,13 @@ public class EmberGame implements ApplicationListener {
         }
         assets.dispose();
         LOG.info(failures.isEmpty() ? "Shut down" : "Shut down with " + failures.size() + " disposal failure(s)");
+    }
+
+    /** Saves on disk when {@link EngineConfig#saveFolder} is set and a libGDX backend runs, otherwise in memory. */
+    private SaveStore createSaveStore() {
+        FileSaveStore store = new FileSaveStore(SaveFolders.forGame(config.saveFolder), config.saveSlots, config.saveVersion, System::currentTimeMillis);
+        LOG.info("Saves in " + store.location());
+        return store;
     }
 
     /** Loads and validates {@link EngineConfig#inputBindings} (already loaded with the global group if listed there). */

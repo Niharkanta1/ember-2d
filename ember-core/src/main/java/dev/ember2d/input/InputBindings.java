@@ -128,6 +128,33 @@ public final class InputBindings {
         return new InputBindings(contexts, actions, axes, touch, controls);
     }
 
+    /**
+     * A copy with one action's inputs replaced: player rebinding from the settings (F-013, I-230).
+     *
+     * @throws IllegalArgumentException for an unknown action, an empty list or an unknown input name
+     */
+    public InputBindings withActionInputs(String action, List<String> inputs) {
+        Action old = actions.get(action);
+        if (old == null) {
+            throw new IllegalArgumentException("Unknown action \"" + action + "\" (actions: " + actions.keySet() + ")");
+        }
+        if (inputs == null || inputs.isEmpty()) {
+            throw new IllegalArgumentException(action + ": needs at least one input");
+        }
+        List<String> clean = new ArrayList<>();
+        for (String input : inputs) {
+            if (input == null || InputNames.code(input) < 0) {
+                throw new IllegalArgumentException(action + ": unknown input name \"" + input + "\"");
+            }
+            if (!clean.contains(input)) {
+                clean.add(input);
+            }
+        }
+        Map<String, Action> copy = new LinkedHashMap<>(actions);
+        copy.put(action, new Action(old.context(), List.copyOf(clean)));
+        return new InputBindings(contexts, copy, new LinkedHashMap<>(axes), touch, touchControls);
+    }
+
     /** The on-screen controls (F-022, I-122), or null if the file has no {@code touchControls} section. */
     public TouchControlsConfig touchControls() {
         return touchControls;

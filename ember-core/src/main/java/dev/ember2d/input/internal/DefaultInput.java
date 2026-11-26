@@ -15,7 +15,10 @@ import dev.ember2d.input.TouchControlsConfig;
 import dev.ember2d.input.TouchLayout;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -47,6 +50,8 @@ public final class DefaultInput implements Input {
     private ScreenToWorld screenToWorld;
     private InputCapture capture;
     private InputBindings bindings;
+    private InputBindings fileBindings;
+    private final Map<String, List<String>> overrides = new LinkedHashMap<>();
 
     // Physical inputs (InputNames codes)
     private final boolean[] physicalDown = new boolean[InputNames.COUNT];
@@ -97,9 +102,67 @@ public final class DefaultInput implements Input {
         return bindings;
     }
 
-    /** Replaces the bindings; resets all state and the context stack (called at boot). */
+    /**
+     * Replaces the bindings file (boot, hot reload); resets all state and the context stack. The player's overrides
+     * that still fit the new file are applied over it; others are dropped.
+     */
     public void setBindings(InputBindings bindings) {
-        this.bindings = Objects.requireNonNull(bindings, "bindings");
+        fileBindings = Objects.requireNonNull(bindings, "bindings");
+        InputBindings effective = bindings;
+        for (Iterator<Map.Entry<String, List<String>>> it = overrides.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry<String, List<String>> e = it.next();
+            try {
+                effective = effective.withActionInputs(e.getKey(), e.getValue());
+            } catch (IllegalArgumentException ex) {
+                it.remove();
+            }
+        }
+        apply(effective);
+    }
+
+    @Override
+    public void rebindAction(String action, List<String> inputs) {
+        InputBindings next = bindings.withActionInputs(action, inputs);   // validates
+        overrides.put(action, List.copyOf(next.actionInputs(action)));
+        reapplyKeepingContexts(next);
+    }
+
+    @Override
+    public void resetBinding(String action) {
+        if (overrides.remove(action) != null) {
+            InputBindings effective = fileBindings;
+            for (Map.Entry<String, List<String>> e : overrides.entrySet()) {
+                effective = effective.withActionInputs(e.getKey(), e.getValue());
+            }
+            reapplyKeepingContexts(effective);
+        }
+    }
+
+    @Override
+    public Map<String, List<String>> bindingOverrides() {
+        return new LinkedHashMap<>(overrides);
+    }
+
+    @Override
+    public List<String> actionInputs(String action) {
+        if (!bindings.actions().contains(action)) {
+            throw new IllegalArgumentException("Unknown action \"" + action + "\"");
+        }
+        return bindings.actionInputs(action);
+    }
+
+    private void reapplyKeepingContexts(InputBindings next) {
+        int[] kept = stack.toArray();
+        apply(next);
+        stack.clear();
+        for (int index : kept) {
+            stack.add(index);
+        }
+        updateOwners();
+    }
+
+    private void apply(InputBindings bindings) {
+        this.bindings = bindings;
         touch.configure(bindings.touch(), density);
         touch.releaseAll();
         controls.configure(bindings.touchControls(), density);

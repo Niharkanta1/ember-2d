@@ -4,6 +4,10 @@ import com.badlogic.gdx.utils.Disposable;
 import dev.ember2d.assets.Assets;
 import dev.ember2d.audio.Audio;
 import dev.ember2d.audio.internal.GdxAudio;
+import dev.ember2d.save.SaveResult;
+import dev.ember2d.save.SaveStore;
+import dev.ember2d.save.internal.FileSaveStore;
+import dev.ember2d.save.internal.MemorySaveFiles;
 import dev.ember2d.core.Log;
 import dev.ember2d.debug.DebugOverlay;
 import dev.ember2d.render.Renderer;
@@ -58,12 +62,13 @@ public final class EngineContext {
     private final SceneManager scenes;
     private final DebugOverlay debug;
     private final Audio audio;
+    private final SaveStore saves;
     private final Map<Class<?>, Object> services;
     private final List<Object> instancesInOrder;
 
     private EngineContext(EngineConfig config, TimeState time, Timers timers, Tweens tweens, DefaultEventBus events,
             DefaultInput input, Assets assets, PrefabLibrary prefabs, Renderer renderer, SceneManager scenes,
-            DebugOverlay debug, Audio audio, Map<Class<?>, Object> services) {
+            DebugOverlay debug, Audio audio, SaveStore saves, Map<Class<?>, Object> services) {
         this.config = config;
         this.time = time;
         this.timers = timers;
@@ -76,6 +81,7 @@ public final class EngineContext {
         this.scenes = scenes;
         this.debug = debug;
         this.audio = audio;
+        this.saves = saves;
         this.services = Collections.unmodifiableMap(new LinkedHashMap<>(services));
         Set<Object> seen = Collections.newSetFromMap(new IdentityHashMap<>());
         List<Object> ordered = new ArrayList<>();
@@ -168,6 +174,21 @@ public final class EngineContext {
         return audio;
     }
 
+    /** Save slots, global data and settings (F-013). */
+    public SaveStore saves() {
+        return saves;
+    }
+
+    /**
+     * Copies the engine's settings (volumes, vibration, on-screen controls layout, rebound keys) into
+     * {@code saves().settings()} and writes what changed (F-013, I-230). The engine also does this on suspend and at
+     * shutdown.
+     */
+    public SaveResult saveSettings() {
+        EngineSettings.capture(this);
+        return saves.flush();
+    }
+
     /** The scene stack (F-010). */
     public SceneManager scenes() {
         return scenes;
@@ -240,6 +261,7 @@ public final class EngineContext {
         private Assets assets;
         private Renderer renderer;
         private Audio audio;
+        private SaveStore saves;
         private final SceneManager scenes;
         private final DebugOverlay debug;
         private final Map<Class<?>, Object> services = new LinkedHashMap<>();
@@ -272,6 +294,12 @@ public final class EngineContext {
         /** Sets the audio service; by default the engine builds one over the asset service (tests may set a fake). */
         public Builder audio(Audio audio) {
             this.audio = Objects.requireNonNull(audio, "audio");
+            return this;
+        }
+
+        /** Sets the save store; by default an in-memory one (the engine sets one over files when saving is on). */
+        public Builder saves(SaveStore saves) {
+            this.saves = Objects.requireNonNull(saves, "saves");
             return this;
         }
 
@@ -326,7 +354,9 @@ public final class EngineContext {
             PrefabLibrary prefabs = assets == null ? null : new PrefabLibrary(components, assets, events);
             Audio sound = audio != null ? audio : assets == null ? null : new GdxAudio(assets);
             EngineContext context = new EngineContext(config, time, timers, tweens, events, input, assets, prefabs,
-                    renderer, scenes, debug, sound, services);
+                    renderer, scenes, debug, sound, saves != null ? saves
+                            : new FileSaveStore(new MemorySaveFiles(), config.saveSlots, config.saveVersion,
+                                    System::currentTimeMillis), services);
             scenes.attach(context);
             return context;
         }

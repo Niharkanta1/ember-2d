@@ -19,6 +19,7 @@ public final class PlatformerDemo {
         config.backgroundColor.set(0.08f, 0.06f, 0.10f, 1f);
         config.firstScene = MenuScene::new;   // main menu, then level 1 (I-220)
         config.inputBindings = "input";
+        config.saveFolder = "demo-platformer";   // settings and best times survive restarts (I-230)
         config.components = new DemoComponents();
         config.devMode = devMode;
         return config;

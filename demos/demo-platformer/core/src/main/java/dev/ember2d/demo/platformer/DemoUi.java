@@ -4,6 +4,8 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import dev.ember2d.app.EngineContext;
 import dev.ember2d.assets.Assets;
 import dev.ember2d.audio.Audio;
 import dev.ember2d.audio.AudioCategory;
@@ -45,21 +47,41 @@ final class DemoUi {
     }
 
     /**
-     * Music and sound volumes in steps of 10%, "Edit controls" while on-screen controls are shown (it reopens the
-     * settings with {@code reopen} when done), and Back.
+     * Music and sound volumes in steps of 10%; while on-screen controls are shown, Vibration on/off and "Edit
+     * controls" (it reopens the settings with {@code reopen} when done); and Back. Leaving the menu saves the settings
+     * (I-230).
      */
-    static MenuList settings(Ui ui, Audio audio, Input input, Runnable back, Runnable reopen) {
+    static MenuList settings(Ui ui, EngineContext context, Runnable back, Runnable reopen) {
+        Audio audio = context.audio();
+        Input input = context.input();
+        Runnable saveAndBack = () -> {
+            context.saveSettings();
+            back.run();
+        };
         MenuList menu = new MenuList(ui);
         menu.addValue("Music", () -> percent(audio.volume(AudioCategory.MUSIC)),
                 v -> audio.setVolume(AudioCategory.MUSIC, v / 100f), 0, 100, 10);
         menu.addValue("Sounds", () -> percent(audio.volume(AudioCategory.SFX)),
                 v -> audio.setVolume(AudioCategory.SFX, v / 100f), 0, 100, 10);
         if (input.touchControlsActive()) {
-            menu.add("Edit controls", () -> TouchLayoutEditor.open(ui, input, reopen));
+            TextButton[] vibration = new TextButton[1];
+            vibration[0] = menu.add(vibrationLabel(input), () -> {
+                input.setHapticsEnabled(!input.hapticsEnabled());
+                vibration[0].setText(vibrationLabel(input));
+                input.vibrate(40);   // a sample buzz when switched on
+            });
+            menu.add("Edit controls", () -> TouchLayoutEditor.open(ui, input, () -> {
+                context.saveSettings();
+                reopen.run();
+            }));
         }
-        menu.add("Back", back);
-        menu.onBack(back);
+        menu.add("Back", saveAndBack);
+        menu.onBack(saveAndBack);
         return menu;
+    }
+
+    private static String vibrationLabel(Input input) {
+        return "Vibration  " + (input.hapticsEnabled() ? "On" : "Off");
     }
 
     private static int percent(float volume) {

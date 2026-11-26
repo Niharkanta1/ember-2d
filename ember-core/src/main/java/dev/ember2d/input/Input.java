@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import dev.ember2d.core.PublicApi;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Named actions and axes (F-005), available as {@code context.input()}. Gameplay code never reads raw keys.
@@ -79,6 +80,23 @@ public interface Input {
 
     /** The on-screen joystick's value (x right, y up, length 0-1), zero while it is not held. Returns {@code out}. */
     Vector2 joystickValue(Vector2 out);
+
+    /**
+     * Rebinds an action to other inputs (F-013, I-230), over the bindings file. The context stack and other actions are
+     * kept; the override survives a reload of the bindings file.
+     *
+     * @throws IllegalArgumentException for an unknown action, an empty list or an unknown input name
+     */
+    void rebindAction(String action, List<String> inputs);
+
+    /** Drops an action's override: it uses the bindings file again. */
+    void resetBinding(String action);
+
+    /** The player's overrides, action to inputs, in the order they were made (a copy). */
+    Map<String, List<String>> bindingOverrides();
+
+    /** The inputs an action is bound to now (with any override). */
+    List<String> actionInputs(String action);
 
     /** Applies the player's layout of the on-screen controls over the bindings file's defaults (I-225). */
     void setTouchLayout(TouchLayout layout);

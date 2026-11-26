@@ -104,6 +104,19 @@ public final class EngineConfig {
      */
     public String touchControlsSkin = null;
 
+    /**
+     * The folder name saves and settings go in (F-013, I-230): a plain name such as {@code "my-game"}. Desktop:
+     * {@code ~/.ember2d/<name>}; Android: the app's private {@code saves} folder. {@code null} keeps saves in memory
+     * only (nothing survives a restart).
+     */
+    public String saveFolder = null;
+
+    /** The number of save slots (1 to 99). */
+    public int saveSlots = 3;
+
+    /** The current save version; older saves are upgraded by the store's migrations (F-013). */
+    public int saveVersion = 1;
+
     /** When the on-screen controls of the bindings file are shown (F-022, I-122). */
     public TouchControlsMode touchControls = TouchControlsMode.AUTO;
 
@@ -167,6 +180,16 @@ public final class EngineConfig {
         }
         if (devMode && assetWatcher != null && assetsDir == null) {
             problems.add("assetWatcher needs assetsDir: the folder it watches must also be the one assets are read from");
+        }
+        if (saveFolder != null && !saveFolder.matches("[A-Za-z0-9][A-Za-z0-9._-]{0,63}")) {
+            problems.add("saveFolder must be null or a plain folder name of letters, digits, '.', '_' and '-' (was "
+                    + quote(saveFolder) + ")");
+        }
+        if (saveSlots < 1 || saveSlots > 99) {
+            problems.add("saveSlots must be between 1 and 99 (was " + saveSlots + ")");
+        }
+        if (saveVersion < 1) {
+            problems.add("saveVersion must be >= 1 (was " + saveVersion + ")");
         }
         if (inputBindings != null && inputBindings.isBlank()) {
             problems.add("inputBindings must be null or an asset ID (was " + quote(inputBindings) + ")");
