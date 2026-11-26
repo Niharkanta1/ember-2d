@@ -76,6 +76,8 @@ Chapters must match the code at the gate; later phases update earlier chapters w
 
 **Exit gate:** one playable level, edited in Tiled (including enemy placement) and hot-reloaded while the game runs; player animation driven by the state machine; collider view in dev tools. Guide chapter `documents/guide/02-levels-prefabs-collision-animation.md` approved by the developer.
 
+**Closed 2026-11-26.** Level 1 played and approved by the developer on desktop; enemy placement edited in Tiled and hot-reloaded in a running dev build; the frog's animation runs on the state machine; the collider view is in the dev tools (Debug draw) and on F3. Android checked on the API 23 emulator with the R8 release build and on-screen controls (a real-device check is still open).
+
 ## Phase 3 — Platformer kit + services (MVP)
 - Extract `kit-platformer` from the demo; add optional mechanics behind flags (F-015).
 - Audio (F-011).

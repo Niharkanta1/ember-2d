@@ -2,7 +2,7 @@
 
 This chapter shows how to build a playable level on what Phase 2 delivers: input, Tiled maps, components from data, collision, animation, text, hot reload and the in-game dev tools. Examples come from level 1 of the platformer demo (`demos/demo-platformer`). Chapter 01 covers the basics this chapter builds on (scenes, ECS, time, events, assets, sprites).
 
-> Status: draft for developer review at the Phase 2 gate.
+> Status: approved by the developer at the Phase 2 gate (2026-11-26).
 
 ## 1. What you get in Phase 2
 - **Input:** named actions and axes from a JSON file, contexts for menus, touch gestures and on-screen controls (joystick and buttons).
