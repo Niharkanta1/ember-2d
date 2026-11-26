@@ -6,6 +6,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.JsonValue;
 import dev.ember2d.assets.internal.AssetManifest;
 import dev.ember2d.assets.internal.GdxAssets;
@@ -23,6 +25,7 @@ import dev.ember2d.input.InputBindings;
 import dev.ember2d.input.internal.DefaultInput;
 import dev.ember2d.render.internal.GdxRenderer;
 import dev.ember2d.render.internal.ScreenLayout;
+import dev.ember2d.ui.Insets;
 import dev.ember2d.ui.Ui;
 import dev.ember2d.ui.UiMode;
 import java.util.List;
@@ -125,7 +128,11 @@ public class EmberGame implements ApplicationListener {
         }
         if (renderer != null) {
             DefaultInput uiInput = builder.inputState();
-            context.scenes().setUiFactory(() -> new Ui(renderer.batch(), uiInput));
+            context.scenes().setUiFactory(() -> {
+                Ui ui = new Ui(renderer.batch(), uiInput);
+                layoutCurrent(ui);   // sized before the scene builds its widgets (dp sizes need it)
+                return ui;
+            });
         }
         if (context.audio() instanceof GdxAudio engineAudio) {
             audio = engineAudio;
@@ -145,6 +152,7 @@ public class EmberGame implements ApplicationListener {
         }
         boolean touchDevice = Gdx.app != null && (Gdx.app.getType() == Application.ApplicationType.Android
                 || Gdx.app.getType() == Application.ApplicationType.iOS);
+        input.setAutoHide(config.touchControls == TouchControlsMode.AUTO);
         input.setTouchControlsVisible(config.touchControls == TouchControlsMode.ALWAYS
                 || (config.touchControls == TouchControlsMode.AUTO && touchDevice));
         if (Gdx.graphics != null) {
@@ -188,6 +196,7 @@ public class EmberGame implements ApplicationListener {
                     Gdx.graphics != null ? Gdx.graphics.getBackBufferHeight() : height);
         }
         ((DefaultInput) context.input()).setScreenSize(width, height);   // touch coordinates use the logical size
+        updateSafeInsets();
         context.forEachLifecycleListener("onResize", listener -> listener.onResize(width, height));
     }
 
@@ -355,7 +364,9 @@ public class EmberGame implements ApplicationListener {
         DefaultInput input = (DefaultInput) context.input();
         if (input.touchControlsActive() && Gdx.graphics != null) {
             if (controlsOverlay == null) {
-                controlsOverlay = new TouchControlsOverlay();   // created on first use
+                Skin custom = config.touchControlsSkin == null ? null
+                        : context.assets().get(config.touchControlsSkin, Skin.class);
+                controlsOverlay = new TouchControlsOverlay(custom);   // created on first use
             }
             controlsOverlay.draw(input.touchControls(), renderer.batch(), Gdx.graphics.getWidth(),
                     Gdx.graphics.getHeight());
@@ -368,22 +379,58 @@ public class EmberGame implements ApplicationListener {
         if (ui == null) {
             return;
         }
-        layoutUi(ui, config, renderer.layout(), renderer.screenWidth(), renderer.screenHeight());
+        layoutCurrent(ui);
         ui.act(context.time().unscaledDelta());
         renderer.batch().setColor(Color.WHITE);
         ui.draw();
     }
 
+    private void layoutCurrent(Ui ui) {
+        Rectangle safe = renderer.safeArea(new Rectangle());
+        Insets insets = new Insets(safe.x, renderer.screenHeight() - safe.y - safe.height,
+                renderer.screenWidth() - safe.x - safe.width, safe.y);
+        layoutUi(ui, config, renderer.layout(), renderer.screenWidth(), renderer.screenHeight(), insets,
+                Gdx.graphics != null ? Gdx.graphics.getDensity() : 1f);
+    }
+
+    /** Reads the safe-area insets (or the dev simulation) and passes them to the renderer and the controls. */
+    private void updateSafeInsets() {
+        Insets px = Insets.NONE;
+        if (config.devMode && config.simulatedSafeInsets != null) {
+            px = config.simulatedSafeInsets;
+        } else if (Gdx.graphics != null) {
+            px = new Insets(Gdx.graphics.getSafeInsetLeft(), Gdx.graphics.getSafeInsetTop(),
+                    Gdx.graphics.getSafeInsetRight(), Gdx.graphics.getSafeInsetBottom());
+        }
+        if (renderer != null) {
+            renderer.setSafeInsets((int) px.left(), (int) px.top(), (int) px.right(), (int) px.bottom());
+        }
+        ((DefaultInput) context.input()).setSafeInsets(px.left(), px.top(), px.right(), px.bottom());
+    }
+
     /**
      * {@link UiMode#VIRTUAL}: the world's virtual size in the world's screen rectangle (same integer scale, same bars).
-     * {@link UiMode#SCREEN}: the whole window in screen pixels divided by {@code uiScale}.
+     * {@link UiMode#SCREEN}: the whole window in screen pixels divided by {@code uiScale} (0: the density, at least 1).
+     * The safe-area insets (window pixels) become UI units; in {@code VIRTUAL} the black bars already count towards
+     * them.
      */
-    static void layoutUi(Ui ui, EngineConfig config, ScreenLayout layout, int screenWidth, int screenHeight) {
+    static void layoutUi(Ui ui, EngineConfig config, ScreenLayout layout, int screenWidth, int screenHeight,
+            Insets insetsPx, float density) {
+        float pixelsPerDp = density > 0f ? density : 1f;
         if (config.uiMode == UiMode.VIRTUAL) {
+            float scale = layout.width() / (float) layout.worldWidth();
             ui.layout(layout.worldWidth(), layout.worldHeight(), layout.x(), layout.y(), layout.width(),
                     layout.height());
+            int barRight = screenWidth - layout.x() - layout.width();
+            int barTop = screenHeight - layout.y() - layout.height();
+            Insets insets = new Insets((insetsPx.left() - layout.x()) / scale, (insetsPx.top() - barTop) / scale,
+                    (insetsPx.right() - barRight) / scale, (insetsPx.bottom() - layout.y()) / scale);
+            ui.setScreenMetrics(insets, pixelsPerDp, scale);
         } else {
-            ui.layout(screenWidth / config.uiScale, screenHeight / config.uiScale, 0, 0, screenWidth, screenHeight);
+            float scale = config.uiScale > 0f ? config.uiScale : Math.max(1f, pixelsPerDp);
+            ui.layout(screenWidth / scale, screenHeight / scale, 0, 0, screenWidth, screenHeight);
+            ui.setScreenMetrics(new Insets(insetsPx.left() / scale, insetsPx.top() / scale,
+                    insetsPx.right() / scale, insetsPx.bottom() / scale), pixelsPerDp, scale);
         }
     }
 

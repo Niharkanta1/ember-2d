@@ -254,10 +254,10 @@ public final class InputBindings {
             }
             String path = "touchControls";
             if (!json.isObject()) {
-                problem(path, "must be an object with opacity, joystick, buttons");
+                problem(path, "must be an object with opacity, joystick or dpad, buttons");
                 return null;
             }
-            fields(json, path, List.of("opacity", "joystick", "buttons"));
+            fields(json, path, List.of("opacity", "joystick", "dpad", "buttons"));
             float opacity = number(json, "opacity", 0.35f, path, 0f, 1f);
             TouchControlsConfig.Joystick joystick = null;
             JsonValue j = json.get("joystick");
@@ -284,6 +284,35 @@ public final class InputBindings {
                     joystick = new TouchControlsConfig.Joystick(axis, mode.equals("floating"),
                             number(j, "x", 96f, jp, 0f, Float.MAX_VALUE), number(j, "y", 96f, jp, 0f, Float.MAX_VALUE),
                             positive(j, "radius", 56f, jp), dead);
+                }
+            }
+            TouchControlsConfig.Dpad dpad = null;
+            JsonValue d = json.get("dpad");
+            if (d != null) {
+                String dp = path + ".dpad";
+                if (joystick != null) {
+                    problem(dp, "use a joystick or a dpad, not both");
+                }
+                if (!d.isObject()) {
+                    problem(dp, "must be an object");
+                } else {
+                    fields(d, dp, List.of("axis", "x", "y", "radius", "diagonals"));
+                    String axis = d.getString("axis", null);
+                    Axis a = axis == null ? null : axes.get(axis);
+                    if (axis == null) {
+                        problem(dp + ".axis", "required (a 2D axis name)");
+                    } else if (a == null) {
+                        problem(dp + ".axis", "unknown axis \"" + axis + "\"");
+                    } else if (!a.twoD()) {
+                        problem(dp + ".axis", "axis \"" + axis + "\" must be 2D (left/right/up/down)");
+                    }
+                    JsonValue diagonals = d.get("diagonals");
+                    if (diagonals != null && !diagonals.isBoolean()) {
+                        problem(dp + ".diagonals", "must be true or false");
+                    }
+                    dpad = new TouchControlsConfig.Dpad(axis, number(d, "x", 96f, dp, 0f, Float.MAX_VALUE),
+                            number(d, "y", 96f, dp, 0f, Float.MAX_VALUE), positive(d, "radius", 56f, dp),
+                            diagonals == null || !diagonals.isBoolean() || diagonals.asBoolean());
                 }
             }
             List<TouchControlsConfig.Button> buttons = new ArrayList<>();
@@ -324,7 +353,7 @@ public final class InputBindings {
                     }
                 }
             }
-            return new TouchControlsConfig(opacity, joystick, buttons);
+            return new TouchControlsConfig(opacity, joystick, dpad, buttons);
         }
 
         private void fields(JsonValue json, String path, List<String> allowed) {

@@ -29,6 +29,9 @@ public final class Ui implements Disposable {
     private Skin skin;
     private boolean ownsSkin;
     private BitmapFont defaultFont;
+    private Insets safeInsets = Insets.NONE;
+    private float pixelsPerDp = 1f;
+    private float pixelsPerUnit = 1f;
 
     /** Engine and tests: a UI drawing with this batch (shared, not owned) and reading menus from this input. */
     public Ui(Batch batch, Input input) {
@@ -84,6 +87,16 @@ public final class Ui implements Disposable {
         return viewport.getWorldHeight();
     }
 
+    /** The safe-area insets in UI units (notches, rounded corners; F-022, I-225); the root table is padded by them. */
+    public Insets safeInsets() {
+        return safeInsets;
+    }
+
+    /** Converts density-independent pixels to UI units (for touch-friendly sizes). */
+    public float dp(float dp) {
+        return dp * pixelsPerDp / pixelsPerUnit;
+    }
+
     /** The menu that reads input now: the most recently shown one still on the stage. */
     public MenuList activeMenu() {
         return menus.isEmpty() ? null : menus.peek();
@@ -94,6 +107,19 @@ public final class Ui implements Disposable {
     /** Engine: the UI area in UI units and its screen rectangle in back-buffer pixels. */
     public void layout(float width, float height, int screenX, int screenY, int screenWidth, int screenHeight) {
         if (viewport.set(width, height, screenX, screenY, screenWidth, screenHeight)) {
+            root.invalidateHierarchy();
+        }
+    }
+
+    /**
+     * Engine: the safe-area insets in UI units, and how many window pixels one dp and one UI unit are.
+     */
+    public void setScreenMetrics(Insets insets, float pixelsPerDp, float pixelsPerUnit) {
+        this.pixelsPerDp = pixelsPerDp > 0f ? pixelsPerDp : 1f;
+        this.pixelsPerUnit = pixelsPerUnit > 0f ? pixelsPerUnit : 1f;
+        if (!insets.equals(safeInsets)) {
+            safeInsets = insets;
+            root.pad(insets.top(), insets.left(), insets.bottom(), insets.right());
             root.invalidateHierarchy();
         }
     }

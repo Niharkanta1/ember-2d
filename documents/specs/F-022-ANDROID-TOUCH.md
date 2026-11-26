@@ -1,6 +1,6 @@
 # F-022 — Android Platform and Touch Input
 
-- Status: Platform launcher part Ready (I-015, 2026-11-25); back action done in I-100 (F-005); touch input Ready (I-105, approved 2026-11-26, see "Decisions in I-105"); basic on-screen controls Ready (I-122, approved 2026-11-26; see "Basic on-screen controls (I-122)" and "Decisions in I-122"); context loss (I-060), screen handling and on-screen controls: Draft
+- Status: Platform launcher part Ready (I-015, 2026-11-25); back action done in I-100 (F-005); touch input Ready (I-105, approved 2026-11-26, see "Decisions in I-105"); basic on-screen controls Ready (I-122, approved 2026-11-26; see "Basic on-screen controls (I-122)" and "Decisions in I-122"); full on-screen controls, safe areas and haptics (I-225) Ready (approved 2026-11-27; see "On-screen controls, safe areas and haptics (I-225)" and "Decisions in I-225"); context loss (I-060): Draft
 - Phase: 1 (Android launcher, smoke build), 2 (touch actions), 3 (on-screen controls, Android demo build)
 - Module / package: `ember-android`; `ember-core` / `ember.input`, `ember.render`, `ember.ui`
 - Depends on: F-001, F-004, F-005, F-012, F-013, F-020
@@ -218,6 +218,142 @@ The defaults were approved as proposed. Details settled while implementing:
   - a tap on the jump button jumps
   - so walking into the glow zone and riding the platform are finally checked on Android
 - **Desktop with `ALWAYS`:** you check with the mouse.
+
+## On-screen controls, safe areas and haptics (I-225)
+Status: Ready (expanded for I-225 and approved 2026-11-27). Builds on I-122 (logic stays in `ember.input`) and I-220 (UI layer).
+
+**Controls drawn as skinned UI.**
+- **Input logic is unchanged:** hit tests, pointer claiming, joystick values and button presses stay in `ember.input` (tested in I-122).
+- **Drawing:** the engine-drawn circles (`TouchControlsOverlay`, a `ShapeRenderer`) are replaced by an engine-owned **controls UI layer** in `ember.ui`. It is a Scene2D stage above every scene's UI, drawing Scene2D images that follow the input state each frame.
+- **Default look:** generated pixel drawables in the pixel skin's palette:
+  - a ring base and a filled knob for the joystick
+  - round buttons with a pressed state and the label in the skin font
+  - a cross for the D-pad
+- **Custom look:** a game can give its own drawables through skin names: `touch-base`, `touch-knob`, `touch-button`, `touch-button-down`, `touch-dpad`, `touch-dpad-down`.
+
+**D-pad.**
+- `"dpad": { "axis": "move", "x": 96, "y": 96, "radius": 56, "diagonals": true }` in `touchControls` is an alternative to `joystick` (one of the two).
+- **Value:** the thumb's direction relative to the centre gives a digital 2D axis: (±1, 0), (0, ±1), and with `diagonals` the normalised diagonals.
+- **Dead zone:** within a 25% centre radius it reads (0, 0).
+- **Behaviour:** fixed position, and sliding the thumb across directions works.
+- **Validation** is as for the joystick.
+
+**When controls show.**
+- **Per context:** a control is shown and active only while the context of its action (or axis) is on top of the stack.
+  - In a pushed `ui` context (menus) the gameplay joystick and buttons disappear and release their state, so they no longer draw over menus.
+  - A control bound to a `ui` action would show in menus.
+- **Auto-hide:**
+  - With `AUTO` mode, after a key press, mouse button or gamepad input, the controls hide.
+  - The next touch on the screen shows them again; that touch is not lost, it acts normally.
+  - `ALWAYS` (desktop testing) never auto-hides.
+- **Per button, from code:** `input.setTouchButtonVisible("dash", false)` hides one button (for example until an ability is unlocked).
+
+**Layout editing.**
+- **`TouchLayout`:** per control, a position (dp from its corner), a size factor (0.6–1.6) and visibility, plus the overall opacity (0.15–0.8).
+  - It is applied over the `input.json` defaults with `input.setTouchLayout(layout)`.
+  - It reads and writes JSON (`toJson()`, `TouchLayout.parse(json)`) so the settings store can keep it.
+- **`TouchLayoutEditor`** (`ember.ui`, opened by a game, for example from a settings menu):
+  - shows every control with a frame
+  - you drag a control to move it, tap it to select it, and use **Size − / +**, **Opacity − / +**, **Reset** and **Done** on a small panel
+  - gameplay input is suspended while it is open (it pushes its own `touch-edit` context)
+- **Persistence:** saving the layout across runs comes with the settings store in **I-230** (F-013), which will call `toJson()`/`parse`. Until then the edited layout lasts for the session.
+
+**Safe areas.**
+- **Rendering under cut-outs:** `EmberAndroidLauncher` turns on `renderUnderCutout`, so the world fills the whole screen including notches.
+- **Insets:** they come from libGDX (`Gdx.graphics.getSafeInset*()`, all 0 on desktop and on devices without cut-outs) and are read on every resize.
+- **API:**
+  - `Renderer.safeArea(Rectangle out)` gives the safe rectangle in screen pixels.
+  - `Ui.safeInsets()` gives the insets in UI units.
+- **What respects them:**
+  - Each scene's **UI root table is padded by the insets** automatically, so HUDs and menus stay clear of notches and rounded corners.
+  - The **on-screen controls** are placed inside the safe area.
+- **Desktop testing:** `EngineConfig.simulatedSafeInsets` (dev builds only; the demo's desktop launcher takes `--safe-insets=L,T,R,B` in pixels) fakes insets.
+- **Device:** only an API 23 emulator image is installed here, and it has no cut-outs. Checking a real cut-out needs an API 28+ image (about 1 GB download, only with your OK) or your phone.
+
+**Touch sizes and scale.**
+- **`Ui.dp(float)`** converts density-independent pixels to UI units.
+- **Menu items** are at least `max(24 UI units, 40 dp)` high and the menu's dialog buttons at least 40 dp, so they are easy to hit on small phones.
+- **UI scale:** in `UiMode.SCREEN`, `uiScale = 0` (the new default) means "from screen density" (`Gdx.graphics.getDensity()`, at least 1). A UI scale setting in the settings menu comes with I-230.
+
+**Haptics.**
+- **API:** `ctx.input().vibrate(milliseconds)`: a short vibration on phones; nothing on desktop or when switched off (`input.setHapticsEnabled(false)`).
+- **Permission:** the Android launcher module adds the `VIBRATE` permission.
+- **Demo:** a 40 ms buzz when hurt; switching it off is part of I-230's settings.
+
+**Demo.**
+- A **"B" dash button**, hidden until the player's `dash` is switched on (checked each frame).
+- **Settings → "Edit controls"**, on touch screens or with `--touch-controls`.
+- Controls hide in menus and when you use the keyboard.
+- The HUD respects safe insets.
+
+**Not in I-225:**
+- persistence of the layout and of the haptics and UI scale settings (I-230)
+- gamepad support itself (Phase 6; the auto-hide hook is ready for it)
+- per-scene control sets
+- swipe areas
+- vibration patterns
+
+## API sketch (I-225)
+```java
+package dev.ember2d.input;
+// TouchControlsConfig gains: Dpad dpad (record Dpad(String axis, float x, float y, float radius, boolean diagonals)), null when a joystick is used
+@PublicApi public final class TouchLayout {                     // overrides over input.json
+    public static TouchLayout defaults(); public static TouchLayout parse(String json); public String toJson();
+    public void move(String control, float xDp, float yDp); public void scale(String control, float factor);
+    public void setVisible(String control, boolean visible); public void setOpacity(float opacity);
+}   // control names: "joystick", "dpad", or a button's action
+// Input gains:
+void setTouchLayout(TouchLayout layout); TouchLayout touchLayout();
+void setTouchButtonVisible(String action, boolean visible);
+void vibrate(int milliseconds); void setHapticsEnabled(boolean enabled);
+
+package dev.ember2d.render;   // Renderer gains
+Rectangle safeArea(Rectangle out);                              // screen pixels
+
+package dev.ember2d.ui;
+// Ui gains: Insets safeInsets(); float dp(float dp);
+@PublicApi public record Insets(float left, float top, float right, float bottom) { }
+@PublicApi public final class TouchLayoutEditor { public static void open(Ui ui, Input input, Runnable onDone); }
+// internal: TouchControlsLayer (engine-owned stage drawing the controls), touch drawables in UiSkins
+
+package dev.ember2d.app;
+// EngineConfig gains: Insets simulatedSafeInsets (dev only); uiScale 0 = from density (default)
+```
+
+## Decisions in I-225
+Implemented under the blanket approval of 2026-11-27 ("approval is not required up to phase 6"). Settled while implementing:
+- **Drawing:** no separate controls stage. `app/TouchControlsOverlay` now draws the skin drawables (`UiSkins.touch()`, or a game skin named by `EngineConfig.touchControlsSkin`) with the UI batch, after every scene's UI. Same look and override names as planned, one fewer stage to lay out and route input to. The input logic stays in `ember.input`.
+- **Editor:** it does not push a `touch-edit` context. `Input.setTouchControlsEditing(true)` shows the controls (even in menus) and makes them inert. The editor also hides the rest of the UI while open (restored on Done) and sits at the top of the screen, so no menu covers the controls. `open` returns the editor's overlay table. The buttons read **Size − / +**, **Opacity − / +**, **Reset**, **Done**; Back closes it as Done.
+- **Extra `Input` methods** the editor needs: `touchControlNames()`, `touchControlCircle(name, Vector3 out)` (window pixels, y up; z is the radius), `moveTouchControl(name, windowX, windowY)`, `setTouchControlsEditing`, `hapticsEnabled()`.
+- **`TouchLayout` positions** are stored in dp from the control's own corner, so a control dragged to the other half of the screen keeps a negative offset from the far edge.
+- **`uiScale`** validation: 0 (from density) or a finite number > 0.
+- **Not verified here:**
+  - a notched device
+  - `--safe-insets` on desktop (covered by unit tests only)
+  - the B button appearing once dash is switched on (seen hidden on the emulator; switching it on needs the desktop inspector)
+  - the D-pad on a device (unit tests only)
+- **Not written:** the demo test for the B button. `DemoScene` needs a full engine, and the code is a three-line flag check.
+
+## Tests (I-225)
+- **Input:**
+  - D-pad directions, diagonals on and off, dead zone, sliding between directions
+  - a control hidden and released when its context is not on top
+  - auto-hide on a key and show again on a touch (the touch still acts), with `ALWAYS` never hiding
+  - `setTouchButtonVisible`
+  - `TouchLayout` move, scale and visibility applied over the defaults; JSON round trip; clamping; unknown control names
+  - `vibrate` calls `Gdx.input.vibrate` only when enabled
+- **UI and render:**
+  - safe area from fake insets in screen pixels and in UI units (`VIRTUAL` at x6 and x4 with bars, `SCREEN`)
+  - the root table padding
+  - `Ui.dp`
+  - menu item minimum height
+  - controls placed inside the safe area
+  - the `TouchLayoutEditor`: drag moves a control, the size and opacity buttons clamp, Reset and Done
+- **Demo:** the B button follows the dash flag (a demo test).
+- **Manual:**
+  - **Emulator (screenshots):** Scene2D controls, D-pad (by a temporary `input.json` switch), controls hidden in menus, the layout editor, the B button, and simulated insets through a dev flag.
+  - **You on desktop with `--touch-controls`:** dragging, sizes, auto-hide.
+  - **A notched device:** your phone, or an API 28+ emulator image if you approve the download.
 
 ## Non-goals
 - iOS (ADR-019). Google Play services, ads, in-app purchases, cloud saves (game-level integrations, later).

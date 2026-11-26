@@ -9,16 +9,33 @@ import java.util.List;
  *
  * @param opacity alpha of the drawn controls, 0-1 (pressed parts are drawn brighter)
  * @param joystick the joystick, or null for none
+ * @param dpad the D-pad (I-225), or null for none; a game has a joystick or a D-pad, not both
  * @param buttons the action buttons (at most {@value #MAX_BUTTONS})
  */
 @PublicApi
-public record TouchControlsConfig(float opacity, Joystick joystick, List<Button> buttons) {
+public record TouchControlsConfig(float opacity, Joystick joystick, Dpad dpad, List<Button> buttons) {
 
     /** Most buttons per game. */
     public static final int MAX_BUTTONS = 8;
 
     public TouchControlsConfig {
         buttons = List.copyOf(buttons);
+    }
+
+    public TouchControlsConfig(float opacity, Joystick joystick, List<Button> buttons) {
+        this(opacity, joystick, null, buttons);
+    }
+
+    /**
+     * A D-pad driving a 2D axis with digital directions (I-225).
+     *
+     * @param axis the 2D axis it drives
+     * @param x centre in dp from the left edge
+     * @param y centre in dp from the bottom edge
+     * @param radius in dp
+     * @param diagonals true: eight directions (diagonals normalised); false: four
+     */
+    public record Dpad(String axis, float x, float y, float radius, boolean diagonals) {
     }
 
     /**

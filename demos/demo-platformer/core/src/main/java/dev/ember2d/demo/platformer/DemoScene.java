@@ -26,6 +26,7 @@ import dev.ember2d.input.InputContextChanged;
 import dev.ember2d.kit.platformer.Jumped;
 import dev.ember2d.kit.platformer.MovingPlatformSystem;
 import dev.ember2d.kit.platformer.PatrollerSystem;
+import dev.ember2d.kit.platformer.PlatformerBody;
 import dev.ember2d.kit.platformer.PlatformerSystem;
 import dev.ember2d.render.RenderLayer;
 import dev.ember2d.render.SortMode;
@@ -70,6 +71,7 @@ final class DemoScene extends Scene {
     private HudCounter deaths;
     private Table pausePanel;
     private boolean paused;
+    private boolean dashShown = true;
 
     @Override
     protected void enter(EngineContext context) {
@@ -110,7 +112,10 @@ final class DemoScene extends Scene {
         audio.playMusic("music.level", 0.5f);
         context.events().on(Jumped.class, e -> audio.playVaried("sfx.jump", 0.06f));
         context.events().on(EnemyStomped.class, e -> audio.play("sfx.stomp"));
-        context.events().on(PlayerHurt.class, e -> audio.play("sfx.hurt"));
+        context.events().on(PlayerHurt.class, e -> {
+            audio.play("sfx.hurt");
+            input.vibrate(40);   // a short buzz on phones (I-225)
+        });
         context.events().on(CheckpointReached.class, e -> audio.play("sfx.checkpoint"));
         context.events().on(LevelCompleted.class, e -> {
             LOG.info("Level complete in " + LevelSystem.clock(e.seconds()) + " with " + e.deaths() + " death(s)");
@@ -159,12 +164,16 @@ final class DemoScene extends Scene {
         MenuList menu = new MenuList(ui);
         menu.add("Resume", this::closePause);
         menu.add("Restart level", () -> context().scenes().restart());
-        menu.add("Settings", () -> DemoUi.show(pausePanel, "Settings",
-                DemoUi.settings(ui, context().audio(), this::showPauseMenu)));
+        menu.add("Settings", this::showPauseSettings);
         menu.add("Main menu", () -> ConfirmDialog.show(ui, "Quit to the main menu?", "Yes", "No",
                 () -> context().scenes().replace(new MenuScene())));
         menu.onBack(this::closePause);
         DemoUi.show(pausePanel, "Paused", menu);
+    }
+
+    private void showPauseSettings() {
+        DemoUi.show(pausePanel, "Settings", DemoUi.settings(ui(), context().audio(), input, this::showPauseMenu,
+                this::showPauseSettings));
     }
 
     private void closePause() {
@@ -215,5 +224,10 @@ final class DemoScene extends Scene {
         }
         time.setSeconds(level.levelTime());
         deaths.setValue(level.deaths());
+        boolean dash = world().get(player, PlatformerBody.class).dash;
+        if (dash != dashShown) {
+            dashShown = dash;
+            input.setTouchButtonVisible("dash", dash);   // the B button appears once dash is switched on (I-225)
+        }
     }
 }

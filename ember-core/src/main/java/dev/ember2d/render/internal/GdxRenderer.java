@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -60,6 +61,10 @@ public final class GdxRenderer implements Renderer, Disposable {
     private int screenWidth;
     private int screenHeight;
     private int renderCallsLastFrame;
+    private int insetLeft;
+    private int insetTop;
+    private int insetRight;
+    private int insetBottom;
 
     public GdxRenderer(int virtualWidth, int virtualHeight, float pixelsPerUnit, RenderMode mode, Color background,
             Time time, Batch batch, RenderTarget target) {
@@ -159,6 +164,20 @@ public final class GdxRenderer implements Renderer, Disposable {
         if (batch instanceof SpriteBatch sprites) {
             renderCallsLastFrame += sprites.totalRenderCalls;
         }
+    }
+
+    /** Engine: the safe-area insets in back-buffer pixels (I-225). */
+    public void setSafeInsets(int left, int top, int right, int bottom) {
+        insetLeft = Math.max(0, left);
+        insetTop = Math.max(0, top);
+        insetRight = Math.max(0, right);
+        insetBottom = Math.max(0, bottom);
+    }
+
+    @Override
+    public Rectangle safeArea(Rectangle out) {
+        return out.set(insetLeft, insetBottom, Math.max(0, screenWidth - insetLeft - insetRight),
+                Math.max(0, screenHeight - insetTop - insetBottom));
     }
 
     /** Draw calls the batch issued in the last frame (0 for batches that do not count them). */

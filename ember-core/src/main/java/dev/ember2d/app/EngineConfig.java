@@ -5,6 +5,7 @@ import dev.ember2d.core.PublicApi;
 import dev.ember2d.render.RenderMode;
 import dev.ember2d.data.ComponentSetup;
 import dev.ember2d.assets.AssetWatcher;
+import dev.ember2d.ui.Insets;
 import dev.ember2d.ui.UiMode;
 import java.util.ArrayList;
 import java.util.List;
@@ -84,8 +85,24 @@ public final class EngineConfig {
     /** How the UI is laid out (F-012): in virtual pixels like the world (default), or in screen pixels. */
     public UiMode uiMode = UiMode.VIRTUAL;
 
-    /** {@link UiMode#SCREEN} only: screen pixels per UI unit (2 makes everything twice as big). */
-    public float uiScale = 1f;
+    /**
+     * {@link UiMode#SCREEN} only: screen pixels per UI unit (2 makes everything twice as big); 0 (default) picks it
+     * from the screen density (at least 1).
+     */
+    public float uiScale = 0f;
+
+    /**
+     * Dev builds only (ignored unless {@link #devMode}): fake safe-area insets in window pixels, to test notch layouts
+     * on desktop (I-225). {@code null} uses the device's insets.
+     */
+    public Insets simulatedSafeInsets = null;
+
+    /**
+     * Asset ID of a {@code skin} whose drawables ({@code touch-base}, {@code touch-knob}, {@code touch-button},
+     * {@code touch-button-down}, {@code touch-dpad}, {@code touch-dpad-down}) replace the on-screen controls' default
+     * look (I-225); {@code null} uses the generated look.
+     */
+    public String touchControlsSkin = null;
 
     /** When the on-screen controls of the bindings file are shown (F-022, I-122). */
     public TouchControlsMode touchControls = TouchControlsMode.AUTO;
@@ -142,8 +159,8 @@ public final class EngineConfig {
         if (uiMode == null) {
             problems.add("uiMode must be set (was null)");
         }
-        if (!(uiScale > 0f) || Float.isInfinite(uiScale)) {
-            problems.add("uiScale must be a finite number > 0 (was " + uiScale + ")");
+        if (!(uiScale >= 0f) || Float.isInfinite(uiScale)) {
+            problems.add("uiScale must be 0 (from density) or a finite number > 0 (was " + uiScale + ")");
         }
         if (assetsDir != null && assetsDir.isBlank()) {
             problems.add("assetsDir must be null or an absolute folder (was " + quote(assetsDir) + ")");

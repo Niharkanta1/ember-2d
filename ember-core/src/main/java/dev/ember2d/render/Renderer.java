@@ -2,6 +2,7 @@ package dev.ember2d.render;
 
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import dev.ember2d.camera.CameraRig;
@@ -38,6 +39,12 @@ public interface Renderer {
 
     /** Converts a window position (pixels, origin top-left, as libGDX input reports it) to world units. */
     Vector2 screenToWorld(float screenX, float screenY, Vector2 out);
+
+    /**
+     * The part of the window clear of notches, cut-outs and rounded corners (F-022, I-225), in back-buffer pixels with
+     * y up. The whole window when the device reports no insets. Returns {@code out}.
+     */
+    Rectangle safeArea(Rectangle out);
 
     /** Whole-number scale of the world image (1 when scaling down, and in {@code SMOOTH}). */
     int scale();

@@ -13,4 +13,5 @@
     "joystick": { "axis": "move", "mode": "floating", "radius": 56, "deadZone": 0.2 },
     "buttons": [
       { "action": "jump", "label": "A", "x": 80, "y": 80, "radius": 44 },
+      { "action": "dash", "label": "B", "x": 176, "y": 64, "radius": 34 },
       { "action": "pause", "label": "II", "x": 48, "y": -48, "radius": 24 } ] } }

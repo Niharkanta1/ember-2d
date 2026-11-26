@@ -28,6 +28,8 @@ public final class MenuList extends Table {
     /** Seconds a direction is held before it repeats, and the repeat interval. */
     static final float REPEAT_DELAY = 0.35f;
     static final float REPEAT_INTERVAL = 0.1f;
+    /** Smallest item height in dp, so items are easy to hit on phones (I-225). */
+    public static final float MIN_TOUCH_DP = 40f;
 
     private static final class Item {
         final TextButton button;
@@ -68,7 +70,7 @@ public final class MenuList extends Table {
         super(ui.skin());
         this.ui = ui;
         this.input = ui.input();
-        defaults().growX().minHeight(24f).pad(2f, 0f, 2f, 0f);
+        defaults().growX().minHeight(Math.max(24f, ui.dp(MIN_TOUCH_DP))).pad(2f, 0f, 2f, 0f);
     }
 
     /** Adds a button running {@code action} when activated; returns it. */

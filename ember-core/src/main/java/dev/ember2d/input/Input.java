@@ -1,7 +1,9 @@
 package dev.ember2d.input;
 
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import dev.ember2d.core.PublicApi;
+import java.util.List;
 
 /**
  * Named actions and axes (F-005), available as {@code context.input()}. Gameplay code never reads raw keys.
@@ -77,6 +79,44 @@ public interface Input {
 
     /** The on-screen joystick's value (x right, y up, length 0-1), zero while it is not held. Returns {@code out}. */
     Vector2 joystickValue(Vector2 out);
+
+    /** Applies the player's layout of the on-screen controls over the bindings file's defaults (I-225). */
+    void setTouchLayout(TouchLayout layout);
+
+    /** The current on-screen controls layout (a copy to change and set again). */
+    TouchLayout touchLayout();
+
+    /**
+     * Shows or hides one on-screen button from game code, for example until an ability is unlocked (I-225).
+     *
+     * @throws IllegalArgumentException if no on-screen button drives that action
+     */
+    void setTouchButtonVisible(String action, boolean visible);
+
+    /** The layout names of the configured on-screen controls: {@code joystick} or {@code dpad}, then buttons. */
+    List<String> touchControlNames();
+
+    /**
+     * A configured control's circle in window pixels, y up: x, y (centre) and z (radius). Returns false (and leaves
+     * {@code out}) for an unknown name.
+     */
+    boolean touchControlCircle(String control, Vector3 out);
+
+    /**
+     * Moves a control so its centre is at a window position (pixels, y up), storing it in the layout in dp from its
+     * corner; buttons in the upper half are stored from the top edge. Unknown names do nothing.
+     */
+    void moveTouchControl(String control, float windowX, float windowY);
+
+    /** While editing, every control is drawn but none reacts to touches (the layout editor, I-225). */
+    void setTouchControlsEditing(boolean editing);
+
+    /** A short vibration on phones (I-225); nothing on desktop or while haptics are off. */
+    void vibrate(int milliseconds);
+
+    void setHapticsEnabled(boolean enabled);
+
+    boolean hapticsEnabled();
 
     /**
      * Puts a context on top of the stack.

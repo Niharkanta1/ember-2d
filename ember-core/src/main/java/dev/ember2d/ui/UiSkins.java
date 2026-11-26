@@ -97,6 +97,49 @@ public final class UiSkins {
         return skin;
     }
 
+    /**
+     * The on-screen controls' default look (F-022, I-225): {@code touch-base} (ring), {@code touch-knob} (disc),
+     * {@code touch-button}, {@code touch-button-down}, {@code touch-dpad}, {@code touch-dpad-down}. White shapes drawn
+     * at the controls' opacity; 128 px textures with linear filtering, scaled to each control's size.
+     */
+    public static Skin touch() {
+        Skin skin = new Skin();
+        int n = 128;
+        float c = (n - 1) / 2f;
+        Pixmap base = new Pixmap(n, n, Pixmap.Format.RGBA8888);
+        Pixmap knob = new Pixmap(n, n, Pixmap.Format.RGBA8888);
+        Pixmap button = new Pixmap(n, n, Pixmap.Format.RGBA8888);
+        Pixmap down = new Pixmap(n, n, Pixmap.Format.RGBA8888);
+        Pixmap dpad = new Pixmap(n, n, Pixmap.Format.RGBA8888);
+        Pixmap dpadDown = new Pixmap(n, n, Pixmap.Format.RGBA8888);
+        for (int y = 0; y < n; y++) {
+            for (int x = 0; x < n; x++) {
+                float d = (float) Math.hypot(x - c, y - c) / c;   // 0 centre .. 1 edge
+                if (d <= 1f) {
+                    base.drawPixel(x, y, Color.rgba8888(1f, 1f, 1f, d > 0.9f ? 0.95f : 0.28f));
+                    knob.drawPixel(x, y, Color.rgba8888(1f, 1f, 1f, d > 0.86f ? 1f : 0.8f));
+                    button.drawPixel(x, y, Color.rgba8888(1f, 1f, 1f, d > 0.9f ? 1f : 0.55f));
+                    down.drawPixel(x, y, Color.rgba8888(1f, 1f, 1f, d > 0.9f ? 1f : 0.85f));
+                }
+                boolean arm = Math.abs(x - c) < n * 0.17f || Math.abs(y - c) < n * 0.17f;
+                if (arm && d <= 1f) {
+                    boolean edge = Math.abs(x - c) > n * 0.15f && Math.abs(y - c) > n * 0.15f || d > 0.94f;
+                    dpad.drawPixel(x, y, Color.rgba8888(1f, 1f, 1f, edge ? 1f : 0.55f));
+                    dpadDown.drawPixel(x, y, Color.rgba8888(1f, 1f, 1f, edge ? 1f : 0.85f));
+                }
+            }
+        }
+        String[] names = {"touch-base", "touch-knob", "touch-button", "touch-button-down", "touch-dpad",
+            "touch-dpad-down"};
+        Pixmap[] maps = {base, knob, button, down, dpad, dpadDown};
+        for (int i = 0; i < names.length; i++) {
+            Texture texture = texture(skin, names[i], maps[i]);
+            texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+            skin.add(names[i], new TextureRegionDrawable(new TextureRegion(texture)), Drawable.class);
+        }
+        return skin;
+    }
+
     /** A 6×6 nine-patch: 1 px border, 2 px stretch margin. */
     private static Drawable nine(Skin skin, String name, Color fill, Color border) {
         Pixmap pixmap = new Pixmap(6, 6, Pixmap.Format.RGBA8888);

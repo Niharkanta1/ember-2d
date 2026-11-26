@@ -14,6 +14,8 @@ import dev.ember2d.core.internal.GameLoop;
 import dev.ember2d.render.RenderMode;
 import dev.ember2d.render.RenderTestKit;
 import dev.ember2d.render.internal.ScreenLayout;
+import dev.ember2d.ui.Insets;
+import dev.ember2d.ui.MenuList;
 import dev.ember2d.ui.Ui;
 import dev.ember2d.ui.UiMode;
 import java.lang.reflect.Proxy;
@@ -81,11 +83,36 @@ class SceneUiTest {
     void assertLayout(EngineConfig config, int w, int h, RenderMode mode, float uiW, float uiH, int x, int y, int sw,
             int sh) {
         Ui ui = ui();
-        EmberGame.layoutUi(ui, config, ScreenLayout.compute(w, h, 320, 180, mode), w, h);
+        EmberGame.layoutUi(ui, config, ScreenLayout.compute(w, h, 320, 180, mode), w, h, Insets.NONE, 1f);
         Viewport v = ui.stage().getViewport();
         assertThat(new float[] {ui.width(), ui.height()}).containsExactly(uiW, uiH);
         assertThat(new int[] {v.getScreenX(), v.getScreenY(), v.getScreenWidth(), v.getScreenHeight()})
                 .as("%dx%d %s", w, h, mode).containsExactly(x, y, sw, sh);
+        ui.dispose();
+    }
+
+    @Test
+    void safeInsetsPadTheUiAndTouchSizesFollowTheDensity() {
+        EngineConfig config = new EngineConfig();
+        config.uiMode = UiMode.SCREEN;
+        Ui ui = ui();
+        // 2400 x 1080 phone at density 3, a 90 px cutout on the left: uiScale 0 means "from density".
+        EmberGame.layoutUi(ui, config, ScreenLayout.compute(2400, 1080, 320, 180, RenderMode.PIXEL_PERFECT_FILL),
+                2400, 1080, new Insets(90f, 0f, 0f, 30f), 3f);
+        assertThat(ui.width()).isEqualTo(800f);
+        assertThat(ui.safeInsets()).isEqualTo(new Insets(30f, 0f, 0f, 10f));
+        assertThat(ui.root().getPadLeft()).isEqualTo(30f);
+        assertThat(ui.dp(40f)).as("40 dp at 3 px per dp and 3 px per unit").isEqualTo(40f);
+        assertThat(new MenuList(ui).defaults().getMinHeight()).isEqualTo(40f);
+
+        // VIRTUAL: 1366 x 768 has 43 px bars on the sides; a 60 px inset on the left is mostly covered by them.
+        config.uiMode = UiMode.VIRTUAL;
+        EmberGame.layoutUi(ui, config, ScreenLayout.compute(1366, 768, 320, 180, RenderMode.PIXEL_PERFECT), 1366, 768,
+                new Insets(60f, 0f, 0f, 0f), 2f);
+        assertThat(ui.safeInsets().left()).isEqualTo((60f - 43f) / 4f);
+        assertThat(ui.safeInsets().right()).isZero();
+        assertThat(ui.dp(40f)).as("2 px per dp, 4 px per unit").isEqualTo(20f);
+        assertThat(new MenuList(ui).defaults().getMinHeight()).as("never below 24 units").isEqualTo(24f);
         ui.dispose();
     }
 
@@ -132,9 +159,9 @@ class SceneUiTest {
     void uiConfigIsValidated() {
         EngineConfig config = new EngineConfig();
         config.uiMode = null;
-        config.uiScale = 0f;
+        config.uiScale = -1f;
         EngineConfigException e = catchThrowableOfType(EngineConfigException.class, config::validate);
         assertThat(e.problems()).contains("uiMode must be set (was null)",
-                "uiScale must be a finite number > 0 (was 0.0)");
+                "uiScale must be 0 (from density) or a finite number > 0 (was -1.0)");
     }
 }

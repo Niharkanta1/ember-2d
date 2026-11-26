@@ -1,6 +1,8 @@
 package dev.ember2d.input.internal;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.IntArray;
 import com.badlogic.gdx.utils.ObjectIntMap;
 import dev.ember2d.core.Time;
@@ -9,6 +11,8 @@ import dev.ember2d.input.Input;
 import dev.ember2d.input.InputBindings;
 import dev.ember2d.input.InputCapture;
 import dev.ember2d.input.InputContextChanged;
+import dev.ember2d.input.TouchControlsConfig;
+import dev.ember2d.input.TouchLayout;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -30,6 +34,10 @@ public final class DefaultInput implements Input {
     private final TouchTracker touch = new TouchTracker();
     private final TouchControls controls = new TouchControls();
     private int stickAxis = -1;
+    private int[] buttonActions = new int[0];
+    private final boolean[] buttonLive = new boolean[TouchControlsConfig.MAX_BUTTONS];
+    private boolean autoHide;
+    private boolean haptics = true;
     private final TouchTracker.Sink touchSink = this::touchInput;
     private final Vector2 dragA = new Vector2();
     private final Vector2 dragB = new Vector2();
@@ -159,6 +167,12 @@ public final class DefaultInput implements Input {
         stickAxis = -1;
         if (bindings.touchControls() != null && bindings.touchControls().joystick() != null) {
             stickAxis = axisIndex.get(bindings.touchControls().joystick().axis(), -1);
+        } else if (bindings.touchControls() != null && bindings.touchControls().dpad() != null) {
+            stickAxis = axisIndex.get(bindings.touchControls().dpad().axis(), -1);
+        }
+        buttonActions = new int[bindings.touchControls() == null ? 0 : bindings.touchControls().buttons().size()];
+        for (int b = 0; b < buttonActions.length; b++) {
+            buttonActions[b] = actionIndex.get(bindings.touchControls().buttons().get(b).action(), -1);
         }
         Arrays.fill(physicalDown, false);
         Arrays.fill(stale, false);
@@ -179,6 +193,19 @@ public final class DefaultInput implements Input {
     /** The window size in pixels (as touch coordinates report it), for placing the on-screen controls. */
     public void setScreenSize(float width, float height) {
         controls.setScreen(width, height);
+    }
+
+    /** Safe-area insets in window pixels; the on-screen controls stay inside them (I-225). */
+    public void setSafeInsets(float left, float top, float right, float bottom) {
+        controls.setInsets(left, top, right, bottom);
+    }
+
+    /** {@code AUTO} touch controls: hide after keyboard use, show again on the next touch (I-225). */
+    public void setAutoHide(boolean autoHide) {
+        this.autoHide = autoHide;
+        if (!autoHide) {
+            controls.setAutoHidden(false);
+        }
     }
 
     /** Shows or hides the on-screen controls (hiding lets go of them). */
@@ -220,9 +247,20 @@ public final class DefaultInput implements Input {
         IntArray recorded = source.events();
         for (int i = 0; i < recorded.size; i++) {
             int event = recorded.items[i];
-            apply(event >>> 1, (event & 1) == 1, keyboardCaptured, pointerCaptured);
+            int code = event >>> 1;
+            boolean down = (event & 1) == 1;
+            if (autoHide && down && code < InputNames.MOUSE_BASE && code != com.badlogic.gdx.Input.Keys.BACK && !controls.autoHidden()
+                    && controls.active()) {
+                releaseControls();
+                controls.setAutoHidden(true);   // keyboard in use: hide the on-screen controls
+            }
+            apply(code, down, keyboardCaptured, pointerCaptured);
         }
         recorded.clear();
+        if (controls.autoHidden() && hasTouchDown(source.touches())) {
+            controls.setAutoHidden(false);   // a touch brings them back; the touch itself acts normally
+        }
+        updateLiveControls();
         controls.process(source.touches(), pointerCaptured, touchSink);   // claims its touches first
         touch.process(source.touches(), time.unscaledElapsed(), pointerCaptured, touchSink);
         float delta = time.delta();
@@ -354,6 +392,101 @@ public final class DefaultInput implements Input {
     }
 
     @Override
+    public void setTouchLayout(TouchLayout layout) {
+        controls.setLayout(layout.copy());
+    }
+
+    @Override
+    public TouchLayout touchLayout() {
+        return controls.layout().copy();
+    }
+
+    @Override
+    public void setTouchButtonVisible(String action, boolean visible) {
+        if (!controls.setButtonHidden(action, !visible)) {
+            throw new IllegalArgumentException("No on-screen button drives the action \"" + action + "\"");
+        }
+        if (!visible) {
+            updateLiveControls();
+        }
+    }
+
+    @Override
+    public List<String> touchControlNames() {
+        List<String> names = new ArrayList<>();
+        if (controls.hasStick()) {
+            names.add(controls.stickName());
+        }
+        for (int b = 0; b < controls.buttonCount(); b++) {
+            names.add(controls.buttonName(b));
+        }
+        return names;
+    }
+
+    @Override
+    public boolean touchControlCircle(String control, Vector3 out) {
+        if (controls.hasStick() && controls.stickName().equals(control)) {
+            out.set(controls.stickHomeX(), controls.stickHomeY(), controls.stickRadius());
+            return true;
+        }
+        for (int b = 0; b < controls.buttonCount(); b++) {
+            if (controls.buttonName(b).equals(control)) {
+                out.set(controls.buttonX(b), controls.buttonY(b), controls.buttonRadius(b));
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public void moveTouchControl(String control, float windowX, float windowY) {
+        TouchControls c = controls;
+        float w = c.screenWidth();
+        float h = c.screenHeight();
+        float x = Math.max(c.insetLeft(), Math.min(w - c.insetRight(), windowX));
+        float y = Math.max(c.insetBottom(), Math.min(h - c.insetTop(), windowY));
+        float d = c.density();
+        TouchLayout layout = c.layout();
+        if (c.hasStick() && c.stickName().equals(control)) {
+            layout.move(control, (x - c.insetLeft()) / d, (y - c.insetBottom()) / d);
+            return;
+        }
+        for (int b = 0; b < c.buttonCount(); b++) {
+            if (c.buttonName(b).equals(control)) {
+                float fromTop = (y - (h - c.insetTop())) / d;   // negative: from the top edge
+                layout.move(control, (w - c.insetRight() - x) / d, y > h / 2f ? Math.min(-0.001f, fromTop)
+                        : (y - c.insetBottom()) / d);
+                return;
+            }
+        }
+    }
+
+    @Override
+    public void setTouchControlsEditing(boolean editing) {
+        if (editing) {
+            releaseControls();
+        }
+        controls.setEditing(editing);
+    }
+
+    @Override
+    public void vibrate(int milliseconds) {
+        if (haptics && milliseconds > 0 && Gdx.input != null) {
+            Gdx.input.vibrate(milliseconds);
+        }
+    }
+
+    @Override
+    public void setHapticsEnabled(boolean enabled) {
+        haptics = enabled;
+    }
+
+    @Override
+    public boolean hapticsEnabled() {
+        return haptics;
+    }
+
+    @Override
     public Vector2 joystickValue(Vector2 out) {
         return out.set(controls.valueX(), controls.valueY());
     }
@@ -398,6 +531,32 @@ public final class DefaultInput implements Input {
     }
 
     // ---- internals ----
+
+    /** Each control works only while its context is on top (I-225); buttons let go report a release. */
+    private void updateLiveControls() {
+        int top = stack.peek();
+        boolean stick = stickAxis >= 0 && axisContext[stickAxis] == top;
+        for (int b = 0; b < buttonActions.length; b++) {
+            buttonLive[b] = buttonActions[b] >= 0 && actionContext[buttonActions[b]] == top;
+        }
+        controls.setLive(stick, buttonLive, touchSink);
+    }
+
+    /** Lets go of every pressed on-screen control, reporting button releases. */
+    private void releaseControls() {
+        boolean[] none = new boolean[TouchControlsConfig.MAX_BUTTONS];
+        controls.setLive(false, none, touchSink);
+        controls.reset();
+    }
+
+    private static boolean hasTouchDown(IntArray touches) {
+        for (int i = 0; i + 3 < touches.size; i += 4) {
+            if (touches.items[i] == GdxInputSource.TOUCH_DOWN) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     private void touchInput(int code, boolean down) {
         apply(code, down, keyboardCaptured, pointerCaptured);

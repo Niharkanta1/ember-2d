@@ -32,6 +32,7 @@ public abstract class EmberAndroidLauncher extends AndroidApplication {
     protected AndroidApplicationConfiguration androidConfig() {
         AndroidApplicationConfiguration configuration = new AndroidApplicationConfiguration();
         configuration.useImmersiveMode = true;
+        configuration.renderUnderCutout = true;   // draw behind notches; the UI keeps clear of them (I-225)
         configuration.useAccelerometer = false;
         configuration.useCompass = false;
         return configuration;

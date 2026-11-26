@@ -57,7 +57,8 @@ final class MenuScene extends Scene {
     }
 
     private void showSettings(EngineContext context, Ui ui) {
-        DemoUi.show(panel, "Settings", DemoUi.settings(ui, context.audio(), () -> showMain(context, ui)));
+        DemoUi.show(panel, "Settings", DemoUi.settings(ui, context.audio(), context.input(),
+                () -> showMain(context, ui), () -> showSettings(context, ui)));
     }
 
     @Override

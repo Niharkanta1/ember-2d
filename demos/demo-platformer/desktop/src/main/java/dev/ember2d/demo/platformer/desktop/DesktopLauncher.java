@@ -12,6 +12,7 @@ import dev.ember2d.desktop.CrashLog;
 import dev.ember2d.desktop.DesktopLogging;
 import dev.ember2d.desktop.DesktopWindow;
 import dev.ember2d.desktop.StartupHelper;
+import dev.ember2d.ui.Insets;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -55,6 +56,11 @@ public final class DesktopLauncher {
         configuration.setWindowedMode(1280, 720);
         try {
             EngineConfig config = PlatformerDemo.config(devMode);
+            for (String arg : args) {
+                if (devMode && arg.startsWith("--safe-insets=")) {
+                    config.simulatedSafeInsets = insets(arg.substring("--safe-insets=".length()));   // I-225
+                }
+            }
             if (List.of(args).contains("--touch-controls")) {
                 config.touchControls = TouchControlsMode.ALWAYS;   // try the on-screen controls with the mouse
             }
@@ -68,6 +74,16 @@ public final class DesktopLauncher {
             Log.get("launcher").info("Exited");
             DesktopLogging.shutdown();
         }
+    }
+
+    /** "L,T,R,B" in window pixels. */
+    private static Insets insets(String text) {
+        String[] p = text.split(",");
+        if (p.length != 4) {
+            throw new IllegalArgumentException("--safe-insets needs L,T,R,B in pixels (was " + text + ")");
+        }
+        return new Insets(Float.parseFloat(p[0].trim()), Float.parseFloat(p[1].trim()), Float.parseFloat(p[2].trim()),
+                Float.parseFloat(p[3].trim()));
     }
 
     /** The Gradle version written into the jar manifest, or "dev" when running from compiled classes. */

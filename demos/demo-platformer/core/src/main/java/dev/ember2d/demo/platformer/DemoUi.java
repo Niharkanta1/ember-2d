@@ -7,7 +7,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import dev.ember2d.assets.Assets;
 import dev.ember2d.audio.Audio;
 import dev.ember2d.audio.AudioCategory;
+import dev.ember2d.input.Input;
 import dev.ember2d.ui.MenuList;
+import dev.ember2d.ui.TouchLayoutEditor;
 import dev.ember2d.ui.Ui;
 import dev.ember2d.ui.UiSkins;
 
@@ -42,13 +44,19 @@ final class DemoUi {
         panel.add(menu).growX();
     }
 
-    /** Music and sound volumes in steps of 10%, and Back. */
-    static MenuList settings(Ui ui, Audio audio, Runnable back) {
+    /**
+     * Music and sound volumes in steps of 10%, "Edit controls" while on-screen controls are shown (it reopens the
+     * settings with {@code reopen} when done), and Back.
+     */
+    static MenuList settings(Ui ui, Audio audio, Input input, Runnable back, Runnable reopen) {
         MenuList menu = new MenuList(ui);
         menu.addValue("Music", () -> percent(audio.volume(AudioCategory.MUSIC)),
                 v -> audio.setVolume(AudioCategory.MUSIC, v / 100f), 0, 100, 10);
         menu.addValue("Sounds", () -> percent(audio.volume(AudioCategory.SFX)),
                 v -> audio.setVolume(AudioCategory.SFX, v / 100f), 0, 100, 10);
+        if (input.touchControlsActive()) {
+            menu.add("Edit controls", () -> TouchLayoutEditor.open(ui, input, reopen));
+        }
         menu.add("Back", back);
         menu.onBack(back);
         return menu;
