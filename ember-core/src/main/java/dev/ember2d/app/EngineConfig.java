@@ -61,6 +61,12 @@ public final class EngineConfig {
     public String assetManifest = "manifest.json";
 
     /**
+     * Asset ID of the input bindings file (F-005): a {@code json} entry of the manifest, normally in group
+     * {@code global}. {@code null} means no bindings (every action query fails).
+     */
+    public String inputBindings = null;
+
+    /**
      * Checks every field and throws one exception listing all problems.
      *
      * @throws EngineConfigException if any field is invalid
@@ -89,6 +95,9 @@ public final class EngineConfig {
         if (assetManifest == null || assetManifest.isBlank()) {
             problems.add("assetManifest must be a non-empty path (was " + quote(assetManifest) + ")");
         }
+        if (inputBindings != null && inputBindings.isBlank()) {
+            problems.add("inputBindings must be null or an asset ID (was " + quote(inputBindings) + ")");
+        }
         if (!problems.isEmpty()) {
             throw new EngineConfigException(problems);
         }
@@ -98,7 +107,7 @@ public final class EngineConfig {
     public String toString() {
         return "EngineConfig[virtual=" + virtualWidth + "x" + virtualHeight + ", pixelsPerUnit=" + pixelsPerUnit
                 + ", fixedStep=" + fixedStep + ", maxCatchUpSteps=" + maxCatchUpSteps + ", renderMode=" + renderMode + ", devMode=" + devMode
-                + ", assetManifest=" + quote(assetManifest) + "]";
+                + ", assetManifest=" + quote(assetManifest) + ", inputBindings=" + quote(inputBindings) + "]";
     }
 
     private static String quote(String value) {

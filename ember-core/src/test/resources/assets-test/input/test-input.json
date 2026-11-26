@@ -1,0 +1,6 @@
+{ "version": 1,
+  "contexts": {
+    "gameplay": {
+      "actions": { "jump": ["SPACE"], "back": ["BACK"] },
+      "axes": { "move": { "left": ["LEFT"], "right": ["RIGHT"], "up": ["UP"], "down": ["DOWN"] } } },
+    "ui": { "actions": { "ui_back": ["ESCAPE"] } } } }

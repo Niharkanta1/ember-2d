@@ -1,3 +1,4 @@
 { "version": 1, "assets": [
-  { "id": "tex.player", "path": "gfx/player-placeholder.png", "type": "texture", "group": "global" }
+  { "id": "tex.player", "path": "gfx/player-placeholder.png", "type": "texture", "group": "global" },
+  { "id": "input", "path": "input.json", "type": "json", "group": "global" }
 ] }

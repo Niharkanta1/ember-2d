@@ -1,0 +1,8 @@
+{ "version": 1,
+  "contexts": {
+    "gameplay": {
+      "actions": { "pause": ["P"], "menu": ["ESCAPE", "BACK"] },
+      "axes": { "move": { "left": ["LEFT", "A"], "right": ["RIGHT", "D"], "up": ["UP", "W"], "down": ["DOWN", "S"] } } },
+    "ui": {
+      "actions": { "ui_back": ["ESCAPE", "BACK"] },
+      "axes": { "ui_nav": { "left": ["LEFT", "A"], "right": ["RIGHT", "D"], "up": ["UP", "W"], "down": ["DOWN", "S"] } } } } }

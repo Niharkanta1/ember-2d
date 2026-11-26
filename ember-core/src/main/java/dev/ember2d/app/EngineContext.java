@@ -13,6 +13,9 @@ import dev.ember2d.core.Tweens;
 import dev.ember2d.core.internal.TimeState;
 import dev.ember2d.event.EventBus;
 import dev.ember2d.event.internal.DefaultEventBus;
+import dev.ember2d.input.Input;
+import dev.ember2d.input.InputBindings;
+import dev.ember2d.input.internal.DefaultInput;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.IdentityHashMap;
@@ -44,6 +47,7 @@ public final class EngineContext {
     private final Timers timers;
     private final Tweens tweens;
     private final DefaultEventBus events;
+    private final DefaultInput input;
     private final Assets assets;
     private final Renderer renderer;
     private final SceneManager scenes;
@@ -52,12 +56,14 @@ public final class EngineContext {
     private final List<Object> instancesInOrder;
 
     private EngineContext(EngineConfig config, TimeState time, Timers timers, Tweens tweens, DefaultEventBus events,
-            Assets assets, Renderer renderer, SceneManager scenes, DebugOverlay debug, Map<Class<?>, Object> services) {
+            DefaultInput input, Assets assets, Renderer renderer, SceneManager scenes, DebugOverlay debug,
+            Map<Class<?>, Object> services) {
         this.config = config;
         this.time = time;
         this.timers = timers;
         this.tweens = tweens;
         this.events = events;
+        this.input = input;
         this.assets = assets;
         this.renderer = renderer;
         this.scenes = scenes;
@@ -96,6 +102,11 @@ public final class EngineContext {
     /** The event bus: immediate and queued events (F-019). */
     public EventBus events() {
         return events;
+    }
+
+    /** Named input actions and axes (F-005). */
+    public Input input() {
+        return input;
     }
 
     /**
@@ -190,6 +201,7 @@ public final class EngineContext {
         private final Timers timers;
         private final Tweens tweens;
         private final DefaultEventBus events;
+        private final DefaultInput input;
         private Assets assets;
         private Renderer renderer;
         private final SceneManager scenes;
@@ -202,6 +214,7 @@ public final class EngineContext {
             this.timers = new Timers(time);
             this.tweens = new Tweens(time);
             this.events = new DefaultEventBus(config.devMode);
+            this.input = new DefaultInput(time, events);
             this.scenes = new SceneManager(time, events, config.devMode);
             this.debug = new DebugOverlay(config.devMode || config.debugOverlayInRelease, config.debugOverlayVisibleAtStart);
         }
@@ -221,6 +234,17 @@ public final class EngineContext {
         public Builder renderer(Renderer renderer) {
             this.renderer = Objects.requireNonNull(renderer, "renderer");
             return this;
+        }
+
+        /** Sets the input bindings; the engine sets the game's file at boot, tests may set their own. */
+        public Builder inputBindings(InputBindings bindings) {
+            input.setBindings(Objects.requireNonNull(bindings, "bindings"));
+            return this;
+        }
+
+        /** The engine's input implementation, driven by the engine in the phases. */
+        DefaultInput inputState() {
+            return input;
         }
 
         /** The engine's event bus implementation, flushed by the engine at the flush points. */
@@ -249,8 +273,8 @@ public final class EngineContext {
         }
 
         public EngineContext build() {
-            EngineContext context = new EngineContext(config, time, timers, tweens, events, assets, renderer, scenes,
-                    debug, services);
+            EngineContext context = new EngineContext(config, time, timers, tweens, events, input, assets, renderer,
+                    scenes, debug, services);
             scenes.attach(context);
             return context;
         }

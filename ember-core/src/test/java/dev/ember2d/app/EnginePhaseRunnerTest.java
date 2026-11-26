@@ -2,12 +2,15 @@ package dev.ember2d.app;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.badlogic.gdx.Input.Keys;
 import dev.ember2d.core.Phase;
 import dev.ember2d.core.Timers;
 import dev.ember2d.core.Tweens;
 import dev.ember2d.core.internal.GameLoop;
 import dev.ember2d.core.internal.TimeState;
 import dev.ember2d.event.internal.DefaultEventBus;
+import dev.ember2d.input.InputBindings;
+import dev.ember2d.input.internal.DefaultInput;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -23,14 +26,18 @@ class EnginePhaseRunnerTest {
     private final TimeState time = new TimeState(1f / 60f);
     private final Timers timers = new Timers(time);
     private final DefaultEventBus bus = new DefaultEventBus(false);
+    private final DefaultInput input = new DefaultInput(time, bus);
     /** What happened, in order: phases as "PHASE", deliveries as "got <from>". */
     private final List<String> trace = new ArrayList<>();
     private Phase queueIn;
     private long nextDelta = FRAME;
 
     private final GameLoop loop = new GameLoop(() -> nextDelta, time,
-            new EnginePhaseRunner(timers, new Tweens(time), bus, () -> { }, () -> { }, () -> { }, phase -> {
+            new EnginePhaseRunner(timers, new Tweens(time), bus, input, () -> { }, () -> { }, () -> { }, phase -> {
                 trace.add(phase.name());
+                if (input.hasAction("jump") && input.justPressed("jump")) {
+                    trace.add("jump");
+                }
                 if (phase == queueIn) {
                     bus.queue(new Ping(phase.name()));
                 }
@@ -104,5 +111,18 @@ class EnginePhaseRunnerTest {
         frame(FRAME);
 
         assertThat(trace).containsExactly("INPUT", "FIXED", "UPDATE", "got timer", "LATE", "RENDER");
+    }
+
+    @Test
+    void inputEdgesAreAppliedAtInputAndLatchedForTheFirstFixedStepOnly() {
+        input.setBindings(InputBindings.parse(new com.badlogic.gdx.utils.JsonReader().parse(
+                "{ \"version\": 1, \"contexts\": { \"gameplay\": { \"actions\": { \"jump\": [\"SPACE\"] } } } }"),
+                "test.json"));
+        input.source().keyDown(Keys.SPACE);
+
+        frame(FRAME * 2);   // two fixed steps
+
+        assertThat(trace).containsExactly("INPUT", "jump", "FIXED", "jump", "FIXED", "UPDATE", "jump", "LATE", "jump",
+                "RENDER", "jump");
     }
 }

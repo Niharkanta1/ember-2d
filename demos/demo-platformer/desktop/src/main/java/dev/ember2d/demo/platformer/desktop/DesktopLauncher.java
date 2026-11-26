@@ -7,6 +7,7 @@ import dev.ember2d.core.Log;
 import dev.ember2d.demo.platformer.PlatformerDemo;
 import dev.ember2d.desktop.CrashLog;
 import dev.ember2d.desktop.DesktopLogging;
+import dev.ember2d.desktop.DesktopWindow;
 import dev.ember2d.desktop.StartupHelper;
 import java.util.List;
 
@@ -39,7 +40,9 @@ public final class DesktopLauncher {
         configuration.setForegroundFPS(Lwjgl3ApplicationConfiguration.getDisplayMode().refreshRate + 1);
         configuration.setWindowedMode(1280, 720);
         try {
-            new Lwjgl3Application(new EmberGame(PlatformerDemo.config(devMode)), configuration);
+            EmberGame game = new EmberGame(PlatformerDemo.config(devMode));
+            configuration.setWindowListener(DesktopWindow.focusListener(game));
+            new Lwjgl3Application(game, configuration);
         } finally {
             Log.get("launcher").info("Exited");
             DesktopLogging.shutdown();

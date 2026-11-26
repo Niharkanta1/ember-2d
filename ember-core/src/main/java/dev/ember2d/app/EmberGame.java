@@ -3,6 +3,8 @@ package dev.ember2d.app;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.utils.JsonValue;
+import dev.ember2d.assets.internal.AssetManifest;
 import dev.ember2d.assets.internal.GdxAssets;
 import dev.ember2d.core.Log;
 import dev.ember2d.core.PublicApi;
@@ -12,6 +14,8 @@ import dev.ember2d.debug.DebugOverlay;
 import dev.ember2d.debug.internal.GdxDebugCanvas;
 import dev.ember2d.event.AppResumed;
 import dev.ember2d.event.AppSuspended;
+import dev.ember2d.input.InputBindings;
+import dev.ember2d.input.internal.DefaultInput;
 import dev.ember2d.render.internal.GdxRenderer;
 import java.util.List;
 import java.util.Objects;
@@ -94,6 +98,7 @@ public class EmberGame implements ApplicationListener {
             if (assets.manifest().group(GLOBAL_GROUP) != null) {
                 assets.loadGroup(GLOBAL_GROUP).finish();
             }
+            loadInputBindings(builder.inputState());
         } catch (RuntimeException e) {
             if (renderer != null) {
                 renderer.dispose();
@@ -104,7 +109,15 @@ public class EmberGame implements ApplicationListener {
             context = null;
             throw e;
         }
-        EnginePhaseRunner phases = new EnginePhaseRunner(context.timers(), context.tweens(), builder.eventBus(),
+        DefaultInput input = builder.inputState();
+        if (renderer != null) {
+            input.setScreenToWorld(renderer::screenToWorld);
+        }
+        if (Gdx.input != null) {
+            Gdx.input.setInputProcessor(input.source());
+            Gdx.input.setCatchKey(Input.Keys.BACK, input.bindings().binds("BACK"));
+        }
+        EnginePhaseRunner phases = new EnginePhaseRunner(context.timers(), context.tweens(), builder.eventBus(), input,
                 assets::update, this::beginRender, this::endRender, context.scenes()::runPhase);
         loop = new GameLoop(new GdxClock(), builder.timeState(), phases, config.maxCatchUpSteps);
         if (config.firstScene != null) {
@@ -137,7 +150,7 @@ public class EmberGame implements ApplicationListener {
         }
         DebugOverlay debug = context.debug();
         if (debug.isAvailable() && Gdx.input != null && Gdx.input.isKeyJustPressed(Input.Keys.F3)) {
-            debug.toggle();   // becomes an input action with I-100
+            debug.toggle();   // a raw key on purpose: works without bindings (F-005 keeps it out of the actions)
         }
         long start = System.nanoTime();
         try {
@@ -165,6 +178,7 @@ public class EmberGame implements ApplicationListener {
         }
         state = AppState.SUSPENDED;
         LOG.info("Suspended");
+        context.input().releaseAll();   // no stuck keys: key-up events can be lost while suspended
         context.forEachLifecycleListener("onSuspend", AppLifecycleListener::onSuspend);
         context.events().publish(new AppSuspended());
     }
@@ -194,6 +208,9 @@ public class EmberGame implements ApplicationListener {
             return; // never started: nothing to release
         }
         context.scenes().exitAll();
+        if (Gdx.input != null) {
+            Gdx.input.setInputProcessor(null);
+        }
         List<RuntimeException> failures = context.disposeServices();
         if (debugCanvas != null) {
             debugCanvas.dispose();
@@ -203,6 +220,26 @@ public class EmberGame implements ApplicationListener {
         }
         assets.dispose();
         LOG.info(failures.isEmpty() ? "Shut down" : "Shut down with " + failures.size() + " disposal failure(s)");
+    }
+
+    /** Loads and validates {@link EngineConfig#inputBindings} (already loaded with the global group if listed there). */
+    private void loadInputBindings(DefaultInput input) {
+        String id = config.inputBindings;
+        if (id == null) {
+            return;
+        }
+        AssetManifest.Entry entry = assets.manifest().find(id);
+        if (entry == null) {
+            throw new EngineConfigException(List.of("inputBindings: asset ID \"" + id
+                    + "\" is not in the asset manifest " + assets.manifest().source()));
+        }
+        if (entry.type() != AssetManifest.Type.JSON) {
+            throw new EngineConfigException(List.of("inputBindings: asset \"" + id + "\" must be of type json (is "
+                    + entry.type() + ")"));
+        }
+        input.setBindings(InputBindings.parse(assets.get(id, JsonValue.class), entry.path()));
+        LOG.debug("Input bindings " + entry.path() + ": " + input.bindings().actions().size() + " action(s), "
+                + input.bindings().axes().size() + " axis/axes, contexts " + input.bindings().contexts());
     }
 
     private void beginRender() {

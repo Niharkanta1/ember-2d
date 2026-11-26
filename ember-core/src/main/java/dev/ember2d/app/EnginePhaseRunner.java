@@ -5,14 +5,16 @@ import dev.ember2d.core.Timers;
 import dev.ember2d.core.Tweens;
 import dev.ember2d.core.internal.PhaseRunner;
 import dev.ember2d.event.internal.DefaultEventBus;
+import dev.ember2d.input.internal.DefaultInput;
 import java.util.Objects;
 
 /**
  * The engine's work in each phase, around the game's systems (F-002, F-019):
  *
  * <ul>
- *   <li>{@code INPUT}: advance asset loading, start the event frame, then systems.</li>
- *   <li>{@code FIXED}: systems, then flush queued events (once per fixed step).</li>
+ *   <li>{@code INPUT}: advance asset loading, start the event frame, apply input events, then systems.</li>
+ *   <li>{@code FIXED}: systems, then flush queued events (once per fixed step), with the input's fixed-step
+ *       edges active.</li>
  *   <li>{@code UPDATE}: timers, tweens, systems, then flush.</li>
  *   <li>{@code LATE}: systems, then flush.</li>
  *   <li>{@code RENDER}: begin the world pass, systems, end the world pass (scale to the window). Without a
@@ -26,16 +28,18 @@ final class EnginePhaseRunner implements PhaseRunner {
     private final Timers timers;
     private final Tweens tweens;
     private final DefaultEventBus events;
+    private final DefaultInput input;
     private final PhaseRunner systems;
     private final Runnable assetLoading;
     private final Runnable beginRender;
     private final Runnable endRender;
 
-    EnginePhaseRunner(Timers timers, Tweens tweens, DefaultEventBus events, Runnable assetLoading,
+    EnginePhaseRunner(Timers timers, Tweens tweens, DefaultEventBus events, DefaultInput input, Runnable assetLoading,
             Runnable beginRender, Runnable endRender, PhaseRunner systems) {
         this.timers = Objects.requireNonNull(timers, "timers");
         this.tweens = Objects.requireNonNull(tweens, "tweens");
         this.events = Objects.requireNonNull(events, "events");
+        this.input = Objects.requireNonNull(input, "input");
         this.systems = Objects.requireNonNull(systems, "systems");
         this.assetLoading = Objects.requireNonNull(assetLoading, "assetLoading");
         this.beginRender = Objects.requireNonNull(beginRender, "beginRender");
@@ -48,9 +52,19 @@ final class EnginePhaseRunner implements PhaseRunner {
             case INPUT -> {
                 assetLoading.run();
                 events.beginFrame();
+                input.beginFrame();
                 systems.run(phase);
             }
-            case FIXED, LATE -> {
+            case FIXED -> {
+                input.beginFixedStep();
+                try {
+                    systems.run(phase);
+                    events.flush();
+                } finally {
+                    input.endFixedStep();
+                }
+            }
+            case LATE -> {
                 systems.run(phase);
                 events.flush();
             }

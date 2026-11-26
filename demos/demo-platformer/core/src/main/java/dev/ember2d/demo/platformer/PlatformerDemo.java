@@ -18,6 +18,7 @@ public final class PlatformerDemo {
         config.virtualHeight = 180;
         config.backgroundColor.set(0.08f, 0.06f, 0.10f, 1f);
         config.firstScene = DemoScene::new;
+        config.inputBindings = "input";
         config.devMode = devMode;
         return config;
     }
