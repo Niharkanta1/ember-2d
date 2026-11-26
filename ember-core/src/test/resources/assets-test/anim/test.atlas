@@ -1,0 +1,16 @@
+atlas.png
+size:64,32
+filter:Nearest,Nearest
+repeat:none
+hero/run
+bounds:0,0,16,16
+index:0
+hero/run
+bounds:16,0,16,16
+index:1
+hero/run
+bounds:32,0,16,16
+index:2
+hero/trim
+bounds:48,0,8,10
+offsets:2,1,16,16

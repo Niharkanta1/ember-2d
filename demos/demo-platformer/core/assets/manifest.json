@@ -1,5 +1,7 @@
 { "version": 1, "assets": [
   { "id": "tex.player", "path": "gfx/player-placeholder.png", "type": "texture", "group": "global" },
+  { "id": "tex.hero_sheet", "path": "gfx/hero-sheet.png", "type": "texture", "group": "global" },
+  { "id": "anim.hero", "path": "anim/hero.clips.json", "type": "clips", "group": "global" },
   { "id": "input", "path": "input.json", "type": "json", "group": "global" },
   { "id": "map.demo", "path": "maps/demo-level.tmx", "type": "map", "group": "global" },
   { "id": "player", "path": "prefabs/player.json", "type": "prefab", "group": "global" },

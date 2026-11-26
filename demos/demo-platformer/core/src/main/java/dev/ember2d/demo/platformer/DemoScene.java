@@ -3,6 +3,9 @@ package dev.ember2d.demo.platformer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.IntArray;
+import dev.ember2d.animation.AnimationEvent;
+import dev.ember2d.animation.AnimationLibrary;
+import dev.ember2d.animation.AnimationSystem;
 import dev.ember2d.app.EngineContext;
 import dev.ember2d.app.Scene;
 import dev.ember2d.camera.CameraFollow;
@@ -37,6 +40,8 @@ import java.util.Map;
  *   <li>Collision (I-120): the player walks ({@code move}), jumps ({@code jump}: Space, Up, W), drops through
  *       the one-way planks with down + jump, rides the moving platform; patrollers turn at walls; the glow zone tints
  *       the player while inside; a squish respawns the player. F3 shows the colliders.</li>
+ *   <li>Animation (I-130): the player plays idle, run, jump and fall from a sprite sheet and faces its walking
+ *       direction; patrollers play run; the run clip's footstep frame events are logged in dev builds.</li>
  *   <li>Input (I-100, I-105): {@code pause} (P, double tap) pauses game time; {@code menu} (Escape, Android back,
  *       long press) opens a menu context in which the same keys move a cursor and {@code ui_back} closes it.</li>
  *   <li>On-screen controls (I-122, touch screens or desktop {@code --touch-controls}): a floating joystick on the
@@ -96,6 +101,7 @@ final class DemoScene extends Scene {
         world.addSystem(new PlayerControlSystem(world, collision, input));
         world.addSystem(new CollisionSystem(world, collision));        // after all movement: hash and triggers
         world.addSystem(new CameraFollowSystem(world, context.renderer().camera(), context.time()));
+        world.addSystem(new AnimationSystem(world, new AnimationLibrary(context.assets()), context.events()));
         SpriteRenderSystem sprites = new SpriteRenderSystem(world, context.renderer(), context.assets(), context.time());
         world.addSystem(sprites);
         new TileMapRenderer(map, context.renderer(), context.time()).attachTo(sprites);
@@ -104,6 +110,11 @@ final class DemoScene extends Scene {
         context.events().on(InputContextChanged.class, e -> LOG.info("Input context: " + e.top()));
         context.events().on(TriggerEntered.class, e -> glow(e.trigger(), e.actor(), true));
         context.events().on(TriggerExited.class, e -> glow(e.trigger(), e.actor(), false));
+        context.events().on(AnimationEvent.class, e -> {
+            if (e.entity() == player && e.name().equals("step")) {
+                LOG.debug("Footstep");   // a frame event from the run clip (dev builds log DEBUG)
+            }
+        });
         context.events().on(ActorSquished.class, e -> {
             if (e.actor() == player) {
                 LOG.info("Squished by " + world.name(e.solid()) + "; respawning");

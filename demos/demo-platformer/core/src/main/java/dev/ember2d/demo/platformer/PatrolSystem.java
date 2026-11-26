@@ -7,6 +7,7 @@ import dev.ember2d.core.Phase;
 import dev.ember2d.ecs.EntitySystem;
 import dev.ember2d.ecs.Transform;
 import dev.ember2d.ecs.World;
+import dev.ember2d.render.Sprite;
 
 /** Fixed-step movement for {@link Patrol}: constant speed with gravity; turns at the limits and at walls. */
 public final class PatrolSystem extends EntitySystem {
@@ -29,6 +30,9 @@ public final class PatrolSystem extends EntitySystem {
         float x = world().get(entity, Transform.class).position.x;
         if (r.hitX || (patrol.direction > 0 && x >= patrol.maxX) || (patrol.direction < 0 && x <= patrol.minX)) {
             patrol.direction = -patrol.direction;
+        }
+        if (world().has(entity, Sprite.class)) {
+            world().get(entity, Sprite.class).flipX = patrol.direction < 0;   // face the walking direction
         }
     }
 }

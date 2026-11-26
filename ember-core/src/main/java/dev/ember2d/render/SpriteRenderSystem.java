@@ -2,6 +2,7 @@ package dev.ember2d.render;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
@@ -133,8 +134,20 @@ public final class SpriteRenderSystem extends EntitySystem {
         Transform transform = world().get(entity, Transform.class);
         float ppu = renderer.pixelsPerUnit();
         transform.interpolated(time.alpha(), position);
-        float originX = sprite.origin.x / ppu;
-        float originY = sprite.origin.y / ppu;
+        // Whitespace-stripped atlas regions (and trimmed animation frames) sit inside their original frame: the origin
+        // is relative to the original frame, the quad covers only the packed pixels at their offset.
+        float offsetX = 0f;
+        float offsetY = 0f;
+        if (region instanceof TextureAtlas.AtlasRegion atlasRegion) {
+            boolean flipX = sprite.flipX != region.isFlipX();
+            boolean flipY = sprite.flipY != region.isFlipY();
+            offsetX = flipX ? atlasRegion.originalWidth - atlasRegion.offsetX - atlasRegion.packedWidth
+                    : atlasRegion.offsetX;
+            offsetY = flipY ? atlasRegion.originalHeight - atlasRegion.offsetY - atlasRegion.packedHeight
+                    : atlasRegion.offsetY;
+        }
+        float originX = (sprite.origin.x - offsetX) / ppu;
+        float originY = (sprite.origin.y - offsetY) / ppu;
         float x = position.x - originX;
         float y = position.y - originY;
         if (renderer.mode() != RenderMode.SMOOTH) {

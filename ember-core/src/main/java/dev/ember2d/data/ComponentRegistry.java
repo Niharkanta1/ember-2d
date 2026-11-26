@@ -2,6 +2,7 @@ package dev.ember2d.data;
 
 import com.badlogic.gdx.utils.reflect.ClassReflection;
 import com.badlogic.gdx.utils.reflect.Field;
+import dev.ember2d.animation.Animator;
 import dev.ember2d.collision.Actor;
 import dev.ember2d.collision.Collider;
 import dev.ember2d.collision.Solid;
@@ -77,6 +78,7 @@ public final class ComponentRegistry {
         register(Collider.class, Collider::new);
         register(Actor.class, Actor::new);
         register(Solid.class, Solid::new);
+        register(Animator.class, Animator::new);
     }
 
     /** Registers a component under its simple class name. Returns this. */

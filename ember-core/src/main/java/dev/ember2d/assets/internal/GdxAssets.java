@@ -287,7 +287,7 @@ public final class GdxAssets implements Assets, Disposable {
             case MUSIC -> new NoOpMusic();
             case JSON -> new JsonValue(JsonValue.ValueType.object);
             case MAP -> new TiledMap();
-            case PREFAB -> new JsonValue(JsonValue.ValueType.object);
+            case PREFAB, CLIPS -> new JsonValue(JsonValue.ValueType.object);
         };
     }
 

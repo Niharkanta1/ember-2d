@@ -1,0 +1,67 @@
+{
+ "version": 1,
+ "defaults": {
+  "frameDuration": 0.1
+ },
+ "clips": {
+  "strip": {
+   "sheet": "tex.strip",
+   "frameWidth": 32,
+   "frameHeight": 32,
+   "events": {
+    "0": "start",
+    "2": "mid"
+   }
+  },
+  "grid2": {
+   "sheet": "tex.grid",
+   "frameWidth": 32,
+   "frameHeight": 32,
+   "frames": [
+    1,
+    3
+   ],
+   "mode": "pingpong",
+   "frameDuration": 0.05
+  },
+  "atlasRun": {
+   "atlas": "atlas.test",
+   "regions": "hero/run",
+   "mode": "once"
+  },
+  "trim": {
+   "atlas": "atlas.test",
+   "regions": "hero/trim"
+  },
+  "aseRun": {
+   "aseprite": "ase.array",
+   "texture": "tex.hero",
+   "tag": "run"
+  },
+  "aseBack": {
+   "aseprite": "ase.hash",
+   "texture": "tex.hero",
+   "tag": "back"
+  },
+  "aseBounce": {
+   "aseprite": "ase.array",
+   "texture": "tex.hero",
+   "tag": "bounce"
+  },
+  "aseHit": {
+   "aseprite": "ase.hash",
+   "texture": "tex.hero",
+   "tag": "hit"
+  },
+  "aseOverride": {
+   "aseprite": "ase.array",
+   "texture": "tex.hero",
+   "tag": "run",
+   "mode": "once",
+   "frameDuration": 0.5,
+   "events": {
+    "0": "go"
+   }
+  }
+ }
+}

@@ -1,0 +1,59 @@
+{
+ "version": 2,
+ "speed": 1,
+ "clips": {
+  "none": {
+   "frameDuration": 0.1
+  },
+  "two": {
+   "sheet": "tex.strip",
+   "atlas": "atlas.test",
+   "regions": "hero/run"
+  },
+  "range": {
+   "sheet": "tex.strip",
+   "frameWidth": 32,
+   "frameHeight": 32,
+   "frames": [
+    2,
+    9
+   ]
+  },
+  "missing": {
+   "atlas": "atlas.test",
+   "regions": "hero/jump"
+  },
+  "tag": {
+   "aseprite": "ase.array",
+   "texture": "tex.hero",
+   "tag": "dash"
+  },
+  "data": {
+   "aseprite": "ase.array",
+   "texture": "tex.hero",
+   "tag": "bad"
+  },
+  "mode": {
+   "sheet": "tex.strip",
+   "frameWidth": 32,
+   "frameHeight": 32,
+   "mode": "twice",
+   "frameDuration": 0
+  },
+  "event": {
+   "sheet": "tex.strip",
+   "frameWidth": 32,
+   "frameHeight": 32,
+   "events": {
+    "7": "x",
+    "a": "y"
+   }
+  },
+  "asset": {
+   "sheet": "tex.nope",
+   "frameWidth": 32,
+   "frameHeight": 32,
+   "colour": "red"
+  }
+ }
+}

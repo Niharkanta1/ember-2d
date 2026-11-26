@@ -153,4 +153,34 @@ class SpriteRenderSystemTest {
         drawOrder();
         assertThat(warnings).singleElement().asString().contains("neither region nor regionId");
     }
+
+    @Test
+    void trimmedAtlasRegionsDrawAtTheirOffsetInsideTheOriginalFrame() {
+        // packed 8x10, placed at (2, 1) inside a 16x16 original frame; origin at the feet centre (8, 0)
+        com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion trimmed =
+                new com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion(texture, 0, 0, 8, 10);
+        trimmed.offsetX = 2f;
+        trimmed.offsetY = 1f;
+        trimmed.originalWidth = 16;
+        trimmed.originalHeight = 16;
+        int e = world.create();
+        world.add(e, Transform.class).teleport(4f, 3f);
+        Sprite sprite = world.add(e, new Sprite());
+        sprite.region = trimmed;
+        sprite.origin.set(8f, 0f);
+
+        kit.calls.clear();
+        world.runPhase(Phase.RENDER, kit.time);
+        RenderTestKit.Call draw = kit.calls("draw").get(0);
+        assertThat(draw.f(1)).as("x = 4 - (8 - 2) / 16").isEqualTo(3.625f);
+        assertThat(draw.f(2)).as("y = 3 + 1 / 16").isEqualTo(3.0625f);
+        assertThat(draw.f(3)).as("origin inside the quad").isEqualTo(0.375f);
+        assertThat(draw.f(5)).as("packed width").isEqualTo(0.5f);
+        assertThat(draw.f(6)).isEqualTo(0.625f);
+
+        sprite.flipX = true;   // the offset mirrors: 16 - 2 - 8 = 6
+        kit.calls.clear();
+        world.runPhase(Phase.RENDER, kit.time);
+        assertThat(kit.calls("draw").get(0).f(1)).as("x = 4 - (8 - 6) / 16").isEqualTo(3.875f);
+    }
 }

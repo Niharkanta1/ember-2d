@@ -23,6 +23,11 @@
    "speed": 6,
    "minX": 4,
    "maxX": 13
+  },
+  "Animator": {
+   "clipSet": "anim.hero",
+   "clip": "run",
+   "speed": 0.8
   }
  }
 }
