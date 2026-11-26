@@ -1,5 +1,6 @@
 package dev.ember2d.app;
 
+import dev.ember2d.assets.AssetReloaded;
 import dev.ember2d.core.PublicApi;
 import dev.ember2d.core.Timers;
 import dev.ember2d.core.Tweens;
@@ -39,6 +40,15 @@ public abstract class Scene {
 
     /** Per-frame hook in {@code UPDATE}, after the world's systems; {@code delta} is scaled (0 while paused). */
     protected void update(float delta) {
+    }
+
+    /**
+     * Hot reload (dev builds, F-008): an asset changed while this scene runs. Return true when the scene applied the
+     * change itself. For a {@code map} that no scene handles the engine restarts the current scene; other assets are
+     * picked up by the engine's caches anyway.
+     */
+    protected boolean onAssetReloaded(AssetReloaded event) {
+        return false;
     }
 
     /** Asset group loaded before {@link #enter} and unloaded after {@link #exit} (unless another scene uses it). */

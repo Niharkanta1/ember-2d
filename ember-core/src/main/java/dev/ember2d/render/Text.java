@@ -38,5 +38,6 @@ public final class Text {
     float laidColor = Float.NaN;
     String resolvedId;
     BitmapFont resolved;
+    int resolvedGeneration;
     int layoutCount;
 }

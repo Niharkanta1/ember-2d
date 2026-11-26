@@ -67,9 +67,10 @@ public final class TextRenderer implements LayerContent {
     }
 
     private void draw(Batch batch, int entity, Text text) {
-        if (!text.font.equals(text.resolvedId)) {
-            text.resolved = assets.get(text.font, BitmapFont.class);
+        if (!text.font.equals(text.resolvedId) || text.resolvedGeneration != assets.generation()) {
+            text.resolved = assets.get(text.font, BitmapFont.class);   // first use, another font, or a hot reload
             text.resolvedId = text.font;
+            text.resolvedGeneration = assets.generation();
         }
         BitmapFont font = text.resolved;
         float ppu = renderer.pixelsPerUnit();

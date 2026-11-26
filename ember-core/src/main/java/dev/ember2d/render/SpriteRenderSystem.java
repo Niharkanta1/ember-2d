@@ -138,9 +138,15 @@ public final class SpriteRenderSystem extends EntitySystem {
     private void draw(Batch batch, int entity) {
         Sprite sprite = world().get(entity, Sprite.class);
         TextureRegion region = sprite.region;
+        if (region != null && region == sprite.resolvedRegion && assets != null
+                && sprite.resolvedGeneration != assets.generation()) {
+            region = null;   // filled from regionId before a hot reload: resolve it again
+        }
         if (region == null && sprite.regionId != null && assets != null) {
             region = assets.region(sprite.regionId);
             sprite.region = region;
+            sprite.resolvedRegion = region;
+            sprite.resolvedGeneration = assets.generation();
         }
         if (region == null) {
             if (!warnedMissingRegion) {

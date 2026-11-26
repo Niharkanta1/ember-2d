@@ -34,6 +34,7 @@ class PrefabLibraryTest {
     /** Prefab JSON by ID; path = "prefabs/" + id + ".json". */
     static final class FakeAssets implements Assets {
         final Map<String, JsonValue> files = new HashMap<>();
+        int generation;
 
         void put(String id, String json) {
             files.put(id, new JsonReader().parse(json));
@@ -71,6 +72,11 @@ class PrefabLibraryTest {
         @Override
         public String path(String id) {
             return "prefabs/" + id + ".json";
+        }
+
+        @Override
+        public int generation() {
+            return generation;
         }
     }
 
@@ -313,5 +319,22 @@ class PrefabLibraryTest {
     void floatTolerance() {
         assets.put("f", "{ \"version\": 1, \"components\": { \"Kitchen\": { \"f\": 0.1 } } }");
         assertThat(world.get(prefabs.spawn(world, "f", 0f, 0f), Kitchen.class).f).isCloseTo(0.1f, within(1e-7f));
+    }
+
+    @Test
+    void aHotReloadedPrefabIsUsedByLaterSpawnsAndABrokenOneKeepsTheOld() {
+        assets.put("hero", "{ \"version\": 1, \"components\": { \"Health\": { \"max\": 3 } } }");
+        int first = prefabs.spawn(world, "hero", 0f, 0f);
+
+        assets.put("hero", "{ \"version\": 1, \"components\": { \"Health\": { \"max\": 7 } } }");
+        assets.generation++;
+        int second = prefabs.spawn(world, "hero", 0f, 0f);
+        assertThat(world.get(second, Health.class).max).isEqualTo(7);
+        assertThat(world.get(first, Health.class).max).as("spawned entities do not change").isEqualTo(3);
+
+        assets.put("hero", "{ \"version\": 1, \"components\": { \"Ghost\": {} } }");
+        assets.generation++;
+        int third = prefabs.spawn(world, "hero", 0f, 0f);
+        assertThat(world.get(third, Health.class).max).as("broken: the old one stays").isEqualTo(7);
     }
 }

@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.JsonValue;
 import dev.ember2d.assets.Assets;
+import dev.ember2d.core.Log;
 import dev.ember2d.core.PublicApi;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,8 +28,11 @@ public final class AnimationLibrary {
     private static final List<String> CLIP_FIELDS = List.of("atlas", "regions", "aseprite", "tag", "texture", "sheet",
             "frameWidth", "frameHeight", "frames", "frameDuration", "mode", "events");
 
+    private static final Log LOG = Log.get("animation");
+
     private final Assets assets;
     private final Map<String, ClipSet> cache = new HashMap<>();
+    private int generation;
 
     public AnimationLibrary(Assets assets) {
         this.assets = Objects.requireNonNull(assets, "assets");
@@ -41,6 +45,9 @@ public final class AnimationLibrary {
      * @throws IllegalArgumentException if the manifest does not list the ID
      */
     public ClipSet clipSet(String id) {
+        if (assets.generation() != generation) {
+            refresh();
+        }
         ClipSet cached = cache.get(id);
         if (cached != null) {
             return cached;
@@ -71,6 +78,27 @@ public final class AnimationLibrary {
             throw new AnimationException("Invalid clip set \"" + id + "\"", problems);
         }
         cache.put(id, new ClipSet(id, clips));
+    }
+
+    /**
+     * Hot reload (F-008): assets changed, so every cached clip set is built again from its current JSON and frames.
+     * One that is now invalid keeps its old version and the problems are logged.
+     */
+    private void refresh() {
+        generation = assets.generation();
+        for (Map.Entry<String, ClipSet> e : cache.entrySet()) {
+            String id = e.getKey();
+            if (!assets.contains(id)) {
+                continue;   // built in memory
+            }
+            try {
+                reload(id, assets.get(id, JsonValue.class));
+            } catch (AnimationException ex) {
+                LOG.error("Hot reload of clip set \"" + id + "\" failed; keeping the old version: " + ex.problems());
+            } catch (RuntimeException ex) {
+                LOG.error("Hot reload of clip set \"" + id + "\" failed; keeping the old version: " + ex.getMessage());
+            }
+        }
     }
 
     /** Adds a clip set built in memory (tests). */

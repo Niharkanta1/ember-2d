@@ -1,6 +1,6 @@
 # F-008 — Assets and Hot Reload
 
-- Status: Part 1 Ready (IDs, manifest, loading, groups, fallbacks: expanded and approved in I-050, 2026-11-26); hot reload (I-150) and scene preloading (I-240): Draft
+- Status: Part 1 Ready (IDs, manifest, loading, groups, fallbacks: expanded and approved in I-050, 2026-11-26); hot reload Ready (I-150: expanded and approved 2026-11-26, see "Hot reload (I-150)"); scene preloading (I-240): Draft
 - Phase: 1 (IDs, manifest, loading), 2 (hot reload), 3 (scene groups/preloading)
 - Module / package: `ember-core` / `ember.assets`; hot reload driver in `ember-devtools`
 - Depends on: F-001, F-019
@@ -91,3 +91,137 @@ Headless unit tests (libGDX headless files and mock audio, a no-op OpenGL stand-
 
 ## Risks/open questions
 - Loading `EngineConfig` from `ember.json` (F-001) stays deferred until a game needs it.
+
+## Hot reload (I-150)
+Status: Ready (expanded for I-150 and approved 2026-11-26; see "Decisions in I-150" for how it was built).
+
+**Goal.** In a desktop dev build, saving a map in Tiled or a JSON file in an editor changes the running game within about half a second, with no restart. A broken file never crashes the game: the old version stays and the error is logged.
+
+**Parts.**
+- **Watcher (`ember-devtools`, desktop only):**
+  - `DirectoryWatcher` watches the game's source assets folder, including subfolders, with the JDK's `WatchService`. No new dependency.
+  - It runs on its own daemon thread.
+  - It collects changed files and hands them over after a quiet period of 200 ms, so an editor saving a file in several writes, or Tiled saving a map and its tilesets, causes one reload.
+- **Hooks (`ember-core`, `ember.assets`):**
+  - The engine reads the changed paths on the render thread at the start of a frame, maps them to manifest IDs, and reloads those assets.
+  - Release builds and Android have no watcher, so nothing runs there.
+- **Reading from the source folder:** desktop dev runs read the assets from the build's classpath copy, which does not change when a file is saved. With `EngineConfig.assetsDir` set, the asset service reads from that absolute folder instead.
+  - The demo's Gradle `run` task passes the folder (`-Dember.assetsDir=.../core/assets`), and the launcher sets `assetsDir` and the watcher only in dev mode.
+  - Packaged builds and `--release` runs are unchanged.
+
+**What reloads (file → manifest IDs).**
+- **Direct match:** a changed file that is an entry's `path` reloads that entry.
+- **Dependencies:**
+  - A file loaded as a dependency (an atlas page `.png`, a map's tileset image) reloads the entries that use it.
+  - A `.tsx` tileset or `.tx` template reloads every loaded map.
+- **Not reloaded:**
+  - Entries that are not loaded (their group isn't loaded) are skipped; they load the new file when their group loads.
+  - A change to `manifest.json` logs a warning that a restart is needed. Changing the manifest at runtime is out of scope.
+  - Files not in the manifest and not a dependency are ignored. They are logged at DEBUG level.
+
+**How each kind of asset takes effect.**
+
+| Asset | After reload |
+| --- | --- |
+| `json`, `prefab` | The new `JsonValue` is served by `assets.get`. `PrefabLibrary` drops the cached prefab, so the next spawn uses it. Entities already spawned are not changed. |
+| `clips`, `asm` | `AnimationLibrary` and `AsmLibrary` rebuild the definition. Animators and state machines switch on their next update. This uses the reload rules already built in I-130 and I-135. |
+| input bindings (the `EngineConfig.inputBindings` entry) | Parsed and applied again. A broken file keeps the old bindings. |
+| `texture`, `atlas` | Regions are looked up again. Sprites that got their region from `regionId` resolve it again on the next frame. A region set by code is the game's responsibility. |
+| `font`, `freetype` | `Text` entities resolve their font again and lay out their glyphs again. |
+| `map` | The engine publishes `AssetReloaded`, then **restarts the current scene**: it exits and enters the same scene object again, with a fresh world. This re-places the entities and rebuilds collision, so a moved enemy or a new platform appears. A scene can handle the reload itself by overriding `onAssetReloaded` and returning true. |
+| `sound`, `music` | Reloaded and served by `assets.get`. Music that is playing keeps the old track until it is started again. |
+
+- **Every reload:**
+  - publishes `AssetReloaded(id, type, path)` on the global event bus (queued, delivered that frame), for game code;
+  - logs one INFO line, for example `Reloaded map.demo (maps/demo-level.tmx) in 18 ms`.
+- **Detection:** caches notice a reload through `Assets.generation()`, a counter that each reload increases. A cache compares one int per lookup and looks the asset up again only when the counter changed, so release builds pay nothing measurable.
+
+**Errors.**
+- **Keep the old version:** a new version is loaded and checked before it replaces the old one. If it fails (bad JSON, invalid prefab/clips/ASM data, a missing tileset or image), the old asset stays and the error is logged with the file and the problem, for example `Hot reload of anim.hero failed; keeping the old version: anim/hero.clips.json: clips.run.frames: ...`.
+- **Scene restart failure:** if restarting the scene after a map reload throws, the error is logged, the old map version is kept, and the scene is entered again with the old map. If that fails too, the error goes to the normal crash path, as for a broken first scene.
+- **Watcher problems:** a deleted file or folder, or watcher overflow, logs a warning and is otherwise ignored. A missing `assetsDir` fails at boot with the path.
+
+**Not in I-150:**
+- shaders (no shader asset type yet; they arrive with the task that adds them)
+- bullet patterns (I-31x reuses this mechanism)
+- changes to `manifest.json`
+- reloading on Android
+- changing entities that are already spawned when their prefab changes
+- the dev tools panel showing reload status (I-160)
+
+## API sketch (I-150)
+```java
+package dev.ember2d.assets;
+@PublicApi public interface Assets {
+    // ... existing methods
+    default int generation() { return 0; }    // increases with every hot reload; caches compare it
+}
+@PublicApi public record AssetReloaded(String id, String type, String path) {}   // global event
+@PublicApi public interface AssetWatcher extends AutoCloseable {   // implemented in ember-devtools
+    void drainChanges(Consumer<String> changedPath);   // render thread; paths relative to the watched folder, '/'
+    @Override void close();
+}
+
+package dev.ember2d.app;
+// EngineConfig gains (dev builds only, ignored unless devMode):
+public String assetsDir = null;        // absolute folder read instead of the internal assets
+public AssetWatcher assetWatcher = null;
+// Scene gains:
+protected boolean onAssetReloaded(AssetReloaded event) { return false; }   // true = handled; map default: restart
+// SceneManager gains:
+public void restart();                 // exit and re-enter the current scene with a fresh world (after this frame)
+
+package dev.ember2d.devtools;
+@PublicApi public final class DirectoryWatcher implements AssetWatcher {
+    public DirectoryWatcher(Path root);                 // starts watching (daemon thread)
+    public DirectoryWatcher(Path root, long quietMillis);
+}
+```
+Internal: `GdxAssets.reload(id)` (load and check the new version, then swap it in, keeping reference counts and groups), `GdxAssets.idsForChange(path)`, and the `EmberGame` frame step that drains the watcher in dev mode.
+
+## Tests (I-150)
+- **Watcher (temp folder, real `WatchService`):**
+  - one change in a subfolder arrives once after the quiet period
+  - several quick writes arrive as one change
+  - `close()` stops the thread
+- **`GdxAssets.reload` (headless, temp assets folder):**
+  - each type is replaced and `generation()` increases
+  - `idsForChange` for a direct path, an atlas page, a `.tsx` file and an unknown file
+  - an entry that isn't loaded is skipped
+  - a broken JSON or map keeps the old version and names the file
+  - an asset shared by two groups keeps its reference count
+- **Caches:**
+  - `PrefabLibrary` spawns the new version
+  - `AnimationLibrary` and `AsmLibrary` pick up a reloaded file through `generation()`
+  - a sprite with `regionId` and a `Text` resolve again
+- **Engine:**
+  - a map reload restarts the current scene with a fresh world
+  - a scene that returns true from `onAssetReloaded` is not restarted
+  - input bindings are applied again
+  - `AssetReloaded` is published
+  - with `devMode` false the watcher is never drained
+- **Demo (manual, desktop `run`):**
+  - Move an enemy and add a platform tile in Tiled → both appear after saving.
+  - Change `hero.clips.json` frame times → the animation changes.
+  - Break a JSON file → an error is logged and the game keeps running.
+  - You check desktop; the emulator is checked to be unaffected.
+
+## Decisions in I-150
+- **A failed scene restart waits for the next fix.** The spec said the old map would be kept and the scene entered again with it. Instead, in dev builds a restart that throws is logged ("fix the file and save it to try again"), and the scene stays out of the stack until the next successful reload of any asset restarts it. The old map is already released by then, and a typo in a map usually means the old map would fail the same way after the next save anyway. Release builds rethrow, as before.
+- **Dev-only code in the desktop launcher.** The desktop build fails release packaging when `ember-devtools` is on the runtime classpath (F-020). So the watcher is wired in `DevLauncher`, in a separate `dev` source set of `demos/demo-platformer/desktop`. Only the Gradle `run` task uses that source set, and it also passes `-Dember.assetsDir`. `DesktopLauncher.launch(args, devSetup)` takes the dev additions; release jars are unchanged.
+- **Names:**
+  - The internal method is `GdxAssets.entriesForChange(path)`, not `idsForChange`. It returns manifest entries and matches dependencies transitively.
+  - `GdxAssets.load(manifest, assetsDir)` reads from the folder. `GdxAssets.folderResolver(folder)` accepts relative paths and the absolute paths that dependency loading produces.
+- **Reference counts:**
+  - A reload first finishes queued loads (`AssetManager.finishLoading()`), so a group still loading, or a second group's reference to a loaded asset, counts before the reference counts are read and restored.
+  - Found by the shared-group test: `unload()` would otherwise only drop the queued request.
+- **Checking a new version:** it is loaded once in a separate `AssetManager` (same loaders) and thrown away. It is then loaded for real in the engine's manager. So a reload loads the file twice; this only happens in dev builds.
+- **Caches:**
+  - `AnimationLibrary`, `AsmLibrary` and `PrefabLibrary` rebuild **every** cached entry when `generation()` changes, not just the changed IDs. A clip set also depends on its sheet's texture, and a state machine on its clip set. On failure an entry keeps its old version and the problems are logged.
+  - Clip sets built in memory are skipped.
+- **Sprites:** `Sprite` remembers the region it got from `regionId` and the generation it came from. A region set by code, or by the animator, is never replaced; the animator sets frames from the rebuilt clip sets anyway.
+- **`Scene.onAssetReloaded`** is called for every reloaded asset, not only maps. Only an unhandled `map` restarts the scene.
+- **Frame timing:** a reload frame and the restart frame after it are long. The loop's accumulator is reset after both, so the game does not fast-forward or log dropped fixed steps.
+- **Tests:**
+  - `DirectoryWatcherTest` uses real files with 100–500 ms quiet periods and 20 s timeouts.
+  - Desktop dev runs were checked from the log: a clip set change, a broken clip file (old kept), and adding and removing an enemy in the map (8, then 7 entities after the restarts).

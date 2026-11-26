@@ -54,4 +54,29 @@ class EngineConfigTest {
                 "pixelsPerUnit must be a finite number > 0 (was Infinity)",
                 "assetManifest must be a non-empty path (was null)");
     }
+
+    @Test
+    void hotReloadNeedsTheFolderItWatches() {
+        EngineConfig config = new EngineConfig();
+        config.devMode = true;
+        config.assetWatcher = new dev.ember2d.assets.AssetWatcher() {
+            @Override
+            public void drainChanges(java.util.function.Consumer<String> changedPath) {
+            }
+
+            @Override
+            public void close() {
+            }
+        };
+        config.assetsDir = " ";
+        EngineConfigException e = catchThrowableOfType(EngineConfigException.class, config::validate);
+        assertThat(e.problems()).containsExactly("assetsDir must be null or an absolute folder (was \" \")");
+
+        config.assetsDir = null;
+        e = catchThrowableOfType(EngineConfigException.class, config::validate);
+        assertThat(e.problems()).singleElement().asString().startsWith("assetWatcher needs assetsDir");
+
+        config.devMode = false;
+        assertThatCode(config::validate).as("ignored outside dev builds").doesNotThrowAnyException();
+    }
 }

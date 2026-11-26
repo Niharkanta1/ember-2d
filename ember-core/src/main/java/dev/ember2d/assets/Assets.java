@@ -44,6 +44,14 @@ public interface Assets {
     /** Whether the manifest lists this ID. */
     boolean contains(String id);
 
+    /**
+     * Increases with every hot reload (dev builds, F-008). Caches of resolved assets compare it to notice a reload;
+     * it stays 0 when nothing is ever reloaded.
+     */
+    default int generation() {
+        return 0;
+    }
+
     /** The file path of an asset ID, for messages; the ID itself if the manifest does not list it. */
     default String path(String id) {
         return id;

@@ -26,10 +26,15 @@ class TextRendererTest {
     private static BitmapFont font;
     private static Texture texture;
 
+    private int generation;
+    private int fontLookups;
+    private int regionLookups;
+
     private final RenderTestKit kit = new RenderTestKit();
     private final World world = new World(false);
     private final GdxRenderer renderer = kit.renderer(RenderMode.PIXEL_PERFECT);
-    private final SpriteRenderSystem sprites = new SpriteRenderSystem(world, renderer, null, kit.time);
+    private final Assets assets = assets();
+    private final SpriteRenderSystem sprites = new SpriteRenderSystem(world, renderer, assets, kit.time);
 
     @BeforeAll
     static void gdx() {
@@ -45,7 +50,7 @@ class TextRendererTest {
 
     TextRendererTest() {
         world.addSystem(sprites);
-        new TextRenderer(world, renderer, assets(), kit.time).attachTo(sprites);
+        new TextRenderer(world, renderer, assets, kit.time).attachTo(sprites);
     }
 
     int text(String s, float x, float y, TextAlign align) {
@@ -184,16 +189,51 @@ class TextRendererTest {
         assertThat(order).containsExactly("sprite", "text", "sprite", "text");
     }
 
-    private static Assets assets() {
+    @Test
+    void afterAHotReloadFontsAndRegionsFromIdsAreLookedUpAgain() {
+        text("HELLO", 0f, 0f, TextAlign.LEFT);
+        int fromId = world.create();
+        world.add(fromId, Transform.class).teleport(0f, 0f);
+        Sprite byId = world.add(fromId, new Sprite());
+        byId.regionId = "tex";
+        int byCode = world.create();
+        world.add(byCode, Transform.class).teleport(0f, 0f);
+        Sprite set = world.add(byCode, new Sprite());
+        TextureRegion own = new TextureRegion(texture);
+        set.region = own;
+
+        render();
+        render();
+        TextureRegion first = byId.region;
+        assertThat(fontLookups).isEqualTo(1);
+        assertThat(regionLookups).isEqualTo(1);
+
+        generation++;
+        render();
+        render();
+        assertThat(fontLookups).isEqualTo(2);
+        assertThat(regionLookups).isEqualTo(2);
+        assertThat(byId.region).isNotSameAs(first);
+        assertThat(set.region).as("a region set by code is left alone").isSameAs(own);
+    }
+
+    private Assets assets() {
         return new Assets() {
             @Override
             public <T> T get(String id, Class<T> type) {
+                fontLookups++;
                 return type.cast(font);
             }
 
             @Override
             public TextureRegion region(String id) {
-                return null;
+                regionLookups++;
+                return new TextureRegion(texture);
+            }
+
+            @Override
+            public int generation() {
+                return generation;
             }
 
             @Override

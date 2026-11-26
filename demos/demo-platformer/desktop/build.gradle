@@ -34,9 +34,26 @@ tasks.named('jar', Jar) {
     }
 }
 
-// `gradlew run` is a dev build: debug logging plus logs/platformer-demo-dev.log (I-008).
+// Dev-only code (I-150): DevLauncher adds the hot reload watcher from ember-devtools. Only `run` uses this source
+// set, so release jars and packages never contain dev tools (verifyReleaseClasspath below).
+sourceSets {
+    dev {
+        compileClasspath += main.output + main.compileClasspath
+        runtimeClasspath += main.output + main.runtimeClasspath
+    }
+}
+
+dependencies {
+    devImplementation project(':ember-devtools')
+}
+
+// `gradlew run` is a dev build: debug logging plus logs/platformer-demo-dev.log (I-008) and hot reload (I-150).
 tasks.named('run', JavaExec) {
+    classpath = sourceSets.dev.runtimeClasspath
+    mainClass = 'dev.ember2d.demo.platformer.desktop.DevLauncher'
     systemProperty 'ember.devMode', 'true'
+    // Hot reload (I-150): read and watch the source assets, so saved files show up without a restart.
+    systemProperty 'ember.assetsDir', rootProject.file('demos/demo-platformer/core/assets').absolutePath
 }
 
 // ----------------------------------------------------------------------------------------------------

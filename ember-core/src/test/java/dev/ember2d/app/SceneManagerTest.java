@@ -282,4 +282,64 @@ class SceneManagerTest {
         assertThat(log).containsExactly("enter first", "exit first");
         assertThat(game.context().scenes().depth()).isZero();
     }
+
+    @Test
+    void restartEntersTheSameSceneAgainWithAFreshWorldAndKeepsItsGroup() {
+        Recorder a = new Recorder("a", "level1");
+        scenes.push(a);
+        frame();
+        World first = a.worldSeen;
+
+        scenes.restart();
+        assertThat(log).containsExactly("load level1", "finished level1", "enter a");
+        frame();
+
+        assertThat(log).containsExactly("load level1", "finished level1", "enter a", "exit a", "load level1",
+                "finished level1", "enter a");
+        assertThat(scenes.current()).isSameAs(a);
+        assertThat(a.worldSeen).isNotSameAs(first);
+        assertThat(first.entityCount()).isZero();
+        assertThat(a.worldSeen.entityCount()).isEqualTo(1);
+    }
+
+    @Test
+    void restartWithoutASceneFails() {
+        assertThatThrownBy(scenes::restart).isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("needs a current scene");
+    }
+
+    @Test
+    void aFailedRestartInDevBuildsWaitsForTheNextRestart() {
+        EngineConfig config = new EngineConfig();
+        config.devMode = true;
+        EngineContext.Builder devBuilder = new EngineContext.Builder(config).assets(new FakeAssets());
+        SceneManager dev = devBuilder.build().scenes();
+        GameLoop devLoop = new GameLoop(() -> 16_666_668L, devBuilder.timeState(), dev::runPhase, 5);
+        boolean[] fail = {false};
+        Recorder a = new Recorder("a", null) {
+            @Override
+            protected void enter(EngineContext context) {
+                if (fail[0]) {
+                    throw new IllegalStateException("bad map");
+                }
+                super.enter(context);
+            }
+        };
+        dev.push(a);
+        devLoop.frame();
+
+        fail[0] = true;
+        dev.restart();
+        devLoop.frame();   // logged, not thrown
+        assertThat(dev.depth()).isZero();
+        assertThat(dev.isBroken()).isTrue();
+        assertThat(dev.canRestart()).isTrue();
+
+        fail[0] = false;
+        dev.restart();
+        devLoop.frame();
+        assertThat(dev.current()).isSameAs(a);
+        assertThat(dev.isBroken()).isFalse();
+        assertThat(log).containsExactly("enter a", "exit a", "enter a");
+    }
 }

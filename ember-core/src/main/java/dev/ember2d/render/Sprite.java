@@ -26,4 +26,8 @@ public final class Sprite {
     public float z;
     /** Draw anchor and rotation/scale pivot, in region pixels from the bottom-left corner. */
     public final Vector2 origin = new Vector2();
+
+    // the region last filled from regionId and the asset generation it came from (hot reload, F-008)
+    TextureRegion resolvedRegion;
+    int resolvedGeneration;
 }

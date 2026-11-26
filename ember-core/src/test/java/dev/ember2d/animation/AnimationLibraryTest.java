@@ -175,4 +175,61 @@ class AnimationLibraryTest {
                 "{ \"version\": 1, \"clips\": { \"x\": { } } }"))).isInstanceOf(AnimationException.class);
         assertThat(library.clipSet("anim.good")).isSameAs(after);
     }
+
+    @Test
+    void aHotReloadIsPickedUpThroughTheGenerationAndABrokenFileKeepsTheOld() {
+        com.badlogic.gdx.utils.JsonValue[] override = {null};
+        int[] generation = {0};
+        dev.ember2d.assets.Assets swapping = new dev.ember2d.assets.Assets() {
+            @Override
+            public <T> T get(String id, Class<T> type) {
+                return id.equals("anim.good") && override[0] != null ? type.cast(override[0]) : assets.get(id, type);
+            }
+
+            @Override
+            public TextureRegion region(String id) {
+                return assets.region(id);
+            }
+
+            @Override
+            public dev.ember2d.assets.AsyncLoad loadGroup(String group) {
+                return assets.loadGroup(group);
+            }
+
+            @Override
+            public void unloadGroup(String group) {
+                assets.unloadGroup(group);
+            }
+
+            @Override
+            public boolean isLoaded(String id) {
+                return assets.isLoaded(id);
+            }
+
+            @Override
+            public boolean contains(String id) {
+                return assets.contains(id);
+            }
+
+            @Override
+            public int generation() {
+                return generation[0];
+            }
+        };
+        AnimationLibrary lib = new AnimationLibrary(swapping);
+        ClipSet before = lib.clipSet("anim.good");
+        assertThat(lib.clipSet("anim.good")).as("cached").isSameAs(before);
+
+        override[0] = new com.badlogic.gdx.utils.JsonReader().parse("""
+                { "version": 1, "clips": { "only": { "sheet": "tex.strip", "frameWidth": 32, "frameHeight": 32 } } }
+                """);
+        generation[0]++;
+        ClipSet after = lib.clipSet("anim.good");
+        assertThat(after).isNotSameAs(before);
+        assertThat(after.names()).containsExactly("only");
+
+        override[0] = new com.badlogic.gdx.utils.JsonReader().parse("{ \"version\": 1, \"clips\": { \"x\": { } } }");
+        generation[0]++;
+        assertThat(lib.clipSet("anim.good")).as("broken: the old one stays").isSameAs(after);
+    }
 }

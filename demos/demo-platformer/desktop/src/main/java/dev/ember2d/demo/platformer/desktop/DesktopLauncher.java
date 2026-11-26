@@ -12,6 +12,7 @@ import dev.ember2d.desktop.DesktopLogging;
 import dev.ember2d.desktop.DesktopWindow;
 import dev.ember2d.desktop.StartupHelper;
 import java.util.List;
+import java.util.function.Consumer;
 
 /** Launches the platformer demo on desktop (LWJGL3). */
 public final class DesktopLauncher {
@@ -22,6 +23,11 @@ public final class DesktopLauncher {
     }
 
     public static void main(String[] args) {
+        launch(args, config -> { });
+    }
+
+    /** Starts the game; {@code devSetup} may change the config of a dev run (the dev launcher adds hot reload). */
+    static void launch(String[] args, Consumer<EngineConfig> devSetup) {
         if (StartupHelper.startNewJvmIfRequired()) {
             return; // macOS needs -XstartOnFirstThread; also works around non-ASCII user paths on Windows.
         }
@@ -45,6 +51,9 @@ public final class DesktopLauncher {
             EngineConfig config = PlatformerDemo.config(devMode);
             if (List.of(args).contains("--touch-controls")) {
                 config.touchControls = TouchControlsMode.ALWAYS;   // try the on-screen controls with the mouse
+            }
+            if (devMode) {
+                devSetup.accept(config);
             }
             EmberGame game = new EmberGame(config);
             configuration.setWindowListener(DesktopWindow.focusListener(game));

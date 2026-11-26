@@ -49,9 +49,12 @@ public class EmberGame implements ApplicationListener {
     private AppState state = AppState.CREATED;
     private EngineContext context;
     private GameLoop loop;
+    private HotReload hotReload;
+    private int hotReloadResets;
 
     public EmberGame(EngineConfig config) {
-        this(config, c -> GdxAssets.load(c.assetManifest));
+        this(config, c -> c.devMode && c.assetsDir != null ? GdxAssets.load(c.assetManifest, c.assetsDir)
+                : GdxAssets.load(c.assetManifest));
     }
 
     /** For tests: supplies the asset service instead of reading the manifest from the game's assets. */
@@ -135,8 +138,13 @@ public class EmberGame implements ApplicationListener {
             Gdx.input.setInputProcessor(input.source());
             Gdx.input.setCatchKey(Input.Keys.BACK, input.bindings().binds("BACK"));
         }
+        if (config.devMode && config.assetWatcher != null) {
+            hotReload = new HotReload(config.assetWatcher, assets, context.scenes(), builder.eventBus(), input,
+                    config.inputBindings);
+            LOG.info("Hot reload on: watching " + config.assetsDir);
+        }
         EnginePhaseRunner phases = new EnginePhaseRunner(context.timers(), context.tweens(), builder.eventBus(), input,
-                assets::update, this::beginRender, this::endRender, context.scenes()::runPhase);
+                this::updateAssets, this::beginRender, this::endRender, context.scenes()::runPhase);
         loop = new GameLoop(new GdxClock(), builder.timeState(), phases, config.maxCatchUpSteps);
         if (config.firstScene != null) {
             context.scenes().push(Objects.requireNonNull(config.firstScene.get(), "EngineConfig.firstScene returned null"));
@@ -227,6 +235,9 @@ public class EmberGame implements ApplicationListener {
             return; // never started: nothing to release
         }
         context.scenes().exitAll();
+        if (config.devMode && config.assetWatcher != null) {
+            config.assetWatcher.close();
+        }
         if (Gdx.input != null) {
             Gdx.input.setInputProcessor(null);
         }
@@ -262,6 +273,20 @@ public class EmberGame implements ApplicationListener {
         input.setBindings(InputBindings.parse(assets.get(id, JsonValue.class), entry.path()));
         LOG.debug("Input bindings " + entry.path() + ": " + input.bindings().actions().size() + " action(s), "
                 + input.bindings().axes().size() + " axis/axes, contexts " + input.bindings().contexts());
+    }
+
+    private void updateAssets() {
+        assets.update();
+        if (hotReload == null) {
+            return;
+        }
+        if (hotReload.step()) {
+            hotReloadResets = 2;   // this frame and the next (a scene restart) are long: do not catch up on them
+        }
+        if (hotReloadResets > 0) {
+            hotReloadResets--;
+            loop.resetAccumulator();
+        }
     }
 
     private void beginRender() {

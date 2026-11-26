@@ -4,6 +4,7 @@ import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.JsonWriter;
 import dev.ember2d.assets.Assets;
+import dev.ember2d.core.Log;
 import dev.ember2d.core.PublicApi;
 import dev.ember2d.ecs.Transform;
 import dev.ember2d.ecs.World;
@@ -59,10 +60,13 @@ public final class PrefabLibrary {
         }
     }
 
+    private static final Log LOG = Log.get("data");
+
     private final ComponentRegistry registry;
     private final Assets assets;
     private final EventBus events;
     private final Map<String, Prefab> cache = new HashMap<>();
+    private int generation;
     private final Map<Integer, UnaryOperator<JsonValue>> migrations = new HashMap<>();
     private int version = 1;
 
@@ -238,7 +242,33 @@ public final class PrefabLibrary {
 
     // ---- parsing ----
 
+    /**
+     * Hot reload (F-008): assets changed, so every cached prefab is parsed again from its current JSON; later spawns
+     * use it. One that is now invalid keeps its old version and the problems are logged.
+     */
+    private void refresh() {
+        generation = assets.generation();
+        Map<String, Prefab> old = new HashMap<>(cache);
+        cache.clear();
+        for (Map.Entry<String, Prefab> e : old.entrySet()) {
+            try {
+                prefab(e.getKey());
+            } catch (PrefabException ex) {
+                LOG.error("Hot reload of prefab \"" + e.getKey() + "\" failed; keeping the old version: "
+                        + ex.problems());
+                cache.put(e.getKey(), e.getValue());
+            } catch (RuntimeException ex) {
+                LOG.error("Hot reload of prefab \"" + e.getKey() + "\" failed; keeping the old version: "
+                        + ex.getMessage());
+                cache.put(e.getKey(), e.getValue());
+            }
+        }
+    }
+
     Prefab prefab(String id) {
+        if (assets.generation() != generation) {
+            refresh();
+        }
         Prefab cached = cache.get(id);
         if (cached != null) {
             return cached;

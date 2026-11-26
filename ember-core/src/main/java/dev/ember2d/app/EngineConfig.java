@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import dev.ember2d.core.PublicApi;
 import dev.ember2d.render.RenderMode;
 import dev.ember2d.data.ComponentSetup;
+import dev.ember2d.assets.AssetWatcher;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -83,6 +84,20 @@ public final class EngineConfig {
     public TouchControlsMode touchControls = TouchControlsMode.AUTO;
 
     /**
+     * Hot reload (F-008, dev builds only; ignored unless {@link #devMode}): an absolute folder the assets are read
+     * from instead of the internal assets, normally the game's source assets folder. {@code null} reads the internal
+     * assets.
+     */
+    public String assetsDir = null;
+
+    /**
+     * Hot reload (F-008, dev builds only; ignored unless {@link #devMode}): reports changed files in
+     * {@link #assetsDir}, for example {@code new DirectoryWatcher(path)} from {@code ember-devtools}. The engine
+     * closes it at shutdown. {@code null} turns hot reload off.
+     */
+    public AssetWatcher assetWatcher = null;
+
+    /**
      * Checks every field and throws one exception listing all problems.
      *
      * @throws EngineConfigException if any field is invalid
@@ -116,6 +131,12 @@ public final class EngineConfig {
         }
         if (tiledProject != null && tiledProject.isBlank()) {
             problems.add("tiledProject must be null or a path (was " + quote(tiledProject) + ")");
+        }
+        if (assetsDir != null && assetsDir.isBlank()) {
+            problems.add("assetsDir must be null or an absolute folder (was " + quote(assetsDir) + ")");
+        }
+        if (devMode && assetWatcher != null && assetsDir == null) {
+            problems.add("assetWatcher needs assetsDir: the folder it watches must also be the one assets are read from");
         }
         if (inputBindings != null && inputBindings.isBlank()) {
             problems.add("inputBindings must be null or an asset ID (was " + quote(inputBindings) + ")");

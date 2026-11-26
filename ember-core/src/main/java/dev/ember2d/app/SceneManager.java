@@ -24,7 +24,7 @@ public final class SceneManager {
 
     private static final Log LOG = Log.get("scene");
 
-    private enum Op { PUSH, POP, REPLACE }
+    private enum Op { PUSH, POP, REPLACE, RESTART }
 
     private record Change(Op op, Scene scene) {
     }
@@ -36,6 +36,7 @@ public final class SceneManager {
     private final Array<Change> pending = new Array<>(true, 4);
     private EngineContext context;
     private int plannedDepth;
+    private Scene broken;   // dev builds: a scene whose restart failed, retried by the next restart()
 
     SceneManager(TimeState time, DefaultEventBus events, boolean devMode) {
         this.time = time;
@@ -70,6 +71,30 @@ public final class SceneManager {
         if (plannedDepth == 0) {
             plannedDepth = 1;
         }
+    }
+
+    /**
+     * Exits the current scene and enters the same scene object again with a fresh world, timers, tweens and event
+     * scope; its asset group stays loaded. Used by hot reload after a map changes (F-008, I-150). In dev builds a
+     * failed restart is logged and leaves the scene out of the stack until the next {@code restart()} retries it.
+     *
+     * @throws IllegalStateException if there is no scene to restart
+     */
+    public void restart() {
+        if (plannedDepth == 0 && broken == null) {
+            throw new IllegalStateException("restart() needs a current scene");
+        }
+        pending.add(new Change(Op.RESTART, null));
+    }
+
+    /** Whether {@link #restart()} has a scene to restart. */
+    boolean canRestart() {
+        return plannedDepth > 0 || broken != null;
+    }
+
+    /** Dev builds: whether a scene's restart failed and waits for the next {@link #restart()}. */
+    boolean isBroken() {
+        return broken != null;
     }
 
     /** The running scene, or null. */
@@ -119,13 +144,38 @@ public final class SceneManager {
                     }
                     enter(change.scene());
                 }
+                case RESTART -> restartTop();
             }
+        }
+    }
+
+    private void restartTop() {
+        Scene scene;
+        if (broken != null) {
+            scene = broken;
+            broken = null;
+        } else if (!stack.isEmpty()) {
+            scene = stack.peek();
+            exit(scene, true);
+        } else {
+            return;
+        }
+        try {
+            enter(scene);
+        } catch (RuntimeException e) {
+            if (!devMode) {
+                throw e;
+            }
+            broken = scene;
+            LOG.error("Restarting " + scene.getClass().getSimpleName() + " failed; fix the file and save it to try "
+                    + "again", e);
         }
     }
 
     /** Exits every scene, top first (shutdown). */
     void exitAll() {
         pending.clear();
+        broken = null;
         while (!stack.isEmpty()) {
             exit(stack.peek());
         }
@@ -144,29 +194,33 @@ public final class SceneManager {
             scene.enter(context);
         } catch (RuntimeException e) {
             stack.pop();
-            release(scene);
+            release(scene, false);
             throw e;
         }
         LOG.info("Entered " + scene.getClass().getSimpleName() + " (stack depth " + stack.size + ")");
     }
 
     private void exit(Scene scene) {
+        exit(scene, false);
+    }
+
+    private void exit(Scene scene, boolean keepGroup) {
         try {
             scene.exit();
         } finally {
             stack.pop();
-            release(scene);
+            release(scene, keepGroup);
             LOG.info("Exited " + scene.getClass().getSimpleName() + " (stack depth " + stack.size + ")");
         }
     }
 
-    private void release(Scene scene) {
+    private void release(Scene scene, boolean keepGroup) {
         scene.worldInternal().clear();
         events.closeScope(scene.eventScope);
         scene.timersInternal().cancelAll();
         scene.tweensInternal().cancelAll();
         String group = scene.assetGroup();
-        if (group != null && !groupInUse(group)) {
+        if (group != null && !keepGroup && !groupInUse(group)) {
             context.assets().unloadGroup(group);
         }
         scene.detach();

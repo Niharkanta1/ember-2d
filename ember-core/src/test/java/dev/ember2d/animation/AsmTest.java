@@ -51,6 +51,7 @@ class AsmTest {
             """;
 
     final Map<String, JsonValue> files = new HashMap<>();
+    int generation;
     final World world = new World(false);
     final DefaultEventBus bus = new DefaultEventBus(false);
     final AnimationLibrary clips = new AnimationLibrary(assets());
@@ -302,6 +303,22 @@ class AsmTest {
                 f + "transitions[2].minTime: must be a number >= 0");
     }
 
+    @Test
+    void aHotReloadedDefinitionIsPickedUpAndABrokenOneKeepsTheOld() {
+        AsmDefinition before = library.definition("asm.hero");
+        files.put("asm.hero", new JsonReader().parse(HERO.replace("\"idle\": { \"clip\": \"idle\" },",
+                "\"idle\": { \"clip\": \"idle\" }, \"extra\": { \"clip\": \"idle\" },")));
+        generation++;
+
+        AsmDefinition after = library.definition("asm.hero");
+        assertThat(after).isNotSameAs(before);
+        assertThat(after.stateNames()).contains("extra");
+
+        files.put("asm.hero", new JsonReader().parse("{ \"version\": 1 }"));
+        generation++;
+        assertThat(library.definition("asm.hero")).as("broken: the old one stays").isSameAs(after);
+    }
+
     private Assets assets() {
         return new Assets() {
             @Override
@@ -336,6 +353,11 @@ class AsmTest {
             @Override
             public String path(String id) {
                 return "asm/" + id + ".json";
+            }
+
+            @Override
+            public int generation() {
+                return generation;
             }
         };
     }

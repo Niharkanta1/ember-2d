@@ -52,6 +52,11 @@ public final class AssetManifest {
             this.assetClass = assetClass;
         }
 
+        /** The name used in manifest files ({@code "map"}, {@code "json"}, ...). */
+        public String manifestName() {
+            return manifestName;
+        }
+
         public Class<?> assetClass() {
             return assetClass;
         }

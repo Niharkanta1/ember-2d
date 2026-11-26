@@ -3,6 +3,7 @@ package dev.ember2d.animation;
 import com.badlogic.gdx.utils.JsonValue;
 import dev.ember2d.animation.AsmDefinition.ParamType;
 import dev.ember2d.assets.Assets;
+import dev.ember2d.core.Log;
 import dev.ember2d.core.PublicApi;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,9 +30,12 @@ public final class AsmLibrary {
     private static final Pattern COMPARISON =
             Pattern.compile("([A-Za-z_][A-Za-z0-9_.]*)\\s*(>=|<=|==|!=|>|<)\\s*(-?\\d+(?:\\.\\d+)?)");
 
+    private static final Log LOG = Log.get("animation");
+
     private final Assets assets;
     private final AnimationLibrary clips;
     private final Map<String, AsmDefinition> cache = new HashMap<>();
+    private int generation;
 
     public AsmLibrary(Assets assets, AnimationLibrary clips) {
         this.assets = Objects.requireNonNull(assets, "assets");
@@ -45,6 +49,9 @@ public final class AsmLibrary {
      * @throws IllegalArgumentException if the manifest does not list the ID
      */
     public AsmDefinition definition(String id) {
+        if (assets.generation() != generation) {
+            refresh();
+        }
         AsmDefinition cached = cache.get(id);
         if (cached != null) {
             return cached;
@@ -64,6 +71,26 @@ public final class AsmLibrary {
      */
     public void reload(String id, JsonValue json) {
         cache.put(id, parse(id, assets.path(id), json));
+    }
+
+    /**
+     * Hot reload (F-008): assets changed, so every cached definition is built again (its JSON or its clip set may
+     * have changed). One that is now invalid keeps its old version and the problems are logged.
+     */
+    private void refresh() {
+        generation = assets.generation();
+        for (Map.Entry<String, AsmDefinition> e : cache.entrySet()) {
+            String id = e.getKey();
+            try {
+                e.setValue(parse(id, assets.path(id), assets.get(id, JsonValue.class)));
+            } catch (AnimationException ex) {
+                LOG.error("Hot reload of state machine \"" + id + "\" failed; keeping the old version: "
+                        + ex.problems());
+            } catch (RuntimeException ex) {
+                LOG.error("Hot reload of state machine \"" + id + "\" failed; keeping the old version: "
+                        + ex.getMessage());
+            }
+        }
     }
 
     private AsmDefinition parse(String id, String file, JsonValue root) {
