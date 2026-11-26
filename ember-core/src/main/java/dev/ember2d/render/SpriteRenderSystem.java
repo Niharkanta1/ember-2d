@@ -24,6 +24,9 @@ import java.util.Objects;
  * Draws every entity with a {@link Transform} and a {@link Sprite} in {@code RENDER} (F-004): grouped by layer in
  * the renderer's layer order, sorted per layer, at the interpolated transform. In the pixel-perfect modes draw
  * positions are snapped to whole virtual pixels. Sorting and drawing do not allocate per frame.
+ *
+ * <p>Other content (tile map layers) joins the same layer order through {@link #addLayerContent}: in each layer it is
+ * drawn before the layer's sprites, in registration order.
  */
 @PublicApi
 public final class SpriteRenderSystem extends EntitySystem {
@@ -38,6 +41,7 @@ public final class SpriteRenderSystem extends EntitySystem {
     private final EntitySort sorter = new EntitySort();
     private final ObjectSet<String> warnedLayers = new ObjectSet<>();
     private final Vector2 position = new Vector2();
+    private final Array<LayerContent> contents = new Array<>(true, 2, LayerContent[]::new);
     private List<RenderLayer> layers;
     private int fallbackLayer;
     private boolean warnedMissingRegion;
@@ -47,6 +51,19 @@ public final class SpriteRenderSystem extends EntitySystem {
         this.renderer = Objects.requireNonNull(renderer, "renderer");
         this.assets = assets;
         this.time = Objects.requireNonNull(time, "time");
+    }
+
+    /** Adds content drawn before the sprites of each layer (no effect if already added). */
+    public void addLayerContent(LayerContent content) {
+        Objects.requireNonNull(content, "content");
+        if (!contents.contains(content, true)) {
+            contents.add(content);
+        }
+    }
+
+    /** Removes content added with {@link #addLayerContent}. */
+    public void removeLayerContent(LayerContent content) {
+        contents.removeValue(content, true);
     }
 
     @Override
@@ -83,6 +100,11 @@ public final class SpriteRenderSystem extends EntitySystem {
     protected void end() {
         Batch batch = renderer.batch();
         for (int l = 0; l < layers.size(); l++) {
+            String layerName = layers.get(l).name();
+            for (int c = 0; c < contents.size; c++) {
+                batch.setColor(Color.WHITE);   // content may read the batch colour (libGDX's tile renderer does)
+                contents.items[c].drawLayer(layerName, batch);
+            }
             IntArray bucket = buckets.get(l);
             if (layers.get(l).sort() != SortMode.NONE) {
                 sorter.sort(bucket, keys.get(l));

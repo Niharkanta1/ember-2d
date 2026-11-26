@@ -1,0 +1,30 @@
+{
+ "automappingRulesFile": "",
+ "commands": [],
+ "extensionsPath": "extensions",
+ "folders": [
+  "."
+ ],
+ "propertyTypes": [
+  {
+   "id": 1,
+   "name": "DoorStats",
+   "type": "class",
+   "useAs": [
+    "property"
+   ],
+   "members": [
+    {
+     "name": "cost",
+     "type": "int",
+     "value": 0
+    },
+    {
+     "name": "locked",
+     "type": "bool",
+     "value": true
+    }
+   ]
+  }
+ ]
+}

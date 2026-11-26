@@ -88,6 +88,7 @@ public class EmberGame implements ApplicationListener {
         EngineContext.Builder builder = new EngineContext.Builder(config);
         assets = assetsFactory.apply(config);
         try {
+            assets.setTiledProject(config.tiledProject);
             builder.assets(assets);
             renderer = GdxRenderer.create(config.virtualWidth, config.virtualHeight, config.pixelsPerUnit,
                     config.renderMode, config.backgroundColor, builder.timeState());

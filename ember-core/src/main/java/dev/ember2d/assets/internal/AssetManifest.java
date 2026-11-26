@@ -5,6 +5,7 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.JsonWriter;
@@ -31,7 +32,9 @@ public final class AssetManifest {
         FONT("font", BitmapFont.class),
         SOUND("sound", Sound.class),
         MUSIC("music", Music.class),
-        JSON("json", JsonValue.class);
+        JSON("json", JsonValue.class),
+        /** A Tiled map, {@code .tmx} or {@code .tmj} (F-009). */
+        MAP("map", TiledMap.class);
 
         final String manifestName;
         final Class<?> assetClass;
@@ -153,6 +156,9 @@ public final class AssetManifest {
         JsonValue optionalValue = item.get("optional");
         if (optionalValue != null && !optionalValue.isBoolean()) {
             problems.add(where + ": \"optional\" must be true or false");
+        }
+        if (type == Type.MAP && path != null && !path.endsWith(".tmx") && !path.endsWith(".tmj")) {
+            problems.add(where + ": a map must be a .tmx or .tmj file (was " + path + ")");
         }
         if (id != null && entries.containsKey(id)) {
             problems.add(where + ": duplicate id \"" + id + "\"");

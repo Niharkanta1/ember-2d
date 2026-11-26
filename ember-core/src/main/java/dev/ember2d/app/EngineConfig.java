@@ -67,6 +67,12 @@ public final class EngineConfig {
     public String inputBindings = null;
 
     /**
+     * Path of the game's Tiled project file ({@code .tiled-project}) in the assets, passed to every map load so class
+     * properties resolve (F-009). {@code null} if the maps use no class properties.
+     */
+    public String tiledProject = null;
+
+    /**
      * Checks every field and throws one exception listing all problems.
      *
      * @throws EngineConfigException if any field is invalid
@@ -95,6 +101,9 @@ public final class EngineConfig {
         if (assetManifest == null || assetManifest.isBlank()) {
             problems.add("assetManifest must be a non-empty path (was " + quote(assetManifest) + ")");
         }
+        if (tiledProject != null && tiledProject.isBlank()) {
+            problems.add("tiledProject must be null or a path (was " + quote(tiledProject) + ")");
+        }
         if (inputBindings != null && inputBindings.isBlank()) {
             problems.add("inputBindings must be null or an asset ID (was " + quote(inputBindings) + ")");
         }
@@ -107,7 +116,8 @@ public final class EngineConfig {
     public String toString() {
         return "EngineConfig[virtual=" + virtualWidth + "x" + virtualHeight + ", pixelsPerUnit=" + pixelsPerUnit
                 + ", fixedStep=" + fixedStep + ", maxCatchUpSteps=" + maxCatchUpSteps + ", renderMode=" + renderMode + ", devMode=" + devMode
-                + ", assetManifest=" + quote(assetManifest) + ", inputBindings=" + quote(inputBindings) + "]";
+                + ", assetManifest=" + quote(assetManifest) + ", inputBindings=" + quote(inputBindings)
+                + ", tiledProject=" + quote(tiledProject) + "]";
     }
 
     private static String quote(String value) {

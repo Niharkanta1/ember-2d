@@ -46,7 +46,7 @@ class AssetManifestTest {
                 "\"version\" must be 1 (was 2)",
                 "assets[1] (\"a\"): duplicate id \"a\"",
                 "assets[2]: \"id\" is required",
-                "assets[2]: unknown \"type\" \"sprite\"; valid types: [texture, atlas, font, sound, music, json]",
+                "assets[2]: unknown \"type\" \"sprite\"; valid types: [texture, atlas, font, sound, music, json, map]",
                 "assets[3] (\"d\"): \"path\" is required",
                 "assets[3] (\"d\"): \"group\" must be a name or a non-empty list of names",
                 "assets[3] (\"d\"): \"optional\" must be true or false",

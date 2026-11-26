@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
+import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.ObjectMap;
@@ -82,12 +83,29 @@ public final class GdxAssets implements Assets, Disposable {
     private Pixmap magentaPixmap;
     private Texture magentaTexture;
     private BitmapFont fallbackFont;
+    private String tiledProject;
 
     public GdxAssets(AssetManifest manifest, FileHandleResolver resolver) {
         this.manifest = Objects.requireNonNull(manifest, "manifest");
         this.resolver = Objects.requireNonNull(resolver, "resolver");
         this.manager = new AssetManager(resolver);
         manager.setLoader(JsonValue.class, new JsonValueLoader(resolver));
+        manager.setLoader(TiledMap.class, ".tmx", new MapLoaders.Tmx(resolver));
+        manager.setLoader(TiledMap.class, ".tmj", new MapLoaders.Tmj(resolver));
+    }
+
+    /**
+     * Sets the Tiled project file passed to every map load (F-009, {@code EngineConfig.tiledProject}); {@code null}
+     * for none. Call before loading maps.
+     *
+     * @throws AssetLoadException if the file does not exist
+     */
+    public void setTiledProject(String path) {
+        if (path != null && !resolver.resolve(path).exists()) {
+            throw new AssetLoadException("Tiled project file not found",
+                    List.of(path + " does not exist in the game's assets (EngineConfig.tiledProject)"));
+        }
+        this.tiledProject = path;
     }
 
     /**
@@ -191,7 +209,11 @@ public final class GdxAssets implements Assets, Disposable {
                     missingRequired);
         }
         for (AssetManifest.Entry entry : present) {
-            manager.load(entry.path(), entry.type().assetClass());
+            if (entry.type() == AssetManifest.Type.MAP) {
+                manager.load(entry.path(), TiledMap.class, MapLoaders.parameters(tiledProject));
+            } else {
+                manager.load(entry.path(), entry.type().assetClass());
+            }
         }
         GroupLoad load = new GroupLoad(group, List.copyOf(present));
         loadedGroups.put(group, load);
@@ -258,6 +280,7 @@ public final class GdxAssets implements Assets, Disposable {
             case SOUND -> new NoOpSound();
             case MUSIC -> new NoOpMusic();
             case JSON -> new JsonValue(JsonValue.ValueType.object);
+            case MAP -> new TiledMap();
         };
     }
 

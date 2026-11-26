@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="10" height="6" tilewidth="16" tileheight="16" infinite="0" nextlayerid="9" nextobjectid="2">
+ <properties>
+  <property name="music" value="cave"/>
+ </properties>
+ <tileset firstgid="1" name="tiles" tilewidth="16" tileheight="16" tilecount="4" columns="4">
+  <image source="test-tiles.png" width="64" height="16"/>
+  <tile id="0"><properties><property name="solid" type="bool" value="true"/></properties></tile>
+  <tile id="1"><properties><property name="oneWay" type="bool" value="true"/></properties></tile>
+  <tile id="2"><animation><frame tileid="2" duration="100"/><frame tileid="3" duration="100"/></animation></tile>
+  <tile id="3"><properties><property name="solid" value="yes"/></properties></tile>
+ </tileset>
+ <imagelayer id="1" name="sky" parallaxx="0.5" parallaxy="0.5">
+  <properties><property name="renderLayer" value="background"/></properties>
+  <image source="test-sky.png" width="32" height="16"/>
+ </imagelayer>
+ <layer id="2" name="ground" width="10" height="6">
+  <data encoding="csv">
+4,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,2,2,2,0,0,0,0,0,
+0,0,0,0,0,0,0,3,0,0,
+1,1,1,1,1,1,1,1,1,1
+</data>
+ </layer>
+ <layer id="3" name="collision" width="10" height="6">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,2,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+ <group id="4" name="front">
+  <properties><property name="renderLayer" value="foreground"/></properties>
+  <layer id="5" name="leaves" width="10" height="6">
+   <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,3,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0
+</data>
+  </layer>
+ </group>
+ <layer id="6" name="hidden" width="10" height="6" visible="0">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,1,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+ <objectgroup id="7" name="entities">
+  <object id="1" name="spawn" x="24" y="72"><point/></object>
+ </objectgroup>
+</map>

@@ -56,7 +56,7 @@ public final class RenderTestKit {
     }
 
     public final List<Call> calls = new ArrayList<>();
-    public final Batch batch = HeadlessGdx.recorder(Batch.class, (name, args) -> {
+    private final Batch recorder = HeadlessGdx.recorder(Batch.class, (name, args) -> {
         Object[] copy = args.clone();
         for (int i = 0; i < copy.length; i++) {
             if (copy[i] instanceof Color color) {
@@ -65,6 +65,21 @@ public final class RenderTestKit {
         }
         calls.add(new Call(name, copy));
     });
+    /** The colour last set on {@link #batch} (white at first). */
+    public final Color batchColor = new Color(Color.WHITE);
+    /** Records every call; remembers {@code setColor} and answers it from {@code getColor()}. */
+    public final Batch batch = (Batch) java.lang.reflect.Proxy.newProxyInstance(Batch.class.getClassLoader(),
+            new Class<?>[] {Batch.class}, (proxy, method, args) -> {
+                Object result = method.invoke(recorder, args);
+                if (method.getName().equals("setColor")) {
+                    if (args.length == 1 && args[0] instanceof Color c) {
+                        batchColor.set(c);
+                    } else if (args.length == 4) {
+                        batchColor.set((Float) args[0], (Float) args[1], (Float) args[2], (Float) args[3]);
+                    }
+                }
+                return method.getName().equals("getColor") ? new Color(batchColor) : result;
+            });
     public final FakeTarget target = new FakeTarget();
     public final TimeState time = new TimeState(1f / 60f);
 
