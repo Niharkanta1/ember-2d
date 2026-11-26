@@ -1,0 +1,15 @@
+{
+ "version": 1,
+ "components": {
+  "Walker": {
+   "speed": 1
+  },
+  "Sprite": {
+   "layer": "world",
+   "origin": [
+    8,
+    0
+   ]
+  }
+ }
+}

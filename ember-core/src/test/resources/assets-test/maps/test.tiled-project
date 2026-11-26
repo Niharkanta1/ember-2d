@@ -25,6 +25,21 @@
      "value": true
     }
    ]
+  },
+  {
+   "id": 2,
+   "name": "Health",
+   "type": "class",
+   "useAs": [
+    "property"
+   ],
+   "members": [
+    {
+     "name": "max",
+     "type": "int",
+     "value": 3
+    }
+   ]
   }
  ]
 }

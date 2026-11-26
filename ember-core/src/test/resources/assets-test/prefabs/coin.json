@@ -1,0 +1,8 @@
+{
+ "version": 1,
+ "components": {
+  "Coin": {
+   "value": 5
+  }
+ }
+}

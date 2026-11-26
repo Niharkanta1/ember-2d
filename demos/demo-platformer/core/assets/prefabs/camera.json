@@ -1,0 +1,13 @@
+{
+ "version": 1,
+ "components": {
+  "CameraFollow": {
+   "deadZone": {
+    "x": 0,
+    "y": 0,
+    "width": 4,
+    "height": 2
+   }
+  }
+ }
+}

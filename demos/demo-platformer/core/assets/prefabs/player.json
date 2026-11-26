@@ -1,0 +1,18 @@
+{
+ "version": 1,
+ "components": {
+  "Sprite": {
+   "regionId": "tex.player",
+   "origin": [
+    8,
+    0
+   ],
+   "z": 2
+  },
+  "PlayerControl": {
+   "speed": 8,
+   "minY": 2,
+   "maxY": 9
+  }
+ }
+}

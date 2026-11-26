@@ -1,5 +1,8 @@
 { "version": 1, "assets": [
   { "id": "tex.player", "path": "gfx/player-placeholder.png", "type": "texture", "group": "global" },
   { "id": "input", "path": "input.json", "type": "json", "group": "global" },
-  { "id": "map.demo", "path": "maps/demo-level.tmx", "type": "map", "group": "global" }
+  { "id": "map.demo", "path": "maps/demo-level.tmx", "type": "map", "group": "global" },
+  { "id": "player", "path": "prefabs/player.json", "type": "prefab", "group": "global" },
+  { "id": "enemy/patroller", "path": "prefabs/enemy/patroller.json", "type": "prefab", "group": "global" },
+  { "id": "camera", "path": "prefabs/camera.json", "type": "prefab", "group": "global" }
 ] }

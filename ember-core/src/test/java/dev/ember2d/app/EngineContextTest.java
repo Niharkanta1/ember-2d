@@ -83,4 +83,20 @@ class EngineContextTest {
         assertThat(context.disposeServices()).isEmpty();
         assertThat(disposed).containsExactly("both");
     }
+
+    static final class Bolt {
+        public int damage;
+    }
+
+    @Test
+    void componentSetupFromTheConfigReachesTheRegistryAndPrefabsNeedAssets() {
+        EngineConfig config = new EngineConfig();
+        config.components = registry -> registry.register(Bolt.class, Bolt::new);
+        EngineContext.Builder builder = new EngineContext.Builder(config);
+
+        assertThat(builder.components().names()).containsExactly("Transform", "Sprite", "Bolt");
+        EngineContext context = builder.build();
+        assertThatThrownBy(context::prefabs).isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("no asset service");
+    }
 }

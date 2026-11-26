@@ -1,6 +1,6 @@
 # F-009 — Tilemaps and Entity Placement (Tiled)
 
-- Status: map part Ready (I-110, approved 2026-11-26; see "Decisions in I-110"). Entity placement (I-112) and the type generator (I-245): Draft.
+- Status: map part Ready (I-110, approved 2026-11-26; see "Decisions in I-110"); entity placement Ready (I-112, specified in F-010 "Prefabs and placement (I-112)"); the type generator (I-245): Draft.
 - Phase: 2 (loading, collision, entity placement), 3 (Tiled project type generator)
 - Module / package: `ember-core` / `ember.tilemap`; generator as a Gradle task in the build
 - Depends on: F-004, F-006, F-008, F-010

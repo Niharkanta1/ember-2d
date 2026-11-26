@@ -16,6 +16,16 @@ android {
         versionName = project.version.toString()
     }
 
+    buildTypes {
+        release {
+            // R8 on (F-010 acceptance: prefabs in a minified build). Signed with the debug key until real signing
+            // arrives with the release build (I-255).
+            minifyEnabled = true
+            signingConfig = signingConfigs.debug
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro',
+                    layout.buildDirectory.file('generated/ember-keep-rules.pro').get().asFile
+        }
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -30,6 +40,32 @@ android {
             assets.srcDirs += [rootProject.file('demos/demo-platformer/core/assets')]
         }
     }
+}
+
+// R8 keep rules for the components the demo registers (F-010): generated from DemoComponents on every build.
+configurations {
+    emberKeepRulesClasspath {
+        canBeConsumed = false
+        canBeResolved = true
+        attributes {
+            attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage, Usage.JAVA_RUNTIME))
+        }
+    }
+}
+dependencies {
+    emberKeepRulesClasspath project(':demos:demo-platformer:core')
+}
+def emberKeepRules = tasks.register('emberKeepRules', JavaExec) {
+    description = 'Generates R8 keep rules for the registered components (F-010).'
+    def out = layout.buildDirectory.file('generated/ember-keep-rules.pro')
+    classpath = configurations.emberKeepRulesClasspath
+    mainClass = 'dev.ember2d.data.KeepRules'
+    args 'dev.ember2d.demo.platformer.DemoComponents', out.get().asFile.path
+    inputs.files(classpath)
+    outputs.file(out)
+}
+tasks.named('preBuild') {
+    dependsOn emberKeepRules
 }
 
 // libGDX ships its Android .so files inside jars; extract them per ABI so they are packed into the APK.

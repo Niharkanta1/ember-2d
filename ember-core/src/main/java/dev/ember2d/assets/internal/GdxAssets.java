@@ -243,6 +243,12 @@ public final class GdxAssets implements Assets, Disposable {
     }
 
     @Override
+    public String path(String id) {
+        AssetManifest.Entry entry = manifest.find(id);
+        return entry == null ? id : entry.path();
+    }
+
+    @Override
     public boolean contains(String id) {
         return manifest.find(id) != null;
     }
@@ -281,6 +287,7 @@ public final class GdxAssets implements Assets, Disposable {
             case MUSIC -> new NoOpMusic();
             case JSON -> new JsonValue(JsonValue.ValueType.object);
             case MAP -> new TiledMap();
+            case PREFAB -> new JsonValue(JsonValue.ValueType.object);
         };
     }
 

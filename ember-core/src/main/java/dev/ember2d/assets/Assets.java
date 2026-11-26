@@ -43,4 +43,9 @@ public interface Assets {
 
     /** Whether the manifest lists this ID. */
     boolean contains(String id);
+
+    /** The file path of an asset ID, for messages; the ID itself if the manifest does not list it. */
+    default String path(String id) {
+        return id;
+    }
 }

@@ -3,6 +3,7 @@ package dev.ember2d.app;
 import com.badlogic.gdx.graphics.Color;
 import dev.ember2d.core.PublicApi;
 import dev.ember2d.render.RenderMode;
+import dev.ember2d.data.ComponentSetup;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -71,6 +72,12 @@ public final class EngineConfig {
      * properties resolve (F-009). {@code null} if the maps use no class properties.
      */
     public String tiledProject = null;
+
+    /**
+     * The game's component registrations (F-010), run once at boot; the build runs the same setup to generate R8 keep
+     * rules. {@code null} registers only the engine components ({@code Transform}, {@code Sprite}).
+     */
+    public ComponentSetup components = null;
 
     /**
      * Checks every field and throws one exception listing all problems.

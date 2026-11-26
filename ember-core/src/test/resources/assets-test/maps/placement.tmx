@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="10" height="6" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="20">
+ <tileset firstgid="1" source="icons.tsx"/>
+ <layer id="1" name="ground" width="10" height="6">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+1,1,1,1,1,1,1,1,1,1
+</data>
+ </layer>
+
+ <objectgroup id="2" name="entities">
+  <object id="1" name="walker_1" template="walker.tx" x="32" y="80">
+   <properties>
+    <property name="Walker.speed" type="float" value="5"/>
+    <property name="target" type="object" value="3"/>
+   </properties>
+  </object>
+  <object id="2" name="walker_2" template="walker.tx" x="112" y="80">
+   <properties>
+    <property name="path" type="object" value="4"/>
+    <property name="home" type="object" value="5"/>
+    <property name="zone" type="object" value="6"/>
+   </properties>
+  </object>
+  <object id="3" name="hero" type="hero" x="80" y="48" width="16" height="32" rotation="90">
+   <properties>
+    <property name="Health" type="class" propertytype="Health">
+     <properties><property name="max" type="int" value="9"/></properties>
+    </property>
+   </properties>
+  </object>
+  <object id="4" name="patrol_path" x="16" y="40"><polyline points="0,0 32,0"/></object>
+  <object id="5" name="home" x="48" y="64"><point/></object>
+  <object id="6" name="zone" x="0" y="0" width="32" height="16"/>
+  <object id="7" name="coin" type="coin" gid="2147483650" x="128" y="96" width="16" height="16"/>
+ </objectgroup>
+</map>

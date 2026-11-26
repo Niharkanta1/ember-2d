@@ -9,6 +9,10 @@ import com.badlogic.gdx.maps.tiled.TmjMapLoader;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
+import com.badlogic.gdx.utils.JsonValue;
+import com.badlogic.gdx.utils.XmlReader;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * libGDX's Tiled map loaders (F-009) with Ember2D's checks: only finite orthogonal maps, and errors that name the map
@@ -38,6 +42,9 @@ final class MapLoaders {
         @Override
         public void loadAsync(AssetManager manager, String fileName, FileHandle file, Parameters parameter) {
             check(fileName, root.getAttribute("orientation", null), root.getIntAttribute("infinite", 0) == 1);
+            List<String> old = new ArrayList<>();
+            classAttributes(root, old);
+            rejectClassAttributes(fileName, old);
             try {
                 super.loadAsync(manager, fileName, file, parameter);
             } catch (RuntimeException e) {
@@ -65,6 +72,9 @@ final class MapLoaders {
         @Override
         public void loadAsync(AssetManager manager, String fileName, FileHandle file, Parameters parameter) {
             check(fileName, root.getString("orientation", null), root.getBoolean("infinite", false));
+            List<String> old = new ArrayList<>();
+            classKeys(root.get("layers"), old);
+            rejectClassAttributes(fileName, old);
             try {
                 super.loadAsync(manager, fileName, file, parameter);
             } catch (RuntimeException e) {
@@ -88,6 +98,46 @@ final class MapLoaders {
         if (infinite) {
             throw new GdxRuntimeException("Tiled map " + fileName + ": infinite maps are not supported; "
                     + "turn off Map > Map Properties > Infinite in Tiled");
+        }
+    }
+
+    /** TMX objects with the Tiled 1.9 {@code class} attribute and no {@code type}, which libGDX would drop. */
+    private static void classAttributes(XmlReader.Element element, List<String> out) {
+        for (int i = 0; i < element.getChildCount(); i++) {
+            XmlReader.Element child = element.getChild(i);
+            if (child.getName().equals("object") && child.hasAttribute("class") && !child.hasAttribute("type")) {
+                out.add(describe(child.getAttribute("name", null), child.getAttribute("id", "?")));
+            }
+            classAttributes(child, out);
+        }
+    }
+
+    /** TMJ objects with {@code "class"} and no {@code "type"}. */
+    private static void classKeys(JsonValue layers, List<String> out) {
+        if (layers == null) {
+            return;
+        }
+        for (JsonValue layer = layers.child; layer != null; layer = layer.next) {
+            classKeys(layer.get("layers"), out);
+            JsonValue objects = layer.get("objects");
+            for (JsonValue o = objects == null ? null : objects.child; o != null; o = o.next) {
+                String cls = o.getString("class", "");
+                if (!cls.isEmpty() && o.getString("type", "").isEmpty()) {
+                    out.add(describe(o.getString("name", null), o.getString("id", "?")));
+                }
+            }
+        }
+    }
+
+    private static String describe(String name, String id) {
+        return (name == null || name.isEmpty() ? "(unnamed)" : "\"" + name + "\"") + " (id " + id + ")";
+    }
+
+    private static void rejectClassAttributes(String fileName, List<String> objects) {
+        if (!objects.isEmpty()) {
+            throw new GdxRuntimeException("Tiled map " + fileName + ": object(s) " + String.join(", ", objects)
+                    + " use the Tiled 1.9 \"class\" attribute, which libGDX ignores; open and save the map with "
+                    + "Tiled 1.10 or later (it writes \"type\")");
         }
     }
 

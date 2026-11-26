@@ -34,7 +34,9 @@ public final class AssetManifest {
         MUSIC("music", Music.class),
         JSON("json", JsonValue.class),
         /** A Tiled map, {@code .tmx} or {@code .tmj} (F-009). */
-        MAP("map", TiledMap.class);
+        MAP("map", TiledMap.class),
+        /** A prefab JSON file; its ID is the prefab ID (F-010). */
+        PREFAB("prefab", JsonValue.class);
 
         final String manifestName;
         final Class<?> assetClass;

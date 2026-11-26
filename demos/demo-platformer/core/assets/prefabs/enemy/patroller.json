@@ -1,0 +1,19 @@
+{
+ "version": 1,
+ "components": {
+  "Sprite": {
+   "regionId": "tex.player",
+   "origin": [
+    8,
+    0
+   ],
+   "tint": "#99E699",
+   "z": 1
+  },
+  "Patrol": {
+   "speed": 6,
+   "minX": 6,
+   "maxX": 30
+  }
+ }
+}

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="10" height="6" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="20">
+ <tileset firstgid="1" source="icons.tsx"/>
+ <layer id="1" name="ground" width="10" height="6">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+1,1,1,1,1,1,1,1,1,1
+</data>
+ </layer>
+
+ <objectgroup id="2" name="entities">
+  <object id="1" name="ghost" type="nosuch" x="0" y="16"><point/></object>
+  <object id="2" name="typo" type="walker" x="16" y="16">
+   <properties>
+    <property name="speeed" type="float" value="1"/>
+    <property name="Walker.speed" value="fast"/>
+    <property name="target" type="object" value="5"/>
+   </properties>
+  </object>
+  <object id="3" name="twins" type="double" x="32" y="16">
+   <properties><property name="speed" type="float" value="1"/></properties>
+  </object>
+  <object id="4" name="nested" type="hero" x="48" y="16">
+   <properties>
+    <property name="Stats" type="class" propertytype="Health">
+     <properties><property name="max" type="int" value="1"/></properties>
+    </property>
+   </properties>
+  </object>
+  <object id="5" name="mark" x="64" y="16"><point/></object>
+ </objectgroup>
+</map>

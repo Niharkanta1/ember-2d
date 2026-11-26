@@ -1,0 +1,14 @@
+{
+ "version": 1,
+ "components": {
+  "Health": {
+   "max": 3
+  },
+  "Transform": {
+   "scale": [
+    2,
+    2
+   ]
+  }
+ }
+}

@@ -13,6 +13,8 @@ import dev.ember2d.core.Tweens;
 import dev.ember2d.core.internal.TimeState;
 import dev.ember2d.event.EventBus;
 import dev.ember2d.event.internal.DefaultEventBus;
+import dev.ember2d.data.ComponentRegistry;
+import dev.ember2d.data.PrefabLibrary;
 import dev.ember2d.input.Input;
 import dev.ember2d.input.InputBindings;
 import dev.ember2d.input.internal.DefaultInput;
@@ -49,6 +51,7 @@ public final class EngineContext {
     private final DefaultEventBus events;
     private final DefaultInput input;
     private final Assets assets;
+    private final PrefabLibrary prefabs;
     private final Renderer renderer;
     private final SceneManager scenes;
     private final DebugOverlay debug;
@@ -56,8 +59,8 @@ public final class EngineContext {
     private final List<Object> instancesInOrder;
 
     private EngineContext(EngineConfig config, TimeState time, Timers timers, Tweens tweens, DefaultEventBus events,
-            DefaultInput input, Assets assets, Renderer renderer, SceneManager scenes, DebugOverlay debug,
-            Map<Class<?>, Object> services) {
+            DefaultInput input, Assets assets, PrefabLibrary prefabs, Renderer renderer, SceneManager scenes,
+            DebugOverlay debug, Map<Class<?>, Object> services) {
         this.config = config;
         this.time = time;
         this.timers = timers;
@@ -65,6 +68,7 @@ public final class EngineContext {
         this.events = events;
         this.input = input;
         this.assets = assets;
+        this.prefabs = prefabs;
         this.renderer = renderer;
         this.scenes = scenes;
         this.debug = debug;
@@ -119,6 +123,19 @@ public final class EngineContext {
             throw new IllegalStateException("This EngineContext has no asset service; set one with Builder.assets(...)");
         }
         return assets;
+    }
+
+    /**
+     * JSON prefabs and the component registry (F-010).
+     *
+     * @throws IllegalStateException in a context built without an asset service (tests)
+     */
+    public PrefabLibrary prefabs() {
+        if (prefabs == null) {
+            throw new IllegalStateException("This EngineContext has no asset service, so no prefabs; set one with "
+                    + "Builder.assets(...)");
+        }
+        return prefabs;
     }
 
     /**
@@ -202,6 +219,7 @@ public final class EngineContext {
         private final Tweens tweens;
         private final DefaultEventBus events;
         private final DefaultInput input;
+        private final ComponentRegistry components = new ComponentRegistry();
         private Assets assets;
         private Renderer renderer;
         private final SceneManager scenes;
@@ -215,6 +233,9 @@ public final class EngineContext {
             this.tweens = new Tweens(time);
             this.events = new DefaultEventBus(config.devMode);
             this.input = new DefaultInput(time, events);
+            if (config.components != null) {
+                config.components.register(components);
+            }
             this.scenes = new SceneManager(time, events, config.devMode);
             this.debug = new DebugOverlay(config.devMode || config.debugOverlayInRelease, config.debugOverlayVisibleAtStart);
         }
@@ -234,6 +255,11 @@ public final class EngineContext {
         public Builder renderer(Renderer renderer) {
             this.renderer = Objects.requireNonNull(renderer, "renderer");
             return this;
+        }
+
+        /** The component registry: engine components, plus {@link EngineConfig#components}; tests may add more. */
+        public ComponentRegistry components() {
+            return components;
         }
 
         /** Sets the input bindings; the engine sets the game's file at boot, tests may set their own. */
@@ -273,8 +299,9 @@ public final class EngineContext {
         }
 
         public EngineContext build() {
-            EngineContext context = new EngineContext(config, time, timers, tweens, events, input, assets, renderer,
-                    scenes, debug, services);
+            PrefabLibrary prefabs = assets == null ? null : new PrefabLibrary(components, assets, events);
+            EngineContext context = new EngineContext(config, time, timers, tweens, events, input, assets, prefabs,
+                    renderer, scenes, debug, services);
             scenes.attach(context);
             return context;
         }
