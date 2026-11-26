@@ -56,19 +56,21 @@ public final class InputBindings {
     private final Map<String, Action> actions;
     private final Map<String, Axis> axes;
     private final TouchThresholds touch;
+    private final TouchControlsConfig touchControls;
 
     private InputBindings(List<String> contexts, Map<String, Action> actions, Map<String, Axis> axes,
-            TouchThresholds touch) {
+            TouchThresholds touch, TouchControlsConfig touchControls) {
         this.contexts = List.copyOf(contexts);
         this.actions = Collections.unmodifiableMap(actions);
         this.axes = Collections.unmodifiableMap(axes);
         this.touch = touch;
+        this.touchControls = touchControls;
     }
 
     /** Bindings with only an empty {@value #GAMEPLAY} context. */
     public static InputBindings empty() {
         return new InputBindings(List.of(GAMEPLAY), new LinkedHashMap<>(), new LinkedHashMap<>(),
-                TouchThresholds.DEFAULTS);
+                TouchThresholds.DEFAULTS, null);
     }
 
     /**
@@ -89,8 +91,9 @@ public final class InputBindings {
             throw p.fail();
         }
         for (JsonValue field = json.child; field != null; field = field.next) {
-            if (!"version".equals(field.name) && !"contexts".equals(field.name) && !"touch".equals(field.name)) {
-                p.problem(field.name, "unknown field (expected version, contexts, touch)");
+            if (!"version".equals(field.name) && !"contexts".equals(field.name) && !"touch".equals(field.name)
+                    && !"touchControls".equals(field.name)) {
+                p.problem(field.name, "unknown field (expected version, contexts, touch, touchControls)");
             }
         }
         JsonValue version = json.get("version");
@@ -118,10 +121,16 @@ public final class InputBindings {
             }
         }
         TouchThresholds touch = p.touch(json.get("touch"));
+        TouchControlsConfig controls = p.touchControls(json.get("touchControls"), actions.keySet(), axes);
         if (!problems.isEmpty()) {
             throw p.fail();
         }
-        return new InputBindings(contexts, actions, axes, touch);
+        return new InputBindings(contexts, actions, axes, touch, controls);
+    }
+
+    /** The on-screen controls (F-022, I-122), or null if the file has no {@code touchControls} section. */
+    public TouchControlsConfig touchControls() {
+        return touchControls;
     }
 
     /** The gesture thresholds (defaults unless the file has a {@code touch} section). */
@@ -237,6 +246,118 @@ public final class InputBindings {
 
         InputBindingsException fail() {
             return new InputBindingsException("Invalid input bindings " + source, problems);
+        }
+
+        TouchControlsConfig touchControls(JsonValue json, Set<String> actionNames, Map<String, Axis> axes) {
+            if (json == null) {
+                return null;
+            }
+            String path = "touchControls";
+            if (!json.isObject()) {
+                problem(path, "must be an object with opacity, joystick, buttons");
+                return null;
+            }
+            fields(json, path, List.of("opacity", "joystick", "buttons"));
+            float opacity = number(json, "opacity", 0.35f, path, 0f, 1f);
+            TouchControlsConfig.Joystick joystick = null;
+            JsonValue j = json.get("joystick");
+            if (j != null) {
+                String jp = path + ".joystick";
+                if (!j.isObject()) {
+                    problem(jp, "must be an object");
+                } else {
+                    fields(j, jp, List.of("axis", "mode", "x", "y", "radius", "deadZone"));
+                    String axis = j.getString("axis", null);
+                    Axis a = axis == null ? null : axes.get(axis);
+                    if (axis == null) {
+                        problem(jp + ".axis", "required (a 2D axis name)");
+                    } else if (a == null) {
+                        problem(jp + ".axis", "unknown axis \"" + axis + "\"");
+                    } else if (!a.twoD()) {
+                        problem(jp + ".axis", "axis \"" + axis + "\" must be 2D (left/right/up/down)");
+                    }
+                    String mode = j.getString("mode", "floating");
+                    if (!mode.equals("floating") && !mode.equals("fixed")) {
+                        problem(jp + ".mode", "must be \"floating\" or \"fixed\"");
+                    }
+                    float dead = number(j, "deadZone", 0.2f, jp, 0f, 0.95f);
+                    joystick = new TouchControlsConfig.Joystick(axis, mode.equals("floating"),
+                            number(j, "x", 96f, jp, 0f, Float.MAX_VALUE), number(j, "y", 96f, jp, 0f, Float.MAX_VALUE),
+                            positive(j, "radius", 56f, jp), dead);
+                }
+            }
+            List<TouchControlsConfig.Button> buttons = new ArrayList<>();
+            JsonValue b = json.get("buttons");
+            if (b != null) {
+                if (!b.isArray()) {
+                    problem(path + ".buttons", "must be a list of buttons");
+                } else {
+                    if (b.size > TouchControlsConfig.MAX_BUTTONS) {
+                        problem(path + ".buttons", "at most " + TouchControlsConfig.MAX_BUTTONS + " buttons (has "
+                                + b.size + ")");
+                    }
+                    int i = 0;
+                    for (JsonValue item = b.child; item != null; item = item.next, i++) {
+                        String bp = path + ".buttons[" + i + "]";
+                        if (!item.isObject()) {
+                            problem(bp, "must be an object");
+                            continue;
+                        }
+                        fields(item, bp, List.of("action", "label", "x", "y", "radius"));
+                        String action = item.getString("action", null);
+                        if (action == null) {
+                            problem(bp + ".action", "required (an action name)");
+                        } else if (!actionNames.contains(action)) {
+                            problem(bp + ".action", "unknown action \"" + action + "\"");
+                        }
+                        JsonValue label = item.get("label");
+                        if (label != null && !label.isString()) {
+                            problem(bp + ".label", "must be a string");
+                        }
+                        if (item.get("x") == null || item.get("y") == null) {
+                            problem(bp, "\"x\" and \"y\" are required");
+                        }
+                        buttons.add(new TouchControlsConfig.Button(action, label == null || !label.isString() ? ""
+                                : label.asString(), number(item, "x", 0f, bp, 0f, Float.MAX_VALUE),
+                                number(item, "y", 0f, bp, -Float.MAX_VALUE, Float.MAX_VALUE),
+                                positive(item, "radius", 40f, bp)));
+                    }
+                }
+            }
+            return new TouchControlsConfig(opacity, joystick, buttons);
+        }
+
+        private void fields(JsonValue json, String path, List<String> allowed) {
+            for (JsonValue f = json.child; f != null; f = f.next) {
+                if (!allowed.contains(f.name)) {
+                    problem(path + "." + f.name, "unknown field (expected " + String.join(", ", allowed) + ")");
+                }
+            }
+        }
+
+        private float number(JsonValue json, String key, float fallback, String path, float min, float max) {
+            JsonValue v = json.get(key);
+            if (v == null) {
+                return fallback;
+            }
+            if (!v.isNumber() || v.asFloat() < min || v.asFloat() > max || Float.isInfinite(v.asFloat())) {
+                problem(path + "." + key, "must be a number" + (min == 0f && max == 1f ? " from 0 to 1"
+                        : min == 0f && max < 1f ? " from 0 to " + max : min == 0f ? " >= 0" : ""));
+                return fallback;
+            }
+            return v.asFloat();
+        }
+
+        private float positive(JsonValue json, String key, float fallback, String path) {
+            JsonValue v = json.get(key);
+            if (v == null) {
+                return fallback;
+            }
+            if (!v.isNumber() || !(v.asFloat() > 0f) || Float.isInfinite(v.asFloat())) {
+                problem(path + "." + key, "must be a number > 0");
+                return fallback;
+            }
+            return v.asFloat();
         }
 
         TouchThresholds touch(JsonValue json) {

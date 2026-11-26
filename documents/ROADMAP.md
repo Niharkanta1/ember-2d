@@ -66,6 +66,7 @@ Chapters must match the code at the gate; later phases update earlier chapters w
 - Tiled map loading, rendering, tile collision mapping (F-009).
 - Component registry, JSON prefabs and Tiled entity placement: classes, property overrides, templates, object references (F-009, F-010).
 - Kinematic collision, triggers, spatial queries (F-006).
+- Basic on-screen controls (joystick and action buttons) so the slice is playable on Android; the full controls follow in Phase 3 (F-022, I-122).
 - Animation: atlas and Aseprite import, events, animation state machine (F-007).
 - Text rendering (F-004 part 2).
 - Hot reload in dev builds (F-008 part 2).

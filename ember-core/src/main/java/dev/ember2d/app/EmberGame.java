@@ -45,6 +45,7 @@ public class EmberGame implements ApplicationListener {
     private GdxAssets assets;
     private GdxRenderer renderer;
     private GdxDebugCanvas debugCanvas;
+    private TouchControlsOverlay controlsOverlay;
     private AppState state = AppState.CREATED;
     private EngineContext context;
     private GameLoop loop;
@@ -118,6 +119,13 @@ public class EmberGame implements ApplicationListener {
         if (Gdx.graphics != null) {
             input.setDensity(Gdx.graphics.getDensity());   // touch thresholds are in dp
         }
+        boolean touchDevice = Gdx.app != null && (Gdx.app.getType() == Application.ApplicationType.Android
+                || Gdx.app.getType() == Application.ApplicationType.iOS);
+        input.setTouchControlsVisible(config.touchControls == TouchControlsMode.ALWAYS
+                || (config.touchControls == TouchControlsMode.AUTO && touchDevice));
+        if (Gdx.graphics != null) {
+            input.setScreenSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        }
         if (Gdx.app != null) {
             // On Android every finger is reported as mouse button 0: fingers must not drive MOUSE_* bindings.
             input.source().setMouseButtons(Gdx.app.getType() != Application.ApplicationType.Android
@@ -149,6 +157,7 @@ public class EmberGame implements ApplicationListener {
             renderer.resize(Gdx.graphics != null ? Gdx.graphics.getBackBufferWidth() : width,
                     Gdx.graphics != null ? Gdx.graphics.getBackBufferHeight() : height);
         }
+        ((DefaultInput) context.input()).setScreenSize(width, height);   // touch coordinates use the logical size
         context.forEachLifecycleListener("onResize", listener -> listener.onResize(width, height));
     }
 
@@ -225,6 +234,9 @@ public class EmberGame implements ApplicationListener {
         if (debugCanvas != null) {
             debugCanvas.dispose();
         }
+        if (controlsOverlay != null) {
+            controlsOverlay.dispose();
+        }
         if (renderer != null) {
             renderer.dispose();   // engine-owned; after the game's services (reverse boot order)
         }
@@ -274,6 +286,14 @@ public class EmberGame implements ApplicationListener {
         renderer.endFrame();
         if (debug.isVisible()) {
             debug.renderPanel(debugCanvas, renderer.screenWidth(), renderer.screenHeight());
+        }
+        DefaultInput input = (DefaultInput) context.input();
+        if (input.touchControlsActive() && Gdx.graphics != null) {
+            if (controlsOverlay == null) {
+                controlsOverlay = new TouchControlsOverlay();   // created on first use
+            }
+            controlsOverlay.draw(input.touchControls(), renderer.batch(), Gdx.graphics.getWidth(),
+                    Gdx.graphics.getHeight());
         }
     }
 

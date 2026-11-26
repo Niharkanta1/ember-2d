@@ -28,6 +28,8 @@ public final class DefaultInput implements Input {
     private final EventBus events;
     private final GdxInputSource source = new GdxInputSource();
     private final TouchTracker touch = new TouchTracker();
+    private final TouchControls controls = new TouchControls();
+    private int stickAxis = -1;
     private final TouchTracker.Sink touchSink = this::touchInput;
     private final Vector2 dragA = new Vector2();
     private final Vector2 dragB = new Vector2();
@@ -92,6 +94,7 @@ public final class DefaultInput implements Input {
         this.bindings = Objects.requireNonNull(bindings, "bindings");
         touch.configure(bindings.touch(), density);
         touch.releaseAll();
+        controls.configure(bindings.touchControls(), density);
         contexts = bindings.contexts();
         contextIndex.clear();
         for (int i = 0; i < contexts.size(); i++) {
@@ -115,7 +118,7 @@ public final class DefaultInput implements Input {
             String name = actionNames.get(a);
             actionIndex.put(name, a);
             actionContext[a] = contextIndex.get(bindings.contextOf(name), 0);
-            actionCodes[a] = codes(bindings.actionInputs(name));
+            actionCodes[a] = withButtons(codes(bindings.actionInputs(name)), name, bindings.touchControls());
             for (int code : actionCodes[a]) {
                 contextBinds[actionContext[a]][code] = true;
                 if (perCode[code] == null) {
@@ -153,6 +156,10 @@ public final class DefaultInput implements Input {
             }
         }
 
+        stickAxis = -1;
+        if (bindings.touchControls() != null && bindings.touchControls().joystick() != null) {
+            stickAxis = axisIndex.get(bindings.touchControls().joystick().axis(), -1);
+        }
         Arrays.fill(physicalDown, false);
         Arrays.fill(stale, false);
         stack.clear();
@@ -166,6 +173,25 @@ public final class DefaultInput implements Input {
     public void setDensity(float density) {
         this.density = density > 0f ? density : 1f;
         touch.configure(bindings.touch(), this.density);
+        controls.configure(bindings.touchControls(), this.density);
+    }
+
+    /** The window size in pixels (as touch coordinates report it), for placing the on-screen controls. */
+    public void setScreenSize(float width, float height) {
+        controls.setScreen(width, height);
+    }
+
+    /** Shows or hides the on-screen controls (hiding lets go of them). */
+    public void setTouchControlsVisible(boolean visible) {
+        if (!visible && controls.active()) {
+            releaseAll();
+        }
+        controls.setVisible(visible);
+    }
+
+    /** The on-screen controls, for drawing. */
+    public TouchControls touchControls() {
+        return controls;
     }
 
     /** Sets how window pixels map to world units; {@code null} keeps window pixels. */
@@ -182,6 +208,7 @@ public final class DefaultInput implements Input {
         if (releasePending) {
             releasePending = false;
             touch.releaseAll();
+            controls.reset();
             for (int code = 0; code < InputNames.COUNT; code++) {
                 if (physicalDown[code]) {
                     apply(code, false, false, false);
@@ -196,6 +223,7 @@ public final class DefaultInput implements Input {
             apply(event >>> 1, (event & 1) == 1, keyboardCaptured, pointerCaptured);
         }
         recorded.clear();
+        controls.process(source.touches(), pointerCaptured, touchSink);   // claims its touches first
         touch.process(source.touches(), time.unscaledElapsed(), pointerCaptured, touchSink);
         float delta = time.delta();
         for (int a = 0; a < actionDown.length; a++) {
@@ -255,6 +283,9 @@ public final class DefaultInput implements Input {
     public Vector2 axis2(String axis, Vector2 out) {
         int x = axis(axis, true);
         int ctx = axisContext[x];
+        if (x == stickAxis && controls.stickHeld() && stack.peek() == ctx) {
+            return out.set(controls.valueX(), controls.valueY());   // analog, already within the unit circle
+        }
         float dx = direction(axisCodes[x][1], ctx) - direction(axisCodes[x][0], ctx);
         float dy = direction(axisCodes[x][2], ctx) - direction(axisCodes[x][3], ctx);
         if (axisNormalize[x] && dx != 0f && dy != 0f) {
@@ -315,6 +346,16 @@ public final class DefaultInput implements Input {
         toWorld(touch.x(p), touch.y(p), dragA);
         toWorld(touch.previousX(p), touch.previousY(p), dragB);
         return out.set(dragA).sub(dragB);
+    }
+
+    @Override
+    public boolean touchControlsActive() {
+        return controls.active();
+    }
+
+    @Override
+    public Vector2 joystickValue(Vector2 out) {
+        return out.set(controls.valueX(), controls.valueY());
     }
 
     @Override
@@ -483,6 +524,20 @@ public final class DefaultInput implements Input {
                     : "1D; use axis()"));
         }
         return x;
+    }
+
+    /** Adds the virtual codes of the on-screen buttons that press this action. */
+    private static int[] withButtons(int[] codes, String action, dev.ember2d.input.TouchControlsConfig config) {
+        if (config == null) {
+            return codes;
+        }
+        IntArray all = new IntArray(codes);
+        for (int b = 0; b < config.buttons().size(); b++) {
+            if (action.equals(config.buttons().get(b).action())) {
+                all.add(InputNames.VIRTUAL_BASE + b);
+            }
+        }
+        return all.toArray();
     }
 
     private static int[] codes(List<String> names) {

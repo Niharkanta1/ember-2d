@@ -27,6 +27,7 @@ class EmberGameInputTest {
             { "version": 1, "assets": [
               { "id": "input.main", "path": "input/test-input.json", "type": "json", "group": "global" },
               { "id": "input.bad", "path": "input/bad-input.json", "type": "json", "group": "global" },
+              { "id": "input.controls", "path": "input/controls-input.json", "type": "json", "group": "global" },
               { "id": "not.json", "path": "input/test-input.json", "type": "sound", "group": "extra" } ] }
             """;
 
@@ -53,8 +54,13 @@ class EmberGameInputTest {
     }
 
     private static EmberGame game(String bindingsId) {
+        return game(bindingsId, TouchControlsMode.AUTO);
+    }
+
+    private static EmberGame game(String bindingsId, TouchControlsMode mode) {
         EngineConfig config = new EngineConfig();
         config.inputBindings = bindingsId;
+        config.touchControls = mode;
         return new EmberGame(config, c -> new GdxAssets(AssetManifest.parse(MANIFEST, "manifest.json"), RESOLVER));
     }
 
@@ -111,5 +117,24 @@ class EmberGameInputTest {
 
         assertThat(input.pressed("jump")).isFalse();
         assertThat(input.justReleased("jump")).isTrue();
+    }
+
+    @Test
+    void touchControlsShowOnTouchDevicesOrWhenForced() {
+        EmberGame auto = game("input.controls");
+        auto.create();
+        assertThat(auto.context().input().touchControlsActive()).as("AUTO on a non-touch app").isFalse();
+
+        EmberGame always = game("input.controls", TouchControlsMode.ALWAYS);
+        always.create();
+        assertThat(always.context().input().touchControlsActive()).isTrue();
+
+        EmberGame never = game("input.controls", TouchControlsMode.NEVER);
+        never.create();
+        assertThat(never.context().input().touchControlsActive()).isFalse();
+
+        EmberGame without = game("input.main", TouchControlsMode.ALWAYS);
+        without.create();
+        assertThat(without.context().input().touchControlsActive()).as("no touchControls section").isFalse();
     }
 }

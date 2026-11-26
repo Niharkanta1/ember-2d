@@ -34,11 +34,13 @@ import java.util.Map;
  *       of the player (foreground layer); the camera stays inside the map.</li>
  *   <li>Prefabs (I-112): the player, the patrollers, the camera (following the player through an object reference),
  *       a moving platform and a trigger zone are placed in the map; one more patroller is spawned from code.</li>
- *   <li>Collision (I-120): the player walks ({@code move}), jumps ({@code jump}: Space, Up, W, tap), drops through
+ *   <li>Collision (I-120): the player walks ({@code move}), jumps ({@code jump}: Space, Up, W), drops through
  *       the one-way planks with down + jump, rides the moving platform; patrollers turn at walls; the glow zone tints
  *       the player while inside; a squish respawns the player. F3 shows the colliders.</li>
  *   <li>Input (I-100, I-105): {@code pause} (P, double tap) pauses game time; {@code menu} (Escape, Android back,
  *       long press) opens a menu context in which the same keys move a cursor and {@code ui_back} closes it.</li>
+ *   <li>On-screen controls (I-122, touch screens or desktop {@code --touch-controls}): a floating joystick on the
+ *       left half walks, button A jumps, button II pauses.</li>
  * </ul>
  */
 final class DemoScene extends Scene {

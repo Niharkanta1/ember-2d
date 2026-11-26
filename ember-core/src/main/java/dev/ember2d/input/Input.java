@@ -72,6 +72,12 @@ public interface Input {
     /** World units moved this frame by the lowest-numbered dragging finger; zero when nothing drags. */
     Vector2 dragDelta(Vector2 out);
 
+    /** True while the on-screen controls (F-022, I-122) are configured and shown. */
+    boolean touchControlsActive();
+
+    /** The on-screen joystick's value (x right, y up, length 0-1), zero while it is not held. Returns {@code out}. */
+    Vector2 joystickValue(Vector2 out);
+
     /**
      * Puts a context on top of the stack.
      *

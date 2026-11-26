@@ -94,7 +94,7 @@ class InputBindingsTest {
                 """);
 
         assertThat(e.problems()).containsExactlyInAnyOrder(
-                "input.json: extra: unknown field (expected version, contexts, touch)",
+                "input.json: extra: unknown field (expected version, contexts, touch, touchControls)",
                 "input.json: version: unsupported version 2 (expected 1)",
                 "input.json: contexts: the \"gameplay\" context is required",
                 "input.json: contexts.ui.keys: unknown field (expected actions, axes)",
@@ -136,6 +136,44 @@ class InputBindingsTest {
         assertThat(invalid("""
                 { "version": 1, "touch": [], "contexts": { "gameplay": { } } }
                 """).problems()).hasSize(1).first().asString().startsWith("input.json: touch: must be an object");
+    }
+
+    @Test
+    void touchControlsParseWithDefaults() {
+        assertThat(parse(VALID).touchControls()).as("no section").isNull();
+        InputBindings b = parse("""
+                { "version": 1, "touchControls": { "joystick": { "axis": "move" },
+                    "buttons": [ { "action": "jump", "label": "A", "x": 72, "y": -40 } ] },
+                  "contexts": { "gameplay": { "actions": { "jump": ["SPACE"] },
+                    "axes": { "move": { "left": ["A"], "right": ["D"], "up": ["W"], "down": ["S"] } } } } }
+                """);
+
+        TouchControlsConfig c = b.touchControls();
+        assertThat(c.opacity()).isEqualTo(0.35f);
+        assertThat(c.joystick()).isEqualTo(new TouchControlsConfig.Joystick("move", true, 96f, 96f, 56f, 0.2f));
+        assertThat(c.buttons()).containsExactly(new TouchControlsConfig.Button("jump", "A", 72f, -40f, 40f));
+    }
+
+    @Test
+    void invalidTouchControlsAreReported() {
+        InputBindingsException e = invalid("""
+                { "version": 1, "touchControls": { "opacity": 2, "size": 1,
+                    "joystick": { "axis": "steer", "mode": "wobbly", "radius": 0 },
+                    "buttons": [ { "action": "fly", "x": 10, "y": 10 }, { "action": "jump", "label": 3 }, 5 ] },
+                  "contexts": { "gameplay": { "actions": { "jump": ["SPACE"] },
+                    "axes": { "steer": { "negative": ["Q"], "positive": ["E"] } } } } }
+                """);
+
+        assertThat(e.problems()).containsExactlyInAnyOrder(
+                "input.json: touchControls.size: unknown field (expected opacity, joystick, buttons)",
+                "input.json: touchControls.opacity: must be a number from 0 to 1",
+                "input.json: touchControls.joystick.axis: axis \"steer\" must be 2D (left/right/up/down)",
+                "input.json: touchControls.joystick.mode: must be \"floating\" or \"fixed\"",
+                "input.json: touchControls.joystick.radius: must be a number > 0",
+                "input.json: touchControls.buttons[0].action: unknown action \"fly\"",
+                "input.json: touchControls.buttons[1].label: must be a string",
+                "input.json: touchControls.buttons[1]: \"x\" and \"y\" are required",
+                "input.json: touchControls.buttons[2]: must be an object");
     }
 
     @Test

@@ -1,9 +1,15 @@
 { "version": 1,
   "contexts": {
     "gameplay": {
-      "actions": { "jump": ["SPACE", "Z", "UP", "W", "TAP"], "pause": ["P", "DOUBLE_TAP"],
+      "actions": { "jump": ["SPACE", "Z", "UP", "W"], "pause": ["P", "DOUBLE_TAP"],
                    "menu": ["ESCAPE", "BACK", "LONG_PRESS"] },
       "axes": { "move": { "left": ["LEFT", "A"], "right": ["RIGHT", "D"], "up": ["UP", "W"], "down": ["DOWN", "S"] } } },
     "ui": {
       "actions": { "ui_back": ["ESCAPE", "BACK", "TAP"] },
-      "axes": { "ui_nav": { "left": ["LEFT", "A"], "right": ["RIGHT", "D"], "up": ["UP", "W"], "down": ["DOWN", "S"] } } } } }
+      "axes": { "ui_nav": { "left": ["LEFT", "A"], "right": ["RIGHT", "D"], "up": ["UP", "W"], "down": ["DOWN", "S"] } } } },
+  "touchControls": {
+    "opacity": 0.35,
+    "joystick": { "axis": "move", "mode": "floating", "radius": 56, "deadZone": 0.2 },
+    "buttons": [
+      { "action": "jump", "label": "A", "x": 80, "y": 80, "radius": 44 },
+      { "action": "pause", "label": "II", "x": 48, "y": -48, "radius": 24 } ] } }

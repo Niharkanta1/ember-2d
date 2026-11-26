@@ -79,6 +79,9 @@ public final class EngineConfig {
      */
     public ComponentSetup components = null;
 
+    /** When the on-screen controls of the bindings file are shown (F-022, I-122). */
+    public TouchControlsMode touchControls = TouchControlsMode.AUTO;
+
     /**
      * Checks every field and throws one exception listing all problems.
      *
@@ -107,6 +110,9 @@ public final class EngineConfig {
         }
         if (assetManifest == null || assetManifest.isBlank()) {
             problems.add("assetManifest must be a non-empty path (was " + quote(assetManifest) + ")");
+        }
+        if (touchControls == null) {
+            problems.add("touchControls must be set (was null)");
         }
         if (tiledProject != null && tiledProject.isBlank()) {
             problems.add("tiledProject must be null or a path (was " + quote(tiledProject) + ")");

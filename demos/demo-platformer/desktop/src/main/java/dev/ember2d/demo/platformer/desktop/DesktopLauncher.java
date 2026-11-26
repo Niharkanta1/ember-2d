@@ -3,6 +3,8 @@ package dev.ember2d.demo.platformer.desktop;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import dev.ember2d.app.EmberGame;
+import dev.ember2d.app.EngineConfig;
+import dev.ember2d.app.TouchControlsMode;
 import dev.ember2d.core.Log;
 import dev.ember2d.demo.platformer.PlatformerDemo;
 import dev.ember2d.desktop.CrashLog;
@@ -40,7 +42,11 @@ public final class DesktopLauncher {
         configuration.setForegroundFPS(Lwjgl3ApplicationConfiguration.getDisplayMode().refreshRate + 1);
         configuration.setWindowedMode(1280, 720);
         try {
-            EmberGame game = new EmberGame(PlatformerDemo.config(devMode));
+            EngineConfig config = PlatformerDemo.config(devMode);
+            if (List.of(args).contains("--touch-controls")) {
+                config.touchControls = TouchControlsMode.ALWAYS;   // try the on-screen controls with the mouse
+            }
+            EmberGame game = new EmberGame(config);
             configuration.setWindowListener(DesktopWindow.focusListener(game));
             new Lwjgl3Application(game, configuration);
         } finally {
