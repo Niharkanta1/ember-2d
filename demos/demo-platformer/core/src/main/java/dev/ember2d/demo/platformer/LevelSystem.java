@@ -163,6 +163,7 @@ public final class LevelSystem extends EntitySystem {
     }
 
     private void defeat(int e, Enemy enemy) {
+        events.publish(new EnemyStomped(e));
         enemy.defeated = true;
         enemy.defeatedTime = 0f;
         world().remove(e, Patroller.class);
@@ -206,6 +207,7 @@ public final class LevelSystem extends EntitySystem {
         }
         PlatformerBody body = world().get(player, PlatformerBody.class);
         deaths++;
+        events.publish(new PlayerHurt(player));
         hurtTimer = HURT_SECONDS;
         body.locked = true;
         body.vx = 0f;
@@ -224,6 +226,7 @@ public final class LevelSystem extends EntitySystem {
         Checkpoint checkpoint = world().get(e.trigger(), Checkpoint.class);
         if (checkpoint != null && !checkpoint.active && !complete()) {
             checkpoint.active = true;
+            events.publish(new CheckpointReached(e.trigger()));
             Vector2 at = world().get(e.trigger(), Transform.class).position;
             respawn.set(at);
             respawnSet = true;

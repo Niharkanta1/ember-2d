@@ -7,6 +7,8 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.utils.JsonValue;
 import dev.ember2d.assets.internal.AssetManifest;
 import dev.ember2d.assets.internal.GdxAssets;
+import dev.ember2d.audio.internal.GdxAudio;
+import dev.ember2d.camera.CameraRig;
 import dev.ember2d.core.Log;
 import dev.ember2d.core.PublicApi;
 import dev.ember2d.core.internal.GameLoop;
@@ -50,6 +52,7 @@ public class EmberGame implements ApplicationListener {
     private EngineContext context;
     private GameLoop loop;
     private HotReload hotReload;
+    private GdxAudio audio;
     private int hotReloadResets;
 
     public EmberGame(EngineConfig config) {
@@ -114,6 +117,15 @@ public class EmberGame implements ApplicationListener {
             assets = null;
             context = null;
             throw e;
+        }
+        if (context.audio() instanceof GdxAudio engineAudio) {
+            audio = engineAudio;
+            for (AssetManifest.Entry entry : assets.manifest().entries()) {
+                if (entry.maxInstances() > 0) {
+                    audio.setLimit(entry.id(), entry.maxInstances());
+                }
+            }
+            assets.setBeforeRelease(audio::release);
         }
         DefaultInput input = builder.inputState();
         if (renderer != null) {
@@ -206,6 +218,9 @@ public class EmberGame implements ApplicationListener {
         state = AppState.SUSPENDED;
         LOG.info("Suspended");
         context.input().releaseAll();   // no stuck keys: key-up events can be lost while suspended
+        if (audio != null) {
+            audio.suspend();
+        }
         context.forEachLifecycleListener("onSuspend", AppLifecycleListener::onSuspend);
         context.events().publish(new AppSuspended());
     }
@@ -220,6 +235,9 @@ public class EmberGame implements ApplicationListener {
         state = AppState.RUNNING;
         loop.resetAccumulator();
         LOG.info("Resumed");
+        if (audio != null) {
+            audio.resume();
+        }
         context.forEachLifecycleListener("onResume", AppLifecycleListener::onResume);
         context.events().publish(new AppResumed());
     }
@@ -235,6 +253,9 @@ public class EmberGame implements ApplicationListener {
             return; // never started: nothing to release
         }
         context.scenes().exitAll();
+        if (audio != null) {
+            audio.stopAll();
+        }
         if (config.devMode && config.assetWatcher != null) {
             config.assetWatcher.close();
         }
@@ -277,6 +298,14 @@ public class EmberGame implements ApplicationListener {
 
     private void updateAssets() {
         assets.update();
+        if (audio != null) {
+            audio.update(context.time().unscaledDelta());   // fades run on real time
+            if (renderer != null) {
+                CameraRig camera = renderer.camera();
+                audio.setListener(camera.position.x, camera.position.y, camera.viewWidth() / 2f,
+                        camera.viewHeight() / 2f);
+            }
+        }
         if (hotReload == null) {
             return;
         }

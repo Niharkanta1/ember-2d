@@ -144,6 +144,7 @@ public final class DirectoryWatcher implements AssetWatcher {
                     if (event.kind() == StandardWatchEventKinds.ENTRY_CREATE) {
                         try {
                             registerTree(changed);   // a new subfolder: watch it too
+                            reportFiles(changed);    // files written before it was watched would be missed
                         } catch (IOException | ClosedWatchServiceException e) {
                             LOG.warn("Hot reload: cannot watch new folder " + changed + ": " + e.getMessage());
                         }
@@ -164,6 +165,21 @@ public final class DirectoryWatcher implements AssetWatcher {
                 folders.remove(key);   // the folder was deleted
             }
         }
+    }
+
+    /** Reports every file under a folder as changed. */
+    private void reportFiles(Path start) throws IOException {
+        Files.walkFileTree(start, new SimpleFileVisitor<>() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+                String relative = root.relativize(file).toString().replace('\\', '/');
+                synchronized (lock) {
+                    pending.add(relative);
+                    lastChange = System.nanoTime();
+                }
+                return FileVisitResult.CONTINUE;
+            }
+        });
     }
 
     private void registerTree(Path start) throws IOException {

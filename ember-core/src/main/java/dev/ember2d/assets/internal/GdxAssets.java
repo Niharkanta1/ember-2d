@@ -92,6 +92,7 @@ public final class GdxAssets implements Assets, Disposable {
     private String tiledProject;
     private String rootPrefix = "";   // absolute assets folder + '/' (hot reload); dependency names start with it
     private int generation;
+    private Consumer<String> beforeRelease = id -> { };
 
     public GdxAssets(AssetManifest manifest, FileHandleResolver resolver) {
         this.manifest = Objects.requireNonNull(manifest, "manifest");
@@ -274,11 +275,24 @@ public final class GdxAssets implements Assets, Disposable {
         return load;
     }
 
+    /**
+     * Called with an asset ID just before that asset is disposed (group unloaded, or replaced by hot reload), so the
+     * audio service can stop it first (F-011).
+     */
+    public void setBeforeRelease(Consumer<String> listener) {
+        this.beforeRelease = Objects.requireNonNull(listener, "listener");
+    }
+
     @Override
     public void unloadGroup(String group) {
         GroupLoad load = loadedGroups.remove(group);
         if (load == null) {
             return;
+        }
+        for (AssetManifest.Entry entry : load.queued) {
+            if (manager.contains(entry.key()) && manager.getReferenceCount(entry.key()) <= 1) {
+                beforeRelease.accept(entry.id());   // the last reference: about to be disposed
+            }
         }
         for (AssetManifest.Entry entry : load.queued) {
             if (manager.contains(entry.key())) {
@@ -376,6 +390,7 @@ public final class GdxAssets implements Assets, Disposable {
         int[] references = new int[ok.size()];
         for (int i = 0; i < ok.size(); i++) {
             String key = ok.get(i).key();
+            beforeRelease.accept(ok.get(i).id());
             references[i] = manager.getReferenceCount(key);
             while (manager.contains(key)) {
                 manager.unload(key);

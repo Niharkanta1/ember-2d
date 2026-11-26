@@ -75,11 +75,19 @@ public final class AssetManifest {
         }
     }
 
-    /** One manifest entry; {@code font} holds the font options of {@code font} and {@code freetype} entries. */
-    public record Entry(String id, String path, Type type, List<String> groups, boolean optional, FontOptions font) {
+    /**
+     * One manifest entry; {@code font} holds the font options of {@code font} and {@code freetype} entries, and
+     * {@code maxInstances} the concurrency limit of a {@code sound} (0 = none, F-011).
+     */
+    public record Entry(String id, String path, Type type, List<String> groups, boolean optional, FontOptions font,
+            int maxInstances) {
 
         public Entry(String id, String path, Type type, List<String> groups, boolean optional) {
-            this(id, path, type, groups, optional, null);
+            this(id, path, type, groups, optional, null, 0);
+        }
+
+        public Entry(String id, String path, Type type, List<String> groups, boolean optional, FontOptions font) {
+            this(id, path, type, groups, optional, font, 0);
         }
 
         /**
@@ -195,6 +203,17 @@ public final class AssetManifest {
             problems.add(where + ": \"optional\" must be true or false");
         }
         FontOptions font = fontOptions(item.get("font"), type, path, where, problems);
+        int maxInstances = 0;
+        JsonValue max = item.get("maxInstances");
+        if (max != null) {
+            if (type != null && type != Type.SOUND) {
+                problems.add(where + ": \"maxInstances\" is only for sound entries");
+            } else if (!max.isLong() || max.asInt() < 1) {
+                problems.add(where + ": \"maxInstances\" must be a whole number > 0");
+            } else {
+                maxInstances = max.asInt();
+            }
+        }
         if (type == Type.MAP && path != null && !path.endsWith(".tmx") && !path.endsWith(".tmj")) {
             problems.add(where + ": a map must be a .tmx or .tmj file (was " + path + ")");
         }
@@ -203,7 +222,8 @@ public final class AssetManifest {
             return;
         }
         if (id != null && path != null && type != null && groups != null) {
-            entries.put(id, new Entry(id, path, type, groups, optionalValue != null && optionalValue.asBoolean(), font));
+            entries.put(id, new Entry(id, path, type, groups, optionalValue != null && optionalValue.asBoolean(), font,
+                    maxInstances));
         }
     }
 

@@ -69,9 +69,7 @@ class DirectoryWatcherTest {
     void aNewSubfolderIsWatchedToo() throws IOException, InterruptedException {
         try (DirectoryWatcher watcher = new DirectoryWatcher(dir, 100)) {
             Files.createDirectories(dir.resolve("new"));
-            Thread.sleep(300);   // let the watcher register the folder
-            watcher.drainChanges(p -> { });
-            Files.writeString(dir.resolve("new/file.json"), "{}");
+            Files.writeString(dir.resolve("new/file.json"), "{}");   // possibly before the folder is watched
 
             assertThat(await(watcher, 10_000)).contains("new/file.json");
         }

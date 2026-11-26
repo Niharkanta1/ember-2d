@@ -286,4 +286,14 @@ class EmberGameTest {
         testGame(new EngineConfig()).create();
         assertThat(logLines).noneMatch(line -> line.startsWith("INFO Boot took"));
     }
+
+    @Test
+    void theEngineBuildsAnAudioServiceOverTheAssets() {
+        EmberGame game = testGame(new EngineConfig());
+        game.create();
+        assertThat(game.context().audio()).isInstanceOf(dev.ember2d.audio.internal.GdxAudio.class);
+        game.pause();    // suspend and resume reach the audio service without failing
+        game.resume();
+        game.dispose();
+    }
 }

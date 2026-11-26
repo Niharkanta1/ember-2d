@@ -76,4 +76,24 @@ class AssetManifestTest {
         assertThat(AssetManifest.distance("kitten", "sitting")).isEqualTo(3);
         assertThat(AssetManifest.empty("x").closestIds("a", 3)).isEmpty();
     }
+
+    @Test
+    void soundEntriesCanLimitTheirInstances() {
+        AssetManifest manifest = AssetManifest.parse("""
+                { "version": 1, "assets": [
+                  { "id": "sfx.coin", "path": "coin.wav", "type": "sound", "group": "g", "maxInstances": 4 },
+                  { "id": "sfx.jump", "path": "jump.wav", "type": "sound", "group": "g" } ] }
+                """, "m.json");
+        assertThat(manifest.find("sfx.coin").maxInstances()).isEqualTo(4);
+        assertThat(manifest.find("sfx.jump").maxInstances()).isZero();
+
+        AssetLoadException e = catchThrowableOfType(AssetLoadException.class, () -> AssetManifest.parse("""
+                { "version": 1, "assets": [
+                  { "id": "a", "path": "a.wav", "type": "sound", "group": "g", "maxInstances": 0 },
+                  { "id": "b", "path": "b.ogg", "type": "music", "group": "g", "maxInstances": 2 } ] }
+                """, "m.json"));
+        assertThat(e.problems()).containsExactly(
+                "assets[0] (\"a\"): \"maxInstances\" must be a whole number > 0",
+                "assets[1] (\"b\"): \"maxInstances\" is only for sound entries");
+    }
 }
