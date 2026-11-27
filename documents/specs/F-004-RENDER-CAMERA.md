@@ -1,6 +1,6 @@
 # F-004 — Rendering, Camera and Text
 
-- Status: Part 1 Ready (sprites, layers and sorting, pixel-perfect pipeline, camera follow/dead-zone/bounds/zoom/shake, resize, context loss: expanded and approved in I-060, 2026-11-26); text Ready (I-140: expanded and approved 2026-11-26, see "Text (I-140)"); look-ahead, scrolling and parallax (Phases 2/4), UI layer (I-210), safe area (I-225), debug draw hook (I-080): Draft
+- Status: Part 1 Ready (sprites, layers and sorting, pixel-perfect pipeline, camera follow/dead-zone/bounds/zoom/shake, resize, context loss: expanded and approved in I-060, 2026-11-26); text Ready (I-140: expanded and approved 2026-11-26, see "Text (I-140)"); scrolling camera Ready (I-310, specified in F-016 "Top-down movement (I-310)"); look-ahead and parallax (Phases 2/4), UI layer (I-210), safe area (I-225), debug draw hook (I-080): Draft
 - Phase: 1 (sprites, layers, camera, pixel-perfect), 2 (text), 4 (Y-sort)
 - Module / package: `ember-core` / `ember.render`, `ember.camera`
 - Depends on: F-002, F-003, F-008
