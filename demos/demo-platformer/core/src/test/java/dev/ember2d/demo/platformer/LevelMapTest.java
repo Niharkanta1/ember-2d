@@ -17,7 +17,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 /**
- * Level 1 as edited in Tiled (F-015, I-170): every object names a prefab in the manifest, the level has one player, one
+ * Every level as edited in Tiled (F-015, I-170, I-250): every object names a prefab in the manifest, the level has one player, one
  * goal and a checkpoint, and they stand on solid ground. Reads the files directly (no libGDX).
  */
 class LevelMapTest {
@@ -29,7 +29,13 @@ class LevelMapTest {
 
     @Test
     void everyObjectIsAPrefabAndTheKeyObjectsStandOnGround() throws Exception {
-        Document map = xml(ASSETS.resolve("maps/level1.tmx"));
+        for (Levels.Level level : Levels.ALL) {
+            check("maps/level" + level.number() + ".tmx");
+        }
+    }
+
+    private static void check(String file) throws Exception {
+        Document map = xml(ASSETS.resolve(file));
         Element root = map.getDocumentElement();
         int width = Integer.parseInt(root.getAttribute("width"));
         int tile = Integer.parseInt(root.getAttribute("tilewidth"));
@@ -50,7 +56,7 @@ class LevelMapTest {
             objects.add(new MapObject(o.getAttribute("name"), o.getAttribute("type"),
                     Float.parseFloat(o.getAttribute("x")), Float.parseFloat(o.getAttribute("y"))));
         }
-        assertThat(objects).allSatisfy(o -> assertThat(prefabs).as(o.name()).contains(o.type()));
+        assertThat(objects).as(file).allSatisfy(o -> assertThat(prefabs).as(o.name()).contains(o.type()));
         assertThat(objects).filteredOn(o -> o.type().equals("player")).hasSize(1);
         assertThat(objects).filteredOn(o -> o.type().equals("level/goal")).hasSize(1);
         assertThat(objects).filteredOn(o -> o.type().equals("level/checkpoint")).isNotEmpty();

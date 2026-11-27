@@ -28,6 +28,8 @@
   {"id": "tex.background", "path": "maps/background.png", "type": "texture", "group": "global"},
   {"id": "input", "path": "input.json", "type": "json", "group": "global"},
   {"id": "map.level1", "path": "maps/level1.tmx", "type": "map", "group": "level1"},
+  {"id": "map.level2", "path": "maps/level2.tmx", "type": "map", "group": "level2"},
+  {"id": "map.level3", "path": "maps/level3.tmx", "type": "map", "group": "level3"},
   {"id": "player", "path": "prefabs/player.json", "type": "prefab", "group": "global"},
   {"id": "camera", "path": "prefabs/camera.json", "type": "prefab", "group": "global"},
   {"id": "enemy/pig", "path": "prefabs/enemy/pig.json", "type": "prefab", "group": "global"},

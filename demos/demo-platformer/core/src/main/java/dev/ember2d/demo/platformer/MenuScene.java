@@ -17,7 +17,9 @@ import dev.ember2d.ui.Ui;
 
 /**
  * The demo's main menu (I-220): the title over the level's background, the frog, and Play, Settings and Quit (desktop
- * only; on Android, Back leaves the app). Menus are driven by the {@code ui} input context.
+ * only; on Android, Back leaves the app). Play opens the level list (I-250): unlocked levels with their best times,
+ * locked ones disabled. The game version is in the top right corner. Menus are driven by the {@code ui} input
+ * context.
  */
 final class MenuScene extends Scene {
 
@@ -25,12 +27,16 @@ final class MenuScene extends Scene {
     private Table panel;
     private Label title;
     private Image frog;
+    private Progress progress;
+    private Label version;
 
     @Override
     protected void enter(EngineContext context) {
         input = context.input();
         input.pushContext("ui");
-        context.scenes().preload(DemoScene.GROUP);   // the level loads while the player reads the menu (I-240)
+        progress = Progress.load(context.saves());
+        // The newest unlocked level loads while the player reads the menu (I-240).
+        context.scenes().preload(Levels.get(progress.unlocked()).group());
         context.audio().playMusic("music.level", 0.5f);
         Ui ui = ui();
         DemoUi.useSkin(ui, context.assets());
@@ -46,7 +52,7 @@ final class MenuScene extends Scene {
 
     private void showMain(EngineContext context, Ui ui) {
         MenuList menu = new MenuList(ui);
-        menu.add("Play", () -> context.scenes().replace(new DemoScene(), Transition.fade(0.5f)));
+        menu.add("Play", () -> showLevels(context, ui));
         menu.add("Settings", () -> showSettings(context, ui));
         boolean android = Gdx.app != null && Gdx.app.getType() == Application.ApplicationType.Android;
         if (!android) {
@@ -59,6 +65,24 @@ final class MenuScene extends Scene {
         layout(ui, true);
     }
 
+    private void showLevels(EngineContext context, Ui ui) {
+        MenuList menu = new MenuList(ui);
+        for (Levels.Level level : Levels.ALL) {
+            int n = level.number();
+            float best = context.saves().global().getFloat(level.bestTimeKey(), -1f);
+            String label = n + " " + level.title() + (best >= 0f ? "  " + LevelSystem.clock(best) : "");
+            menu.add(label, () -> context.scenes().replace(new DemoScene(n), Transition.fade(0.5f)));
+            if (!progress.isUnlocked(n)) {
+                menu.setDisabled(n - 1, true);
+            }
+        }
+        menu.add("Back", () -> showMain(context, ui));
+        menu.onBack(() -> showMain(context, ui));
+        menu.focus(progress.unlocked() - 1);
+        DemoUi.show(panel, "Levels", menu);
+        layout(ui, false);   // the list needs the room, like the settings
+    }
+
     /** The title and frog over the panel, or the panel alone (the settings need the room on small screens). */
     private void layout(Ui ui, boolean header) {
         Table root = ui.root();
@@ -67,7 +91,16 @@ final class MenuScene extends Scene {
             root.add(title).padBottom(6f).row();
             root.add(frog).size(32f, 32f).padBottom(6f).row();
         }
-        root.add(panel).minWidth(130f);
+        root.add(panel).minWidth(130f).row();
+        Label version = new Label("v" + PlatformerDemo.version(), ui.skin());
+        version.setColor(1f, 1f, 1f, 0.6f);
+        ui.stage().addActor(version);   // replaced on every layout
+        if (this.version != null) {
+            this.version.remove();
+        }
+        this.version = version;
+        version.setPosition(ui.stage().getWidth() - version.getPrefWidth() - 4f,
+                ui.stage().getHeight() - version.getPrefHeight() - 3f);
     }
 
     private void showSettings(EngineContext context, Ui ui) {

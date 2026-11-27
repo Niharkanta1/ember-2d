@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="120" height="18" tilewidth="16" tileheight="16" infinite="0" nextlayerid="4" nextobjectid="50">
+ <properties>
+  <property name="title" value="Level 3"/>
+ </properties>
+ <tileset firstgid="1" source="terrain.tsx"/>
+ <imagelayer id="1" name="sky" parallaxx="0.3" parallaxy="0.3" repeatx="1" repeaty="1">
+  <properties><property name="renderLayer" value="background"/></properties>
+  <image source="background.png" width="64" height="64"/>
+ </imagelayer>
+ <layer id="2" name="ground" width="120" height="18">
+  <data encoding="csv">
+8,9,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,7,8,
+30,31,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,29,30,
+30,31,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,29,30,
+30,31,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,29,30,
+30,31,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,29,30,
+30,31,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,29,30,
+30,31,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,29,30,
+30,31,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,29,30,
+30,31,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,29,30,
+30,31,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,7,8,8,8,8,8,8,9,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,40,41,42,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,29,30,
+30,31,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,29,30,30,30,30,30,30,31,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,29,30,
+30,31,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,29,30,30,30,30,30,30,31,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,7,8,8,8,8,8,8,8,9,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,29,30,
+30,31,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,7,8,8,8,8,8,30,30,30,30,30,30,30,31,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,29,30,30,30,30,30,30,30,31,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,29,30,
+30,31,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,29,30,30,30,30,30,30,30,30,30,30,30,30,31,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,7,8,8,8,8,8,8,8,8,9,0,0,0,0,0,0,29,30,30,30,30,30,30,30,31,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,29,30,
+30,30,8,8,8,8,8,8,8,8,8,8,8,8,9,0,0,0,0,0,0,7,8,8,8,8,8,8,9,0,0,0,0,0,0,29,30,30,30,30,30,30,30,30,30,30,30,30,30,8,8,8,8,8,8,8,9,0,0,0,0,0,0,0,0,0,0,0,0,0,0,29,30,30,30,30,30,30,30,30,31,0,0,0,0,0,0,29,30,30,30,30,30,30,30,30,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,30,30,
+30,30,30,30,30,30,30,30,30,30,30,30,30,30,31,0,0,0,0,0,0,29,30,30,30,30,30,30,31,0,0,0,0,0,0,29,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,31,0,0,0,0,0,0,0,0,0,0,0,0,0,0,29,30,30,30,30,30,30,30,30,31,0,0,0,0,0,0,29,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,
+30,30,30,30,30,30,30,30,30,30,30,30,30,30,31,0,0,0,0,0,0,29,30,30,30,30,30,30,31,0,0,0,0,0,0,29,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,31,0,0,0,0,0,0,0,0,0,0,0,0,0,0,29,30,30,30,30,30,30,30,30,31,0,0,0,0,0,0,29,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,
+30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,8,8,8,8,8,8,30,30,30,30,30,30,30,30,8,8,8,8,8,8,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,8,8,8,8,8,8,8,8,8,8,8,8,8,8,30,30,30,30,30,30,30,30,30,30,8,8,8,8,8,8,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30
+</data>
+ </layer>
+ <objectgroup id="3" name="entities">
+  <object id="1" name="pit_a_15" type="hazard/spikes" x="248" y="272"><point/></object>
+  <object id="2" name="pit_a_16" type="hazard/spikes" x="264" y="272"><point/></object>
+  <object id="3" name="pit_a_17" type="hazard/spikes" x="280" y="272"><point/></object>
+  <object id="4" name="pit_a_18" type="hazard/spikes" x="296" y="272"><point/></object>
+  <object id="5" name="pit_a_19" type="hazard/spikes" x="312" y="272"><point/></object>
+  <object id="6" name="pit_a_20" type="hazard/spikes" x="328" y="272"><point/></object>
+  <object id="7" name="pit_b_29" type="hazard/spikes" x="472" y="272"><point/></object>
+  <object id="8" name="pit_b_30" type="hazard/spikes" x="488" y="272"><point/></object>
+  <object id="9" name="pit_b_31" type="hazard/spikes" x="504" y="272"><point/></object>
+  <object id="10" name="pit_b_32" type="hazard/spikes" x="520" y="272"><point/></object>
+  <object id="11" name="pit_b_33" type="hazard/spikes" x="536" y="272"><point/></object>
+  <object id="12" name="pit_b_34" type="hazard/spikes" x="552" y="272"><point/></object>
+  <object id="13" name="pit_c_57" type="hazard/spikes" x="920" y="272"><point/></object>
+  <object id="14" name="pit_c_58" type="hazard/spikes" x="936" y="272"><point/></object>
+  <object id="15" name="pit_c_59" type="hazard/spikes" x="952" y="272"><point/></object>
+  <object id="16" name="pit_c_60" type="hazard/spikes" x="968" y="272"><point/></object>
+  <object id="17" name="pit_c_61" type="hazard/spikes" x="984" y="272"><point/></object>
+  <object id="18" name="pit_c_62" type="hazard/spikes" x="1000" y="272"><point/></object>
+  <object id="19" name="pit_c_63" type="hazard/spikes" x="1016" y="272"><point/></object>
+  <object id="20" name="pit_c_64" type="hazard/spikes" x="1032" y="272"><point/></object>
+  <object id="21" name="pit_c_65" type="hazard/spikes" x="1048" y="272"><point/></object>
+  <object id="22" name="pit_c_66" type="hazard/spikes" x="1064" y="272"><point/></object>
+  <object id="23" name="pit_c_67" type="hazard/spikes" x="1080" y="272"><point/></object>
+  <object id="24" name="pit_c_68" type="hazard/spikes" x="1096" y="272"><point/></object>
+  <object id="25" name="pit_c_69" type="hazard/spikes" x="1112" y="272"><point/></object>
+  <object id="26" name="pit_c_70" type="hazard/spikes" x="1128" y="272"><point/></object>
+  <object id="27" name="pit_d_81" type="hazard/spikes" x="1304" y="272"><point/></object>
+  <object id="28" name="pit_d_82" type="hazard/spikes" x="1320" y="272"><point/></object>
+  <object id="29" name="pit_d_83" type="hazard/spikes" x="1336" y="272"><point/></object>
+  <object id="30" name="pit_d_84" type="hazard/spikes" x="1352" y="272"><point/></object>
+  <object id="31" name="pit_d_85" type="hazard/spikes" x="1368" y="272"><point/></object>
+  <object id="32" name="pit_d_86" type="hazard/spikes" x="1384" y="272"><point/></object>
+  <object id="33" name="spikes_99" type="hazard/spikes" x="1592" y="224"><point/></object>
+  <object id="34" name="spikes_100" type="hazard/spikes" x="1608" y="224"><point/></object>
+  <object id="35" name="spikes_101" type="hazard/spikes" x="1624" y="224"><point/></object>
+  <object id="36" name="spikes_102" type="hazard/spikes" x="1640" y="224"><point/></object>
+  <object id="37" name="spikes_103" type="hazard/spikes" x="1656" y="224"><point/></object>
+  <object id="38" name="spikes_104" type="hazard/spikes" x="1672" y="224"><point/></object>
+  <object id="39" name="player" type="player" x="72" y="224">
+   <properties><property name="PlatformerBody" type="class" propertytype="PlatformerBody"><properties><property name="airJumps" type="int" value="1"/><property name="dash" type="bool" value="true"/></properties></property></properties>
+   <point/>
+  </object>
+  <object id="40" name="start" type="level/start" x="136" y="224">
+   <properties><property name="Text.text">Jump again in the air.
+X or Shift dashes!</property></properties>
+   <point/>
+  </object>
+  <object id="41" name="pig_1" type="enemy/pig" x="408" y="224"><point/></object>
+  <object id="42" name="pig_2" type="enemy/pig" x="616" y="192"><point/></object>
+  <object id="43" name="checkpoint" type="level/checkpoint" x="728" y="144"><point/></object>
+  <object id="44" name="pig_3" type="enemy/pig" x="856" y="224"><point/></object>
+  <object id="45" name="platform" type="platform/moving" x="944" y="208">
+   <properties><property name="MovingPlatform" type="class" propertytype="MovingPlatform"><properties><property name="distance" type="float" value="9"/></properties></property></properties>
+   <point/>
+  </object>
+  <object id="46" name="pig_4" type="enemy/pig" x="1224" y="208"><point/></object>
+  <object id="47" name="pig_5" type="enemy/pig" x="1464" y="176"><point/></object>
+  <object id="48" name="goal" type="level/goal" x="1800" y="224"><point/></object>
+  <object id="49" name="camera" type="camera" x="0" y="0">
+   <properties><property name="target" type="object" value="39"/></properties>
+   <point/>
+  </object>
+ </objectgroup>
+</map>

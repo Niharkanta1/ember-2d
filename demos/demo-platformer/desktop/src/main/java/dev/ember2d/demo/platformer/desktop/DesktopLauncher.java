@@ -55,7 +55,7 @@ public final class DesktopLauncher {
         configuration.setForegroundFPS(Lwjgl3ApplicationConfiguration.getDisplayMode().refreshRate + 1);
         configuration.setWindowedMode(1280, 720);
         try {
-            EngineConfig config = PlatformerDemo.config(devMode);
+            EngineConfig config = PlatformerDemo.config(devMode, version);
             for (String arg : args) {
                 if (devMode && arg.startsWith("--safe-insets=")) {
                     config.simulatedSafeInsets = insets(arg.substring("--safe-insets=".length()));   // I-225

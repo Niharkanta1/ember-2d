@@ -1,6 +1,6 @@
 # F-020 — Packaging and Release Builds
 
-- Status: Desktop part Ready (expanded and approved in the I-009 plan, 2026-11-25); Android part Draft
+- Status: Desktop part Ready (expanded and approved in the I-009 plan, 2026-11-25); complete demo and desktop release Ready (I-250, approved 2026-11-27 under the standing approval for Phases 3 to 6; see "Complete demo and desktop release (I-250)"); Android release Draft
 - Phase: 0 (desktop empty window), 1 (Android smoke build), 3 (MVP demo release on desktop and Android)
 - Module / package: `ember-desktop`, `ember-android`, demo build scripts
 - Depends on: F-001, F-022
@@ -49,6 +49,57 @@ Downloadable desktop and Android builds exist from the first phases, so shipping
 ## Android debug build (I-015)
 - `./gradlew :demos:demo-platformer:android:assembleDebug` produces `demos/demo-platformer/android/build/outputs/apk/debug/android-debug.apk` (about 5 MB, three ABIs). It is part of every `./gradlew build`, and CI uploads it as the `platformer-demo-android-debug` artifact on every run.
 - Version name comes from the Gradle version; version code is 1 until the release build (I-255), which also adds signing, R8 and the AAB.
+
+## Complete demo and desktop release (I-250)
+Status: Ready. Approved 2026-11-27 under the developer's standing approval for Phases 3 to 6. The Phase 3 exit gate asks for "a small complete platformer (3+ levels) with main menu, pause, HUD, audio, settings and save, packaged for desktop". This task completes the demo and makes the desktop zip; I-255 does Android.
+
+**Three levels, each teaching one more mechanic of `kit-platformer` (F-015):**
+
+| Level | Map | Mechanics | How the mechanics are switched on |
+| --- | --- | --- | --- |
+| 1 Meadow | `maps/level1.tmx` (existing) | run, jump, one-way planks, pigs, spikes, moving platform | prefab defaults |
+| 2 Cliffs | `maps/level2.tmx` | wall slide and wall jump; a vertical moving platform | the player object has a class-typed `PlatformerBody` property (`wallSlide`, `wallJump`), the I-245 workflow |
+| 3 Sky | `maps/level3.tmx` | air jump and dash over spike pits | `PlatformerBody` property (`airJumps` 1, `dash` true) |
+
+- **Asset groups:** each map is in its own group (`level1`, `level2`, `level3`).
+- **Making the maps:** levels 2 and 3 are made by `assets-src/demo-platformer/maps/make_levels.py` from ASCII layouts. The script writes ordinary Tiled files, which can then be edited in Tiled. The script is only a starting point; Tiled is the editor.
+- **Level code:** `DemoScene(int level)` loads `map.level<N>`. A `Levels` table in the demo holds each level's number, title and map.
+
+**Progress (F-013):**
+- **The slot:** save slot 0 holds the campaign. Its data is `{ "unlocked": N }`, and its `SlotMeta` is the scene `level<N>`, the total play time and the summary "Level N of 3".
+- **Finishing a level** unlocks the next one and saves the slot.
+- **Best times:** they stay in global data, under `best.level<N>`.
+- **A damaged slot:** the backup is used when it is readable. Otherwise progress starts at level 1, and the problem is logged.
+
+**Menus:**
+- **Main menu:** Play opens a level list. Unlocked levels show their best time; locked levels show their name and are disabled. The menu preloads the group of the newest unlocked level.
+- **Results panel:** "Next level" (when there is one), "Play again" and "Main menu". After level 3 the title is "You finished the demo!".
+- **Version:** the main menu shows the game version in the top right corner. `PlatformerDemo.config(devMode, version)` takes it from the launcher: the desktop jar manifest, or the Android package's version name.
+
+**Desktop release:**
+- **The zip:** `./gradlew :demos:demo-platformer:packageWinX64` builds the Windows zip with Construo (I-009). The Temurin JDK is already cached in the build folder, so there is no new download.
+- **Check:** run the zip's executable from a folder outside the repository with no `JAVA_HOME`. The menu, the three levels and the saved progress must work, and the saves go to `~/.ember2d/demo-platformer`.
+- **Not checked here:** the Linux and macOS zips are configured (I-009) but cannot be run on this machine.
+
+**Tests:**
+- `LevelMapTest` covers every level: each object is a prefab; there is one player, one goal and a checkpoint; the key objects stand on ground.
+- A reachability check (`LevelReachabilityTest`) uses a cautious jump model: 4 tiles across and 3 up with a plain jump; more with the abilities the level switches on. It walks from the player to the goal over standable cells and never stands on spikes, which shows each level can be finished.
+- `ProgressTest` covers unlocking and saving, the damaged-slot fallback, and the level list's locked and unlocked states.
+
+## Decisions in I-250
+- **Reachability model:** the plain jump reach is 5 columns. With 4, level 1 (already played and approved) failed, because its 4-tile pits are 5 columns from edge to edge.
+- **The new mechanics are needed:** `LevelReachabilityTest.eachNewMechanicIsNeeded` shows that level 2 cannot be finished without the wall jump, nor level 3 without the air jump and dash.
+- **Level list:** it shows the panel alone, like the settings menu. With the title and the frog above it, the list ran off a 180-pixel-high screen on the emulator. The version label sits top right, because at the bottom it covered "Back".
+- **Ability log:** `DemoScene` logs the player's mechanics as set by the map (for example "air jumps 1, dash true, wall jump false"), so a wrong class property shows up in the log.
+- **Checked on the emulator (API 23):**
+  - The level list shows locked and unlocked levels; I made a save that unlocks all three and pushed it with `run-as`.
+  - Levels 2 and 3 load, and their mechanics come from the map.
+  - In level 3 the B (dash) button appears, which also closes an I-225 check that was still open.
+  - The version shows in the menu.
+- **Checked on desktop:** the Windows zip, run without Java on `PATH` or `JAVA_HOME`, starts in release mode, keeps saves in `~/.ember2d/demo-platformer` and enters the main menu.
+- **Not checked:**
+  - Nobody has played levels 2 and 3 to the end, so the "Next level" and "You finished the demo!" panels have not been seen. The reachability test covers whether the levels can be finished.
+  - Playing the desktop zip through is left to the developer at the phase gate.
 
 ## Non-goals
 - Desktop installers, code signing and notarisation (document as later steps), Steam integration, iOS and web packaging, Play Store listing automation.
