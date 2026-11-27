@@ -10,3 +10,14 @@ dependencies {
     api project(':kits:kit-common')
     api project(':kits:kit-platformer')
 }
+
+// Writes the prefab and component types into the Tiled project (F-009, I-245). Run by hand after changing prefabs or
+// components, then commit the result: ./gradlew :demos:demo-platformer:core:tiledTypes
+tasks.register('tiledTypes', JavaExec) {
+    description = 'Writes prefab and component types into assets/maps/platformer.tiled-project (F-009).'
+    group = 'ember2d'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'dev.ember2d.data.TiledTypes'
+    args 'dev.ember2d.demo.platformer.DemoComponents', file('assets').path,
+            file('assets/maps/platformer.tiled-project').path
+}

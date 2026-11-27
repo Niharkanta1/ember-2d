@@ -1,6 +1,6 @@
 # F-009 — Tilemaps and Entity Placement (Tiled)
 
-- Status: map part Ready (I-110, approved 2026-11-26; see "Decisions in I-110"); entity placement Ready (I-112, specified in F-010 "Prefabs and placement (I-112)"); the type generator (I-245): Draft.
+- Status: map part Ready (I-110, approved 2026-11-26; see "Decisions in I-110"); entity placement Ready (I-112, specified in F-010 "Prefabs and placement (I-112)"); the type generator Ready (I-245, approved 2026-11-27 under the standing approval for Phases 3 to 6; see "Tiled type generator (I-245)").
 - Phase: 2 (loading, collision, entity placement), 3 (Tiled project type generator)
 - Module / package: `ember-core` / `ember.tilemap`; generator as a Gradle task in the build
 - Depends on: F-004, F-006, F-008, F-010
@@ -201,6 +201,79 @@ The defaults were approved as proposed. Details settled while implementing:
 - **Headless:** loading through `GdxAssets` (TMX and TMJ), `TileMap` geometry and lookups, `TileGrid` from properties and from a `collision` layer, animated-tile frames over game time and pause, and errors.
 - **Rendering:** `SpriteRenderSystem` content order, with a recording batch: background tile layer, sprites, foreground layer.
 - **Visual:** the parallax rendering is checked visually in the demo.
+
+## Tiled type generator (I-245)
+Status: Ready. Approved 2026-11-27 under the developer's standing approval for Phases 3 to 6.
+
+**What it writes.** `dev.ember2d.data.TiledTypes` (a `main` in `ember.data`, next to `KeepRules`) runs a game's `ComponentSetup`, reads every `prefab` entry of the asset manifest and updates the `propertyTypes` of a `.tiled-project` file:
+- **One class per registered component.**
+  - Named like the component (`Health`) and usable as a property (`useAs: ["property"]`).
+  - It has one member per settable field, with the default value of a new instance.
+  - **Member types:**
+
+    | Field | Tiled type | Default |
+    | --- | --- | --- |
+    | `int`, `long` | `int` | the field's value |
+    | `float`, `double` | `float` | the field's value |
+    | `boolean` | `bool` | the field's value |
+    | `String` | `string` | the value, or `""` |
+    | enum | `string` with `propertyType` set to a generated enum type (named after the enum's simple name) | the constant's name |
+    | `Color` | `color` | `#AARRGGBB` |
+- **One class per prefab.**
+  - Named by the prefab ID (`enemy/patroller`) and usable on objects (`useAs: ["object"]`).
+  - It has one class-typed member per component in the prefab, holding the prefab's values. When a designer gives an object that class, Tiled lists the prefab's components with their real values. An edited member is saved as a class-typed property named after the component, which `MapSpawner` already applies (F-010, I-112).
+
+**Left out on purpose** (found in I-245): libGDX's loader writes *every* member of an object's class into the object's properties as defaults. Generated members must therefore give exactly what spawning gives anyway. So these are not generated:
+- `Transform`, because position and rotation come from the object;
+- `Sprite.flipX` and `flipY`, which come from a flipped tile object;
+- fields that only object references can set (`Vector2`, `Rectangle`, `float[]`, `EntityRef`);
+- fields that are null on a new instance;
+- in a prefab class, components that would have no members, because libGDX skips classes without members and then fails on a member of such a class.
+
+All of these can still be set with plain `Component.field` properties. `MapSpawner` applies class-typed properties first and plain properties after, so a plain property always wins over a class default.
+
+**Merging.**
+- Other keys of the project file and other property types are kept.
+- A generated type keeps the `id` of an existing type with the same name; new types get ids after the highest one.
+- Types for removed components or prefabs are not deleted, because the generator cannot tell them from hand-made types. They are listed in a warning in the task output.
+- A missing project file is created with Tiled's default keys.
+
+**Errors (all problems reported together, the file is not written):**
+- an unknown component in a prefab, an unknown field, or a value of the wrong type (checked with the same field setters as spawning)
+- a prefab file that is missing or not valid JSON
+
+Prefab files are read as they are: migrations registered in code do not run, so prefab files should be kept at the current version.
+
+**Gradle task.** The demo's `core` project gets `tiledTypes` (`JavaExec`). It writes `assets/maps/platformer.tiled-project`, which is also the runtime copy: the demo sets `EngineConfig.tiledProject` to it, so class-typed properties load. The generator is re-run by hand after changing prefabs or components, and its output is committed. It is not part of `build`, because it rewrites a source file.
+
+**API sketch:**
+```java
+package dev.ember2d.data;
+public final class TiledTypes {
+    public static void main(String[] args);   // <ComponentSetup class> <assets dir> <.tiled-project file>
+    /** The updated project JSON; prefabs maps prefab ID to its parsed file. */
+    public static String update(ComponentRegistry registry, Map<String, JsonValue> prefabs, String existingProject,
+            List<String> warnings);
+    public static Map<String, JsonValue> readPrefabs(String assetsDir) throws IOException;   // from manifest.json
+}
+```
+
+**Tests (headless):**
+- Every field kind becomes the right member type and default, including enum types and colours.
+- Prefab classes carry the prefab's values.
+- Existing types keep their ids; types made by hand stay; stale types are warned about.
+- Bad prefabs are reported together.
+- The demo's committed project file is up to date: regenerating it from the demo's components and prefabs gives the same text.
+
+## Decisions in I-245
+- **libGDX writes every class member into each object.** The emulator run found this: the first project file made level 1 fail to load ("no class with name 'Hazard'"). libGDX's `loadMapPropertiesClassDefaults` writes every member of an object's class into the object's properties, and it skips class types that have no members. That led to the "Left out on purpose" rules above.
+- **A new test checks it.** `MapSpawnerTest.aGeneratedProjectSpawnsTheSameEntities` loads the placement map through the real loader with a generated project and asserts exactly the same entities as without one.
+- **Two other problems this exposed:**
+  - **Fixed:** class defaults overwrote plain `speed=5` properties. `MapSpawner` now applies class-typed properties before plain ones.
+  - **Avoided:** class defaults would also overwrite `Transform` rotation. `Transform` is no longer generated.
+- **The project file lives in the assets.** The demo's project file is `assets/maps/platformer.tiled-project`, which is both the editing copy and the runtime copy, and `EngineConfig.tiledProject` points at it. Tiled opens it from the maps folder. Using a separate `assets-src/` copy would mean keeping two files in step for no gain.
+- **A test keeps it current.** `TiledProjectTest` in the demo fails when the committed project is stale and names the Gradle task to run.
+- **Demo:** `pig_2` uses a class-typed `Patroller` property (`speed` 4), saved the way Tiled saves an edited class member. It loads on the emulator (API 23). Its faster patrol was not watched on screen; `MapSpawnerTest` covers class-property values.
 
 ## Non-goals
 - A custom map format or editor.

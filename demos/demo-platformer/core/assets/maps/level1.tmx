@@ -62,7 +62,16 @@ Reach the trophy!</property>
   <object id="23" name="pit_spikes_119" type="hazard/spikes" x="1912" y="272"><point/></object>
   <object id="24" name="pit_spikes_120" type="hazard/spikes" x="1928" y="272"><point/></object>
   <object id="25" name="pig_1" type="enemy/pig" x="1368" y="224"><point/></object>
-  <object id="26" name="pig_2" type="enemy/pig" x="1592" y="224"><point/></object>
+  <object id="26" name="pig_2" type="enemy/pig" x="1592" y="224">
+   <properties>
+    <property name="Patroller" type="class" propertytype="Patroller">
+     <properties>
+      <property name="speed" type="float" value="4"/>
+     </properties>
+    </property>
+   </properties>
+   <point/>
+  </object>
   <object id="27" name="pig_3" type="enemy/pig" x="888" y="224"><point/></object>
   <object id="28" name="platform" type="platform/moving" x="1696" y="208"><point/></object>
   <object id="29" name="goal" type="level/goal" x="2120" y="224"><point/></object>

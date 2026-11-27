@@ -1,0 +1,865 @@
+{
+"automappingRulesFile": "",
+"commands": [],
+"extensionsPath": "extensions",
+"folders": [
+	"."
+],
+"propertyTypes": [
+	{
+		"id": 1,
+		"name": "Sprite",
+		"type": "class",
+		"useAs": [
+			"property"
+		],
+		"color": "#ffa0a0a4",
+		"drawFill": true,
+		"members": [
+			{
+				"name": "tint",
+				"type": "color",
+				"value": "#ffffffff"
+			},
+			{
+				"name": "layer",
+				"type": "string",
+				"value": "world"
+			},
+			{
+				"name": "z",
+				"type": "float",
+				"value": 0
+			}
+		]
+	},
+	{
+		"id": 2,
+		"name": "Text",
+		"type": "class",
+		"useAs": [
+			"property"
+		],
+		"color": "#ffa0a0a4",
+		"drawFill": true,
+		"members": [
+			{
+				"name": "text",
+				"type": "string",
+				"value": ""
+			},
+			{
+				"name": "color",
+				"type": "color",
+				"value": "#ffffffff"
+			},
+			{
+				"name": "scale",
+				"type": "float",
+				"value": 1
+			},
+			{
+				"name": "align",
+				"type": "string",
+				"propertyType": "TextAlign",
+				"value": "LEFT"
+			},
+			{
+				"name": "wrapWidth",
+				"type": "float",
+				"value": 0
+			},
+			{
+				"name": "layer",
+				"type": "string",
+				"value": "world"
+			}
+		]
+	},
+	{
+		"id": 3,
+		"name": "Collider",
+		"type": "class",
+		"useAs": [
+			"property"
+		],
+		"color": "#ffa0a0a4",
+		"drawFill": true,
+		"members": [
+			{
+				"name": "layer",
+				"type": "int",
+				"value": 0
+			},
+			{
+				"name": "mask",
+				"type": "int",
+				"value": -1
+			},
+			{
+				"name": "trigger",
+				"type": "bool",
+				"value": false
+			}
+		]
+	},
+	{
+		"id": 4,
+		"name": "Actor",
+		"type": "class",
+		"useAs": [
+			"property"
+		],
+		"color": "#ffa0a0a4",
+		"drawFill": true,
+		"members": [
+			{
+				"name": "dropThroughTicks",
+				"type": "int",
+				"value": 0
+			},
+			{
+				"name": "hitX",
+				"type": "bool",
+				"value": false
+			},
+			{
+				"name": "hitY",
+				"type": "bool",
+				"value": false
+			},
+			{
+				"name": "hitEntityX",
+				"type": "int",
+				"value": -1
+			},
+			{
+				"name": "hitEntityY",
+				"type": "int",
+				"value": -1
+			}
+		]
+	},
+	{
+		"id": 5,
+		"name": "Solid",
+		"type": "class",
+		"useAs": [
+			"property"
+		],
+		"color": "#ffa0a0a4",
+		"drawFill": true,
+		"members": [
+			{
+				"name": "oneWay",
+				"type": "bool",
+				"value": false
+			}
+		]
+	},
+	{
+		"id": 6,
+		"name": "Animator",
+		"type": "class",
+		"useAs": [
+			"property"
+		],
+		"color": "#ffa0a0a4",
+		"drawFill": true,
+		"members": [
+			{
+				"name": "speed",
+				"type": "float",
+				"value": 1
+			}
+		]
+	},
+	{
+		"id": 7,
+		"name": "AnimationStateMachine",
+		"type": "class",
+		"useAs": [
+			"property"
+		],
+		"color": "#ffa0a0a4",
+		"drawFill": true,
+		"members": []
+	},
+	{
+		"id": 8,
+		"name": "PlatformerBody",
+		"type": "class",
+		"useAs": [
+			"property"
+		],
+		"color": "#ffa0a0a4",
+		"drawFill": true,
+		"members": [
+			{
+				"name": "moveAxis",
+				"type": "string",
+				"value": "move"
+			},
+			{
+				"name": "jumpAction",
+				"type": "string",
+				"value": "jump"
+			},
+			{
+				"name": "dashAction",
+				"type": "string",
+				"value": "dash"
+			},
+			{
+				"name": "maxSpeed",
+				"type": "float",
+				"value": 8
+			},
+			{
+				"name": "groundAccel",
+				"type": "float",
+				"value": 60
+			},
+			{
+				"name": "groundDecel",
+				"type": "float",
+				"value": 70
+			},
+			{
+				"name": "airAccel",
+				"type": "float",
+				"value": 35
+			},
+			{
+				"name": "airDecel",
+				"type": "float",
+				"value": 20
+			},
+			{
+				"name": "gravity",
+				"type": "float",
+				"value": 40
+			},
+			{
+				"name": "fallMultiplier",
+				"type": "float",
+				"value": 1.600000023841858
+			},
+			{
+				"name": "maxFall",
+				"type": "float",
+				"value": 25
+			},
+			{
+				"name": "jumpSpeed",
+				"type": "float",
+				"value": 16
+			},
+			{
+				"name": "jumpCut",
+				"type": "float",
+				"value": 0.44999998807907104
+			},
+			{
+				"name": "coyoteTicks",
+				"type": "int",
+				"value": 6
+			},
+			{
+				"name": "bufferTicks",
+				"type": "int",
+				"value": 6
+			},
+			{
+				"name": "airJumps",
+				"type": "int",
+				"value": 0
+			},
+			{
+				"name": "airJumpSpeed",
+				"type": "float",
+				"value": 14
+			},
+			{
+				"name": "dash",
+				"type": "bool",
+				"value": false
+			},
+			{
+				"name": "dashSpeed",
+				"type": "float",
+				"value": 20
+			},
+			{
+				"name": "dashTicks",
+				"type": "int",
+				"value": 10
+			},
+			{
+				"name": "dashCooldownTicks",
+				"type": "int",
+				"value": 30
+			},
+			{
+				"name": "airDashes",
+				"type": "int",
+				"value": 1
+			},
+			{
+				"name": "wallSlide",
+				"type": "bool",
+				"value": false
+			},
+			{
+				"name": "wallSlideSpeed",
+				"type": "float",
+				"value": 3
+			},
+			{
+				"name": "wallJump",
+				"type": "bool",
+				"value": false
+			},
+			{
+				"name": "wallJumpX",
+				"type": "float",
+				"value": 9
+			},
+			{
+				"name": "wallJumpY",
+				"type": "float",
+				"value": 15
+			},
+			{
+				"name": "wallJumpLockTicks",
+				"type": "int",
+				"value": 8
+			},
+			{
+				"name": "ladders",
+				"type": "bool",
+				"value": false
+			},
+			{
+				"name": "climbSpeed",
+				"type": "float",
+				"value": 5
+			},
+			{
+				"name": "inheritPlatformVelocity",
+				"type": "bool",
+				"value": false
+			},
+			{
+				"name": "vx",
+				"type": "float",
+				"value": 0
+			},
+			{
+				"name": "vy",
+				"type": "float",
+				"value": 0
+			},
+			{
+				"name": "locked",
+				"type": "bool",
+				"value": false
+			}
+		]
+	},
+	{
+		"id": 9,
+		"name": "Patroller",
+		"type": "class",
+		"useAs": [
+			"property"
+		],
+		"color": "#ffa0a0a4",
+		"drawFill": true,
+		"members": [
+			{
+				"name": "speed",
+				"type": "float",
+				"value": 6
+			},
+			{
+				"name": "minX",
+				"type": "float",
+				"value": -12
+			},
+			{
+				"name": "maxX",
+				"type": "float",
+				"value": 12
+			},
+			{
+				"name": "range",
+				"type": "float",
+				"value": 0
+			},
+			{
+				"name": "direction",
+				"type": "float",
+				"value": 1
+			},
+			{
+				"name": "gravity",
+				"type": "float",
+				"value": 40
+			},
+			{
+				"name": "artFacesLeft",
+				"type": "bool",
+				"value": false
+			},
+			{
+				"name": "turnAtLedges",
+				"type": "bool",
+				"value": false
+			},
+			{
+				"name": "vy",
+				"type": "float",
+				"value": 0
+			}
+		]
+	},
+	{
+		"id": 10,
+		"name": "MovingPlatform",
+		"type": "class",
+		"useAs": [
+			"property"
+		],
+		"color": "#ffa0a0a4",
+		"drawFill": true,
+		"members": [
+			{
+				"name": "speed",
+				"type": "float",
+				"value": 2
+			},
+			{
+				"name": "distance",
+				"type": "float",
+				"value": 6
+			},
+			{
+				"name": "vertical",
+				"type": "bool",
+				"value": false
+			},
+			{
+				"name": "direction",
+				"type": "float",
+				"value": 1
+			},
+			{
+				"name": "travelled",
+				"type": "float",
+				"value": 0
+			}
+		]
+	},
+	{
+		"id": 11,
+		"name": "Ladder",
+		"type": "class",
+		"useAs": [
+			"property"
+		],
+		"color": "#ffa0a0a4",
+		"drawFill": true,
+		"members": []
+	},
+	{
+		"id": 12,
+		"name": "CameraFollow",
+		"type": "class",
+		"useAs": [
+			"property"
+		],
+		"color": "#ffa0a0a4",
+		"drawFill": true,
+		"members": [
+			{
+				"name": "smoothing",
+				"type": "float",
+				"value": 0
+			}
+		]
+	},
+	{
+		"id": 13,
+		"name": "Enemy",
+		"type": "class",
+		"useAs": [
+			"property"
+		],
+		"color": "#ffa0a0a4",
+		"drawFill": true,
+		"members": [
+			{
+				"name": "defeatSeconds",
+				"type": "float",
+				"value": 0.4000000059604645
+			},
+			{
+				"name": "stompBounce",
+				"type": "float",
+				"value": 12
+			},
+			{
+				"name": "defeated",
+				"type": "bool",
+				"value": false
+			},
+			{
+				"name": "defeatedTime",
+				"type": "float",
+				"value": 0
+			}
+		]
+	},
+	{
+		"id": 14,
+		"name": "Hazard",
+		"type": "class",
+		"useAs": [
+			"property"
+		],
+		"color": "#ffa0a0a4",
+		"drawFill": true,
+		"members": []
+	},
+	{
+		"id": 15,
+		"name": "Checkpoint",
+		"type": "class",
+		"useAs": [
+			"property"
+		],
+		"color": "#ffa0a0a4",
+		"drawFill": true,
+		"members": [
+			{
+				"name": "active",
+				"type": "bool",
+				"value": false
+			}
+		]
+	},
+	{
+		"id": 16,
+		"name": "Goal",
+		"type": "class",
+		"useAs": [
+			"property"
+		],
+		"color": "#ffa0a0a4",
+		"drawFill": true,
+		"members": []
+	},
+	{
+		"id": 17,
+		"name": "TextAlign",
+		"type": "enum",
+		"storageType": "string",
+		"values": [
+			"LEFT",
+			"CENTER",
+			"RIGHT"
+		],
+		"valuesAsFlags": false
+	},
+	{
+		"id": 18,
+		"name": "camera",
+		"type": "class",
+		"useAs": [
+			"object"
+		],
+		"color": "#ff4a9de0",
+		"drawFill": true,
+		"members": [
+			{
+				"name": "CameraFollow",
+				"type": "class",
+				"propertyType": "CameraFollow",
+				"value": {}
+			}
+		]
+	},
+	{
+		"id": 19,
+		"name": "enemy/pig",
+		"type": "class",
+		"useAs": [
+			"object"
+		],
+		"color": "#ff4a9de0",
+		"drawFill": true,
+		"members": [
+			{
+				"name": "Sprite",
+				"type": "class",
+				"propertyType": "Sprite",
+				"value": {
+					"z": 1
+				}
+			},
+			{
+				"name": "Collider",
+				"type": "class",
+				"propertyType": "Collider",
+				"value": {}
+			},
+			{
+				"name": "Actor",
+				"type": "class",
+				"propertyType": "Actor",
+				"value": {}
+			},
+			{
+				"name": "Patroller",
+				"type": "class",
+				"propertyType": "Patroller",
+				"value": {
+					"speed": 2.5,
+					"range": 3,
+					"artFacesLeft": true
+				}
+			},
+			{
+				"name": "Enemy",
+				"type": "class",
+				"propertyType": "Enemy",
+				"value": {}
+			},
+			{
+				"name": "Animator",
+				"type": "class",
+				"propertyType": "Animator",
+				"value": {}
+			}
+		]
+	},
+	{
+		"id": 20,
+		"name": "hazard/spikes",
+		"type": "class",
+		"useAs": [
+			"object"
+		],
+		"color": "#ff4a9de0",
+		"drawFill": true,
+		"members": [
+			{
+				"name": "Sprite",
+				"type": "class",
+				"propertyType": "Sprite",
+				"value": {
+					"z": 0
+				}
+			},
+			{
+				"name": "Collider",
+				"type": "class",
+				"propertyType": "Collider",
+				"value": {
+					"trigger": true
+				}
+			}
+		]
+	},
+	{
+		"id": 21,
+		"name": "level/checkpoint",
+		"type": "class",
+		"useAs": [
+			"object"
+		],
+		"color": "#ff4a9de0",
+		"drawFill": true,
+		"members": [
+			{
+				"name": "Sprite",
+				"type": "class",
+				"propertyType": "Sprite",
+				"value": {
+					"z": -1
+				}
+			},
+			{
+				"name": "Collider",
+				"type": "class",
+				"propertyType": "Collider",
+				"value": {
+					"trigger": true
+				}
+			},
+			{
+				"name": "Checkpoint",
+				"type": "class",
+				"propertyType": "Checkpoint",
+				"value": {}
+			},
+			{
+				"name": "Animator",
+				"type": "class",
+				"propertyType": "Animator",
+				"value": {}
+			}
+		]
+	},
+	{
+		"id": 22,
+		"name": "level/goal",
+		"type": "class",
+		"useAs": [
+			"object"
+		],
+		"color": "#ff4a9de0",
+		"drawFill": true,
+		"members": [
+			{
+				"name": "Sprite",
+				"type": "class",
+				"propertyType": "Sprite",
+				"value": {
+					"z": -1
+				}
+			},
+			{
+				"name": "Collider",
+				"type": "class",
+				"propertyType": "Collider",
+				"value": {
+					"trigger": true
+				}
+			},
+			{
+				"name": "Animator",
+				"type": "class",
+				"propertyType": "Animator",
+				"value": {}
+			}
+		]
+	},
+	{
+		"id": 23,
+		"name": "level/start",
+		"type": "class",
+		"useAs": [
+			"object"
+		],
+		"color": "#ff4a9de0",
+		"drawFill": true,
+		"members": [
+			{
+				"name": "Sprite",
+				"type": "class",
+				"propertyType": "Sprite",
+				"value": {
+					"z": -1
+				}
+			},
+			{
+				"name": "Text",
+				"type": "class",
+				"propertyType": "Text",
+				"value": {
+					"text": "",
+					"align": "CENTER",
+					"color": "#fffff2cc"
+				}
+			}
+		]
+	},
+	{
+		"id": 24,
+		"name": "platform/moving",
+		"type": "class",
+		"useAs": [
+			"object"
+		],
+		"color": "#ff4a9de0",
+		"drawFill": true,
+		"members": [
+			{
+				"name": "Sprite",
+				"type": "class",
+				"propertyType": "Sprite",
+				"value": {
+					"z": 0
+				}
+			},
+			{
+				"name": "Collider",
+				"type": "class",
+				"propertyType": "Collider",
+				"value": {}
+			},
+			{
+				"name": "Solid",
+				"type": "class",
+				"propertyType": "Solid",
+				"value": {}
+			},
+			{
+				"name": "MovingPlatform",
+				"type": "class",
+				"propertyType": "MovingPlatform",
+				"value": {
+					"speed": 2.5,
+					"distance": 10
+				}
+			}
+		]
+	},
+	{
+		"id": 25,
+		"name": "player",
+		"type": "class",
+		"useAs": [
+			"object"
+		],
+		"color": "#ff4a9de0",
+		"drawFill": true,
+		"members": [
+			{
+				"name": "Sprite",
+				"type": "class",
+				"propertyType": "Sprite",
+				"value": {
+					"z": 2
+				}
+			},
+			{
+				"name": "Collider",
+				"type": "class",
+				"propertyType": "Collider",
+				"value": {}
+			},
+			{
+				"name": "Actor",
+				"type": "class",
+				"propertyType": "Actor",
+				"value": {}
+			},
+			{
+				"name": "PlatformerBody",
+				"type": "class",
+				"propertyType": "PlatformerBody",
+				"value": {}
+			},
+			{
+				"name": "Animator",
+				"type": "class",
+				"propertyType": "Animator",
+				"value": {}
+			}
+		]
+	}
+]
+}

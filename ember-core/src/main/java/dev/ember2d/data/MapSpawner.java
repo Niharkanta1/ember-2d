@@ -101,17 +101,21 @@ public final class MapSpawner {
                 continue;
             }
             MapProperties p = object.getProperties();
-            for (Iterator<String> keys = p.getKeys(); keys.hasNext();) {
-                String key = keys.next();
-                if (RESERVED.contains(key)) {
-                    continue;
-                }
-                Object value = p.get(key);
-                String where = where(map, object) + ": property \"" + key + "\"";
-                if (value instanceof MapProperties members) {
-                    classProperty(world, map, instance, key, members, spawned, ppu, problems, where);
-                } else {
-                    set(world, map, instance, key, value, spawned, ppu, problems, where);
+            // Class-typed properties first, plain ones after: with a generated project (I-245) libGDX fills in the
+            // object class's members as defaults, and a plain "Component.field" or "field" property must still win.
+            for (int pass = 0; pass < 2; pass++) {
+                for (Iterator<String> keys = p.getKeys(); keys.hasNext();) {
+                    String key = keys.next();
+                    Object value = p.get(key);
+                    if (RESERVED.contains(key) || (value instanceof MapProperties) != (pass == 0)) {
+                        continue;
+                    }
+                    String where = where(map, object) + ": property \"" + key + "\"";
+                    if (value instanceof MapProperties members) {
+                        classProperty(world, map, instance, key, members, spawned, ppu, problems, where);
+                    } else {
+                        set(world, map, instance, key, value, spawned, ppu, problems, where);
+                    }
                 }
             }
         }

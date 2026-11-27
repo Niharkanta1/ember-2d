@@ -21,6 +21,15 @@ import dev.ember2d.ecs.World;
 import dev.ember2d.event.internal.DefaultEventBus;
 import dev.ember2d.render.Sprite;
 import dev.ember2d.tilemap.TileMap;
+import com.badlogic.gdx.utils.JsonReader;
+import com.badlogic.gdx.utils.JsonValue;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import org.junit.jupiter.api.io.TempDir;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
@@ -75,7 +84,37 @@ class MapSpawnerTest {
 
     @Test
     void spawnsClassedObjectsWithTemplatesOverridesAndReferences() {
-        IntArray entities = new MapSpawner(prefabs).spawn(world, map("level", "map.placement"));
+        assertPlacement(map("level", "map.placement"));
+    }
+
+    /**
+     * I-245: with a project file from the type generator, libGDX writes every class member into the objects as defaults;
+     * the entities must come out exactly the same.
+     */
+    @Test
+    void aGeneratedProjectSpawnsTheSameEntities(@TempDir File dir) throws IOException {
+        ComponentRegistry registry = new ComponentRegistry();
+        new TestComponents.Setup().register(registry);
+        Map<String, JsonValue> files = new LinkedHashMap<>();
+        for (String id : List.of("walker", "hero", "coin")) {
+            files.put(id, new JsonReader().parse(Gdx.files.internal("assets-test/prefabs/" + id + ".json")));
+        }
+        String existing = Gdx.files.internal("assets-test/maps/test.tiled-project").readString("UTF-8");
+        File project = new File(dir, "generated.tiled-project");
+        Files.write(project.toPath(), TiledTypes.update(registry, files, existing, new ArrayList<>())
+                .getBytes(StandardCharsets.UTF_8));
+
+        assets.dispose();
+        FileHandleResolver resolver = path -> path.endsWith("generated.tiled-project")
+                ? Gdx.files.absolute(project.getAbsolutePath()) : RESOLVER.resolve(path);
+        assets = new GdxAssets(AssetManifest.parse(MANIFEST, "assets-test/manifest.json"), resolver);
+        assets.setTiledProject("maps/generated.tiled-project");
+        prefabs = new PrefabLibrary(registry, assets, events);
+        assertPlacement(map("level", "map.placement"));
+    }
+
+    private void assertPlacement(TileMap map) {
+        IntArray entities = new MapSpawner(prefabs).spawn(world, map);
 
         assertThat(entities.size).isEqualTo(4);
         assertThat(spawnedOrder).as("published after both passes, in map order")

@@ -21,6 +21,7 @@ public final class PlatformerDemo {
         config.inputBindings = "input";
         config.saveFolder = "demo-platformer";   // settings and best times survive restarts (I-230)
         config.components = new DemoComponents();
+        config.tiledProject = "maps/platformer.tiled-project";   // class-typed properties (I-245)
         config.devMode = devMode;
         return config;
     }
