@@ -7,7 +7,7 @@ Prerequisites: [Getting Started](Getting-Started). Reference pages: [kit-platfor
 ---
 
 ## 1. Project bootstrap
-1. Copy `demos/demo-platformer` to `demos/my-platformer` and rename the packages, classes and build entries ([Creating a New Game Project](Creating-a-New-Game-Project)).
+1. Generate the project from the platformer demo: `./gradlew newGame -PgameName=my-platformer -PgamePackage=com.example.platformer -Ptemplate=platformer` ([Creating a New Game Project](Creating-a-New-Game-Project)). Use `-Ptemplate=blank` to start without the demo's levels and art, then add `kit-platformer`.
 2. The config:
 ```java
 public final class MyPlatformer {

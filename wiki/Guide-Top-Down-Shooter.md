@@ -9,7 +9,7 @@ Reference pages: [kit-topdown](Kit-Topdown), [kit-common](Kit-Common), [kit-bull
 ---
 
 ## 1. Project bootstrap
-Copy `demos/demo-shooter` ([Creating a New Game Project](Creating-a-New-Game-Project)). Then the config and the components:
+Generate the project from the shooter demo: `./gradlew newGame -PgameName=my-shooter -PgamePackage=com.example.shooter -Ptemplate=shooter` ([Creating a New Game Project](Creating-a-New-Game-Project)). Then the config and the components:
 ```java
 public static EngineConfig config(boolean devMode, String version) {
     EngineConfig config = new EngineConfig();

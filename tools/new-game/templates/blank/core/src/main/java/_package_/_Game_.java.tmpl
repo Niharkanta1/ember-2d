@@ -1,0 +1,36 @@
+package @PACKAGE@;
+
+import dev.ember2d.app.EngineConfig;
+
+/** @TITLE@: the engine configuration, shared by the desktop and Android launchers. */
+public final class @GAME@ {
+
+    private static String version = "dev";
+
+    private @GAME@() {
+    }
+
+    /** The game's engine configuration, with the version "dev". */
+    public static EngineConfig config(boolean devMode) {
+        return config(devMode, "dev");
+    }
+
+    /** The game's engine configuration; {@code version} comes from the launcher. */
+    public static EngineConfig config(boolean devMode, String version) {
+        @GAME@.version = version == null || version.isBlank() ? "dev" : version;
+        EngineConfig config = new EngineConfig();
+        config.virtualWidth = 320;
+        config.virtualHeight = 180;
+        config.backgroundColor.set(0.08f, 0.07f, 0.12f, 1f);
+        config.firstScene = MainScene::new;
+        config.inputBindings = "input";
+        config.saveFolder = "@NAME@";
+        config.components = new @COMPONENTS@();
+        config.devMode = devMode;
+        return config;
+    }
+
+    static String version() {
+        return version;
+    }
+}

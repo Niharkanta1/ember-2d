@@ -1,0 +1,13 @@
+plugins {
+    id 'java-library'
+}
+
+description = '@TITLE@: game code shared by the desktop and Android launchers.'
+
+dependencies {
+    testImplementation testFixtures(project(':ember-core'))
+    api project(':ember-core')
+    // Add the kits your game uses, for example:
+    // api project(':kits:kit-common')
+    // api project(':kits:kit-platformer')
+}

@@ -11,6 +11,7 @@ Problems collected from building the demos, with their causes. Each reference pa
 | A Java API compile error that works in your IDE | compiled with `--release 17` | use Java 17 APIs |
 | Architecture test failure | a forbidden import, package or genre word | fix the code (the message names the rule and the line) |
 | `... is not listed in allowedModuleDependencies` | a module outside the allowed layout | put games under `demos/<game>/core|desktop|android` |
+| `newGame` fails with `Cannot create the game:` | an option breaks its rule, or the game already exists | fix the listed options; pick a new name or remove the old game ([Creating a New Game Project](Creating-a-New-Game-Project)) |
 | `TiledProjectTest` fails | the Tiled project file is stale (a component or prefab changed) | `./gradlew :demos:<game>:core:tiledTypes` |
 | Gradle: "uses this output of task ':…:compileInk' without declaring a dependency" | `compileInk` and asset tasks in one build | add `mustRunAfter` ([Build Differences per Kit](Build-Differences-per-Kit)) |
 

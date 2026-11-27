@@ -1,0 +1,28 @@
+plugins {
+    id 'java'
+}
+
+description = 'Project generator (F-027, I-580): creates a new game under demos/ from a template.'
+
+// ./gradlew newGame -PgameName=my-game -PgamePackage=com.example.mygame [-PgameTitle="My Game"] [-Ptemplate=blank]
+// Runs from the repository root, so the new game lands in demos/<gameName> and is added to settings.gradle.
+tasks.register('newGame', JavaExec) {
+    group = 'ember2d'
+    description = 'Creates a new game project under demos/ (F-027). Needs -PgameName and -PgamePackage.'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'dev.ember2d.tools.newgame.NewGame'
+    workingDir = rootDir
+    def name = providers.gradleProperty('gameName').orElse('')
+    def pkg = providers.gradleProperty('gamePackage').orElse('')
+    def title = providers.gradleProperty('gameTitle').orElse('')
+    def template = providers.gradleProperty('template').orElse('')
+    argumentProviders.add({
+        ["--name=${name.get()}", "--package=${pkg.get()}", "--title=${title.get()}", "--template=${template.get()}"]
+    } as CommandLineArgumentProvider)
+}
+
+// The tests generate games from the real demos into a temporary folder.
+tasks.named('test', Test) {
+    systemProperty 'ember.repo', rootDir.absolutePath
+    inputs.dir('templates').withPathSensitivity(PathSensitivity.RELATIVE)
+}

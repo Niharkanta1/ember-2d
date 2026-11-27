@@ -49,3 +49,4 @@ include 'demos:demo-novel:android'
 
 // Build tools
 include 'tools:android-api-check'   // Android API guard (I-016)
+include 'tools:new-game'            // project generator (I-580)

@@ -9,7 +9,7 @@ Reference pages: [kit-novel](Kit-Novel), [kit-common](Kit-Common) (the dialogue 
 ---
 
 ## 1. Project bootstrap
-Copy `demos/demo-novel` ([Creating a New Game Project](Creating-a-New-Game-Project)). The core module depends on `kit-novel`, which brings `kit-common`.
+Generate the project from the novel demo: `./gradlew newGame -PgameName=my-novel -PgamePackage=com.example.novel -Ptemplate=novel` ([Creating a New Game Project](Creating-a-New-Game-Project)). The story's Ink source lands in `demos/my-novel/core/ink/`. The core module depends on `kit-novel`, which brings `kit-common`.
 ```java
 public static EngineConfig config(boolean devMode, String version) {
     EngineConfig config = new EngineConfig();

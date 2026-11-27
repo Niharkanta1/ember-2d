@@ -31,6 +31,7 @@ Specifications define feature scope, behaviour, API boundaries and acceptance cr
 | F-023 | Visual novel kit | 5 | `kit-novel` | Ready (I-460, I-470) |
 | F-006B | Optional Box2D module | 6 | `ember-box2d` | Draft |
 | F-026 | Sprite materials: hit flash, outline, palette swap | 6 | `ember.render`, `kit-common` | Ready (I-520) |
+| F-027 | Project generator (`newGame`) | 6 | `tools/new-game` | Ready (I-580) |
 
 Not yet written (Phase 6 candidates): custom shaders and post-processing (beyond F-026), gamepad details (in F-005), Spine adapter details (in F-007, ADR-021).
 

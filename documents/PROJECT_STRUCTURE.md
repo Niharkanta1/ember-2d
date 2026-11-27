@@ -29,6 +29,7 @@ ember2d/
 │   └── demo-novel/
 ├── tools/
 │   ├── android-api-check/       # build-only Android module: lints shared sources against minSdk (I-016)
+│   ├── new-game/                # project generator: ./gradlew newGame creates demos/<game> (F-027, I-580)
 │   └── tiled-types/             # Gradle task: generate Tiled custom types from prefabs (F-009)
 ├── assets-src/                  # source art: Aseprite files, Tiled projects and templates, Ink sources
 ├── documents/                   # all project documentation (this file lives here)

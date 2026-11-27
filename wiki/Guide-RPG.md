@@ -22,7 +22,7 @@ Reference pages: [kit-topdown](Kit-Topdown), [kit-common](Kit-Common), [kit-nove
 ---
 
 ## 1. Project bootstrap
-Copy `demos/demo-rpg` ([Creating a New Game Project](Creating-a-New-Game-Project)).
+Generate the project from the RPG demo: `./gradlew newGame -PgameName=my-rpg -PgamePackage=com.example.rpg -Ptemplate=rpg` ([Creating a New Game Project](Creating-a-New-Game-Project)). The stories' Ink sources land in `demos/my-rpg/core/ink/`.
 ```java
 public static EngineConfig config(boolean devMode, String version) {
     EngineConfig config = new EngineConfig();

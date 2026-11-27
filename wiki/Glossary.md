@@ -26,6 +26,7 @@
 | **Manifest** | `manifest.json`, the list of all assets |
 | **Marker** | an empty prefab placed in a map as a named position (arrival points) |
 | **Material** | a sprite effect drawn with the built-in shader: flash, outline, palette swap |
+| **`newGame`** | the Gradle task that creates a game project under `demos/` from a template ([Creating a New Game Project](Creating-a-New-Game-Project)) |
 | **Phase** | when a system runs in the frame: `INPUT`, `FIXED`, `UPDATE`, `LATE`, `RENDER` |
 | **Pixels per unit** | virtual pixels in one world unit (16 by default) |
 | **Prefab** | a JSON template for an entity's components |
@@ -35,6 +36,7 @@
 | **Solid** | a body that blocks actors; optionally one-way |
 | **Staging tag** | an Ink tag that changes a novel's stage (`bg:`, `show:`, `music:` …) |
 | **Suspend** | the platform pausing the app (minimised, home button); not game pause |
+| **Template** | what `newGame` copies: `blank` or one of the four demos |
 | **Trigger** | a collider that never blocks and reports enter and exit |
 | **Virtual resolution** | the size the world is drawn at before scaling (320 × 180 by default) |
 | **World** | the entities, components and systems of one scene |

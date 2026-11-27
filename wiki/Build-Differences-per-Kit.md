@@ -23,7 +23,7 @@ All games build the same way ([Building for Desktop](Building-for-Desktop), [Bui
 | Generated demo data | `python assets-src/demo-<game>/make_assets.py` | only to regenerate from scratch; after that the files are edited by hand |
 
 ### Setting up `compileInk` in your game
-Copy the `CompileInk` task from `demos/demo-rpg/core/build.gradle` and change the source folder. Then make the launchers' asset tasks run after it, so a combined build never reads half-written stories:
+A game generated from the `rpg` or `novel` template already has it, reading `demos/<game>/core/ink/`. Otherwise, copy the `CompileInk` task from `demos/demo-rpg/core/build.gradle` and change the source folder. Then make the launchers' asset tasks run after it, so a combined build never reads half-written stories:
 ```groovy
 // desktop/build.gradle
 tasks.named('processResources') { mustRunAfter ':demos:my-game:core:compileInk' }

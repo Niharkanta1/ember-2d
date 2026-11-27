@@ -109,6 +109,7 @@ Time-boxed throwaway prototypes (`templates/SPIKE_TEMPLATE.md`). Code is deleted
 - **I-550 Standalone editor decision** (ADR-009 review)
 - **I-560 ember-spine** (ADR-021, F-007; only with a Spine license)
 - **I-570 iOS decision** (ADR-019 review; spike first if pursued)
+- **I-580 Project generator** — `./gradlew newGame` creates a game under `demos/` from a blank or demo template (F-027)
 
 - **G-6 Guide chapters** — one chapter per adopted extra in `documents/guide/`; developer review and approval required
 
