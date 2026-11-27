@@ -71,4 +71,4 @@ package dev.ember2d.i18n;
 - **A new package:** `ember.i18n` is at tier 3, with the other services. ARCHITECTURE.md and the ArchUnit tiers list it.
 - **Switching language in the middle of a conversation:** the test shows that a German story loads a state saved by the English one. Choices already on offer keep the language they were made in, because Ink stores choice texts in the state. Switching language is therefore meant to happen between conversations.
 - **External function fallbacks:** I-440 found that blade-ink refuses unbound `EXTERNAL` functions even when the story has an Ink fallback. `DialogueRunner` now allows fallbacks (F-021 decisions).
-- **Not checked on a device:** no demo is localised yet. The RPG and novel demos (I-450, I-470) use string tables.
+- **Not checked on a device:** no demo is localised yet. The plan was for the RPG and novel demos (I-450, I-470) to use string tables; they were built without them (their text is in English in the Ink stories and the scenes). Localising one demo is a follow-up.
