@@ -30,6 +30,9 @@
    "damage": 1,
    "knockback": 10
   },
-  "Boss": {}
+  "Boss": {},
+  "HitFlash": {
+   "seconds": 0.06
+  }
  }
 }

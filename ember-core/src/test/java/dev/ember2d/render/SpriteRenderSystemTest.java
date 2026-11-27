@@ -183,4 +183,45 @@ class SpriteRenderSystemTest {
         world.runPhase(Phase.RENDER, kit.time);
         assertThat(kit.calls("draw").get(0).f(1)).as("x = 4 - (8 - 6) / 16").isEqualTo(3.875f);
     }
+
+    @Test
+    void onlySpritesWithAMaterialSwitchShadersAndOrderIsKept() {
+        World w = new World(false);
+        SpriteMaterials recorder = new SpriteMaterials() {
+            @Override
+            public boolean begin(com.badlogic.gdx.graphics.g2d.Batch batch, Sprite sprite, TextureRegion region,
+                    Texture palette) {
+                kit.calls.add(new RenderTestKit.Call("begin", new Object[] {region.getRegionX()}));
+                return true;
+            }
+
+            @Override
+            public void end(com.badlogic.gdx.graphics.g2d.Batch batch) {
+                kit.calls.add(new RenderTestKit.Call("end", new Object[0]));
+            }
+        };
+        Renderer withMaterials = (Renderer) java.lang.reflect.Proxy.newProxyInstance(Renderer.class.getClassLoader(),
+                new Class<?>[] {Renderer.class}, (proxy, method, args) -> method.getName().equals("materials")
+                        ? recorder : method.invoke(renderer, args));
+        w.addSystem(new SpriteRenderSystem(w, withMaterials, null, kit.time));
+        for (int i = 0; i < 4; i++) {
+            int e = w.create();
+            w.add(e, Transform.class).teleport(0f, 0f);
+            Sprite sprite = w.add(e, new Sprite());
+            sprite.region = new TextureRegion(texture, i * 16, 0, 16, 16);
+            sprite.z = i;
+            if (i == 1) {
+                sprite.flash = 1f;
+            } else if (i == 3) {
+                sprite.outline.set(1f, 1f, 0f, 1f);
+            }
+        }
+        kit.calls.clear();
+        w.runPhase(Phase.RENDER, kit.time);
+        List<String> sequence = kit.calls.stream().filter(c -> List.of("begin", "draw", "end").contains(c.name()))
+                .map(c -> c.name().equals("draw") ? "draw" + c.args()[10] : c.name().equals("begin")
+                        ? "begin" + c.args()[0] : "end").toList();
+        assertThat(sequence).containsExactly("draw0", "begin16", "draw16", "end", "draw32", "begin48", "draw48",
+                "end");
+    }
 }

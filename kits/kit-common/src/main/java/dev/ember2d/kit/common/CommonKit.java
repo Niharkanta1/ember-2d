@@ -10,7 +10,7 @@ public final class CommonKit {
     private CommonKit() {
     }
 
-    /** Health, Team, Hitbox, Hurtbox, Lifetime, TriggerZone and Spawner. */
+    /** Health, Team, Hitbox, Hurtbox, Lifetime, TriggerZone, Spawner and HitFlash. */
     public static void register(ComponentRegistry registry) {
         registry.register(Health.class, Health::new)
                 .register(Team.class, Team::new)
@@ -18,6 +18,7 @@ public final class CommonKit {
                 .register(Hurtbox.class, Hurtbox::new)
                 .register(Lifetime.class, Lifetime::new)
                 .register(TriggerZone.class, TriggerZone::new)
-                .register(Spawner.class, Spawner::new);
+                .register(Spawner.class, Spawner::new)
+                .register(HitFlash.class, HitFlash::new);
     }
 }

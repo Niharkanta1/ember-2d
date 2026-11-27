@@ -35,6 +35,7 @@ import dev.ember2d.kit.common.Died;
 import dev.ember2d.kit.common.EntityPool;
 import dev.ember2d.kit.common.Health;
 import dev.ember2d.kit.common.HealthSystem;
+import dev.ember2d.kit.common.HitFlashSystem;
 import dev.ember2d.kit.common.Hitbox;
 import dev.ember2d.kit.common.HitSystem;
 import dev.ember2d.kit.common.LifetimeSystem;
@@ -169,6 +170,7 @@ abstract class StageScene extends Scene {
                 input));
         world.addSystem(health);
         world.addSystem(new HitSystem(world, health));
+        world.addSystem(new HitFlashSystem(world, context.events()));   // enemies flash white when hit (I-520)
         world.addSystem(bullets);
         world.addSystem(new TriggerZoneSystem(world, context.events()));
         world.addSystem(new CollisionSystem(world, collision));

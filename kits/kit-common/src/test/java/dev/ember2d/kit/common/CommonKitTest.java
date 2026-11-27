@@ -381,4 +381,23 @@ class CommonKitTest {
         assertThat(world.get(e, Hitbox.class).box.width).isEqualTo(2f);
         assertThat(world.get(e, Spawner.class).waitFor).isEqualTo("z");
     }
+
+    @Test
+    void aHitFlashesTheSpriteForItsTime() {
+        world.addSystem(new HitFlashSystem(world, events));
+        int e = target(0f, 0f, 2);
+        dev.ember2d.render.Sprite sprite = world.add(e, new dev.ember2d.render.Sprite());
+        HitFlash flash = world.add(e, new HitFlash());
+        flash.seconds = 0.1f;
+        flash.color.set(com.badlogic.gdx.graphics.Color.RED);
+        frames(1);
+        assertThat(sprite.flash).isZero();
+        health.damage(e, 1, World.NONE, 0f, 0f);
+        assertThat(sprite.flash).as("on at once").isEqualTo(1f);
+        assertThat(sprite.flashColor).isEqualTo(com.badlogic.gdx.graphics.Color.RED);
+        frames(3);   // 0.05 s
+        assertThat(sprite.flash).isEqualTo(1f);
+        frames(4);   // past 0.1 s
+        assertThat(sprite.flash).as("off after its time").isZero();
+    }
 }

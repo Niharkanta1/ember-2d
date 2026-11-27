@@ -19,6 +19,11 @@ public interface Renderer {
     /** The sprite batch, begun with the world camera during {@code RENDER}. */
     Batch batch();
 
+    /** Draws sprites with material effects (F-026); {@link SpriteMaterials#NONE} when the renderer has no shaders. */
+    default SpriteMaterials materials() {
+        return SpriteMaterials.NONE;
+    }
+
     /** The libGDX camera the world is drawn with; driven by {@link #camera()} every frame. */
     OrthographicCamera worldCamera();
 

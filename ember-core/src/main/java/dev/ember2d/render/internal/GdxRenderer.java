@@ -16,6 +16,7 @@ import dev.ember2d.core.Time;
 import dev.ember2d.render.RenderLayer;
 import dev.ember2d.render.RenderMode;
 import dev.ember2d.render.Renderer;
+import dev.ember2d.render.SpriteMaterials;
 import dev.ember2d.render.SortMode;
 import java.util.HashSet;
 import java.util.List;
@@ -31,6 +32,8 @@ import java.util.Set;
  * scale with black bars. {@code SMOOTH} draws straight into the fitted window rectangle.
  */
 public final class GdxRenderer implements Renderer, Disposable {
+
+    private final MaterialShader materials = new MaterialShader();
 
     /** Libgdx's viewport with its fields set by the layout (never applied: the renderer sets GL state itself). */
     private static final class LayoutViewport extends Viewport {
@@ -210,6 +213,11 @@ public final class GdxRenderer implements Renderer, Disposable {
     }
 
     @Override
+    public SpriteMaterials materials() {
+        return materials;
+    }
+
+    @Override
     public OrthographicCamera worldCamera() {
         return worldCamera;
     }
@@ -270,6 +278,7 @@ public final class GdxRenderer implements Renderer, Disposable {
 
     @Override
     public void dispose() {
+        materials.dispose();
         batch.dispose();
         if (target != null) {
             target.dispose();

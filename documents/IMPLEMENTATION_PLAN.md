@@ -104,7 +104,7 @@ Time-boxed throwaway prototypes (`templates/SPIKE_TEMPLATE.md`). Code is deleted
 ### Phase 6 — Optional extras
 - **I-500 ember-box2d** (F-006B)
 - **I-510 Particles** (F-014)
-- **I-520 Shaders and materials** (spec to be written)
+- **I-520 Shaders and materials** — hit flash, outline, palette swap (F-026)
 - **I-530 Gamepad** (F-005)
 - **I-550 Standalone editor decision** (ADR-009 review)
 - **I-560 ember-spine** (ADR-021, F-007; only with a Spine license)

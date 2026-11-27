@@ -51,6 +51,7 @@
   "Enemy": {
    "score": 25
   },
+  "HitFlash": {},
   "Gunner": {
    "pattern": "pattern.skeleton",
    "interval": 2.5

@@ -1,6 +1,7 @@
 package dev.ember2d.render;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -178,12 +179,18 @@ public final class SpriteRenderSystem extends EntitySystem {
             x = Math.round(x * ppu) / ppu;
             y = Math.round(y * ppu) / ppu;
         }
+        // Materials (F-026): only sprites with an effect switch shaders; the rest keep batching.
+        boolean material = sprite.hasMaterial() && renderer.materials().begin(batch, sprite, region,
+                sprite.paletteId == null || assets == null ? null : assets.get(sprite.paletteId, Texture.class));
         batch.setColor(sprite.tint);
         batch.draw(region.getTexture(), x, y, originX, originY,
                 region.getRegionWidth() / ppu, region.getRegionHeight() / ppu,
                 transform.scale.x, transform.scale.y, transform.interpolatedRotation(time.alpha()),
                 region.getRegionX(), region.getRegionY(), region.getRegionWidth(), region.getRegionHeight(),
                 sprite.flipX != region.isFlipX(), sprite.flipY != region.isFlipY());
+        if (material) {
+            renderer.materials().end(batch);
+        }
     }
 
     private int layerIndex(String name) {

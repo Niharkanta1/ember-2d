@@ -87,6 +87,7 @@ final class AreaScene extends Scene {
     private boolean travelling;
     private boolean cutsceneDue;
     private boolean touch;
+    private int focused = World.NONE;
 
     AreaScene(Game game) {
         this.game = game;
@@ -205,6 +206,9 @@ final class AreaScene extends Scene {
         context.events().on(InteractionFocus.class, e -> {
             if (e.interactor() == player) {
                 prompt.setText(e.prompt().isEmpty() ? "" : (touch ? "A: " : "E: ") + e.prompt());
+                outline(focused, false);
+                focused = e.target();
+                outline(focused, true);
             }
         });
         context.events().on(ZoneEntered.class, e -> {
@@ -218,6 +222,14 @@ final class AreaScene extends Scene {
                 context.scenes().replace(new AreaScene(game), Transition.fade(0.6f));
             }
         });
+    }
+
+    /** Outlines the focused interactable (F-026). */
+    private void outline(int entity, boolean on) {
+        Sprite sprite = entity == World.NONE || !world.isAlive(entity) ? null : world.get(entity, Sprite.class);
+        if (sprite != null) {
+            sprite.outline.set(1f, 0.85f, 0.3f, on ? 1f : 0f);
+        }
     }
 
     private void converse(String knot) {

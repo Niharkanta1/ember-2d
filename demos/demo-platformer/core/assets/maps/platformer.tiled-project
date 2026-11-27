@@ -30,6 +30,21 @@
 				"name": "z",
 				"type": "float",
 				"value": 0
+			},
+			{
+				"name": "flash",
+				"type": "float",
+				"value": 0
+			},
+			{
+				"name": "flashColor",
+				"type": "color",
+				"value": "#ffffffff"
+			},
+			{
+				"name": "outline",
+				"type": "color",
+				"value": "#00000000"
 			}
 		]
 	},

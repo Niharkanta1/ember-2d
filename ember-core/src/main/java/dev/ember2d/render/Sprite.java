@@ -27,6 +27,20 @@ public final class Sprite {
     /** Draw anchor and rotation/scale pivot, in region pixels from the bottom-left corner. */
     public final Vector2 origin = new Vector2();
 
+    // ---- materials (F-026, I-520): all off by default ----
+    /** Hit flash: 0..1 mixes the colour towards {@link #flashColor}. */
+    public float flash;
+    public final Color flashColor = new Color(Color.WHITE);
+    /** A 1-pixel outline around the opaque pixels; alpha 0 means none. Needs a transparent margin in the region. */
+    public final Color outline = new Color(0f, 0f, 0f, 0f);
+    /** Palette swap: a texture asset of up to 16 x 2 pixels (row 0: source colours, row 1: their replacements). */
+    public String paletteId;
+
+    /** Whether any material effect is on. */
+    public boolean hasMaterial() {
+        return flash > 0f || outline.a > 0f || paletteId != null;
+    }
+
     // the region last filled from regionId and the asset generation it came from (hot reload, F-008)
     TextureRegion resolvedRegion;
     int resolvedGeneration;

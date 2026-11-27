@@ -12,7 +12,7 @@ Specifications define feature scope, behaviour, API boundaries and acceptance cr
 | F-004 | Rendering, camera, text | 1, 2, 4 | `ember.render`, `ember.camera` | Part 1 Ready; text, look-ahead, parallax, UI, safe area Draft |
 | F-008 | Assets and hot reload | 1, 2, 3 | `ember.assets` | Part 1 Ready; hot reload and preloading Draft |
 | F-010 | Scenes, data, prefabs, component registry | 1, 2, 3 | `ember.app`, `ember.scene`, `ember.data` | Scene lifecycle Ready; rest Draft |
-| F-014 | Debug overlay and particles | 1, 6 | `ember.debug`, `ember.particles` | Overlay (Phase 1) Ready; rest Draft |
+| F-014 | Debug overlay and particles | 1, 6 | `ember.debug`, `ember.particles` | Overlay (Phase 1) and particles (I-510) Ready; rest Draft |
 | F-022 | Android platform and touch input | 1, 2, 3 | `ember-android`, `ember.input` | Launcher Ready; rest Draft |
 | F-005 | Input actions | 2, 3, 6 | `ember.input` | Draft |
 | F-006 | Physics: kinematic collision | 2 | `ember.collision` | Draft |
@@ -28,9 +28,10 @@ Specifications define feature scope, behaviour, API boundaries and acceptance cr
 | F-025 | Localisation (string tables, language setting, translated Ink stories) | 5 | `ember-core` / `ember.i18n` | Ready |
 | F-016 | Top-down movement and shooter | 4 | `kit-topdown` | Draft |
 | F-017 | RPG package | 5 | `kit-topdown` | Draft |
-| F-023 | Visual novel kit | 5 | `kit-novel` | Draft |
+| F-023 | Visual novel kit | 5 | `kit-novel` | Ready (I-460, I-470) |
 | F-006B | Optional Box2D module | 6 | `ember-box2d` | Draft |
+| F-026 | Sprite materials: hit flash, outline, palette swap | 6 | `ember.render`, `kit-common` | Ready (I-520) |
 
-Not yet written (Phase 6 candidates): shaders/materials, gamepad details (in F-005), Spine adapter details (in F-007, ADR-021).
+Not yet written (Phase 6 candidates): custom shaders and post-processing (beyond F-026), gamepad details (in F-005), Spine adapter details (in F-007, ADR-021).
 
 File names are kept from revision 1 for continuity: `F-006-PHYSICS.md` now specifies kinematic collision, `F-014-PARTICLES-DEBUG.md` covers the debug overlay and the particle wrapper, and `F-018-EDITOR.md` specifies in-game dev tools instead of a JavaFX editor. Revision 1 versions are in `../old-files/specs/`.

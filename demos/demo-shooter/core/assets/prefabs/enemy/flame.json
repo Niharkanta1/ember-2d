@@ -50,6 +50,7 @@
   "Hurtbox": {},
   "Enemy": {
    "score": 15
-  }
+  },
+  "HitFlash": {}
  }
 }
