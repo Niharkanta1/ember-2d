@@ -12,6 +12,8 @@ construo = "2.3.0"
 # Dev tools (I-160, F-018): imgui-java needs LWJGL 3.4.1; every desktop build is pinned to it (S-01).
 imgui = "1.92.7.1"
 lwjgl = "3.4.1"
+# Kit AI (I-330, F-016): steering and pathfinding behind the kit-topdown AI adapter; approved for download 2026-11-27.
+gdxAi = "1.8.2"
 
 # Android SDK levels. minSdk 23 (Android 6) decided in I-015 (ADR-015).
 androidCompileSdk = "36"  # gdx-backend-android 1.14.2 pulls androidx.core 1.17.0, which requires 36+
@@ -32,6 +34,7 @@ gdx-backend-headless = { module = "com.badlogicgames.gdx:gdx-backend-headless", 
 gdx-backend-android = { module = "com.badlogicgames.gdx:gdx-backend-android", version.ref = "gdx" }
 gdx-freetype = { module = "com.badlogicgames.gdx:gdx-freetype", version.ref = "gdx" }
 gdx-freetype-platform = { module = "com.badlogicgames.gdx:gdx-freetype-platform", version.ref = "gdx" }
+gdx-ai = { module = "com.badlogicgames.gdx:gdx-ai", version.ref = "gdxAi" }
 android-desugar = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugarJdkLibs" }
 
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }

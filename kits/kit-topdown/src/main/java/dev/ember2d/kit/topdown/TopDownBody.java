@@ -40,6 +40,11 @@ public final class TopDownBody {
     public boolean moving;
     /** Ignore input (cutscenes, dialogue); knockback still applies. */
     public boolean locked;
+    /** Read the {@code move} input axis; false for bodies driven by AI or code through {@link #moveX}, {@link #moveY}. */
+    public boolean useInput = true;
+    /** The move direction when {@link #useInput} is false (length at most 1), set by AI (I-330) or game code. */
+    public float moveX;
+    public float moveY;
     /** Runtime, grid mode: distance left in the current step along {@link #stepX}, {@link #stepY}. */
     public float stepLeft;
     public float stepX;

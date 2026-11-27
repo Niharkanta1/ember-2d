@@ -1,6 +1,6 @@
 # F-016 — Top-down Movement and Shooter Package
 
-- Status: Top-down movement Ready (I-310, approved 2026-11-27 under the developer's standing approval for Phases 3 to 6; see "Top-down movement (I-310)"); shooter package Ready (I-320, approved 2026-11-27 under the standing approval; see "Shooter package (I-320)"); AI hooks and demo: Draft
+- Status: Top-down movement Ready (I-310, approved 2026-11-27 under the developer's standing approval for Phases 3 to 6; see "Top-down movement (I-310)"); shooter package Ready (I-320, approved 2026-11-27 under the standing approval; see "Shooter package (I-320)"); AI hooks Ready (I-330, approved 2026-11-27 under the standing approval; see "Enemy AI hooks (I-330)"); demo: Draft
 - Phase: 4
 - Module / package: `kit-topdown` (movement + `shooter` package)
 - Depends on: F-003, F-004 (Y-sort), F-005, F-006, F-021, F-024 (bullets); gdx-ai (optional)
@@ -148,6 +148,45 @@ Status: Ready. Approved 2026-11-27 under the developer's standing approval for P
 - **Input in fixed steps:** `WeaponSystem` reads the trigger with `input.pressed(fireAction)`. Edges inside `FIXED` follow the input's fixed-step rules (F-005).
 - **Allocation test:** the "no allocation" test pulls the trigger directly, because the test's proxy-based fake `Input` allocates an argument array on every call. The real input does not.
 - **Not checked on a device:** the aim stick on a touch screen is checked with the shooter demo (I-340).
+
+## Enemy AI hooks (I-330)
+Status: Ready. Approved 2026-11-27 under the developer's standing approval for Phases 3 to 6.
+
+**The gdx-ai dependency:** the developer approved downloading gdx-ai on 2026-11-27. It is in the dependency register (D-014). `kit-topdown` uses version 1.8.2 as an `implementation` dependency, so no gdx-ai type is part of the kit's API. Package: `dev.ember2d.kit.topdown.ai`.
+
+**Driving a body from code:** `TopDownBody` gains `useInput` (true) and `moveX`/`moveY`. With `useInput` false, `TopDownSystem` moves the body by these values instead of the `move` axis (clamped to length 1). This is how AI, or any game code, drives a body.
+
+**`Steering` component** (registered by `TopDownKit.register`):
+- **`mode`:** `NONE`, `SEEK`, `FLEE`, `ARRIVE` or `FOLLOW_PATH` (the default).
+- **Target:** `target` (an entity), or (`targetX`, `targetY`) when `target` is null. A dead target entity stops the body.
+- **Distances:** `arriveRadius` (0.3), `slowRadius` (2), `fleeRadius` (0 means always flee), `sight` (0 means no limit; seek and path modes stop when the target is farther).
+- **Path timing:** `repathSeconds` (0.5).
+- **Runtime fields:** `pathFound`, `repathLeft` and `waypoint`.
+
+**`AiSystem(world, planner)`,** in `FIXED`, added before `TopDownSystem`:
+- **What it sets:** for each entity with `Steering`, `TopDownBody` and `Transform`, it sets `useInput` to false and the move direction.
+- **Seek, flee and arrive:** these come from gdx-ai's `Seek`, `Flee` and `Arrive` behaviours, through an adapter that reports zero velocity and a maximum acceleration equal to the body's maximum speed. The behaviour's output is therefore the velocity it wants, and the move is that velocity divided by `maxSpeed`. `TopDownSystem` keeps doing the accelerating and the sliding, so AI bodies move exactly like players.
+- **`FOLLOW_PATH`:**
+  - It plans with the `PathPlanner` every `repathSeconds` and seeks each waypoint in turn (a waypoint within 0.2 counts as reached).
+  - In the goal's cell it arrives at the target itself.
+  - With no path it stands still and sets `pathFound` to false.
+  - Without a planner it seeks directly.
+
+**`PathPlanner(TileGrid)`:**
+- **Search:** gdx-ai's `IndexedAStarPathFinder` over the free cells of a collision tile grid, with 8 directions. A diagonal step needs both side cells free, so paths never cut corners.
+- **`find(fromX, fromY, toX, toY, FloatArray out)`:** returns waypoints at cell centres, from the cell after the start to the goal's cell. It returns false when an end is solid or outside the grid, or when no path exists.
+- **Grid changes:** `refresh()` after the grid changes (doors). `walkable(x, y)` answers for one position.
+- **Cost:** searches reuse gdx-ai's buffers; a path makes no new objects after the first search, apart from growing `out`.
+
+**Not in I-330:** behaviour trees and formations (gdx-ai offers them; add them when a demo needs them), and line-of-sight shortcuts on paths.
+
+**Tests (headless):**
+- A path goes around a wall through its only gap and never cuts corners.
+- An enclosed goal has no path.
+- An enemy body following a path reaches its target around walls through the real `TopDownSystem` and `Collision`.
+- Seek moves at full speed towards the target, flee moves away and only within `fleeRadius`, and arrive slows inside `slowRadius` and stops inside `arriveRadius`.
+- `sight` and a dead target stop the body.
+- `useInput` false moves a body by `moveX` and `moveY`.
 
 ## Non-goals (deferred)
 Weapon switching UI, burst mode, hitscan, melee combos, a visual bullet pattern editor (patterns are JSON, F-024).

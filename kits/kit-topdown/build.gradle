@@ -8,4 +8,5 @@ dependencies {
     testImplementation testFixtures(project(':ember-core'))
     api project(':kits:kit-common')
     api project(':kits:kit-bullets')
+    implementation libs.gdx.ai   // behind the AI adapter (dev.ember2d.kit.topdown.ai); gdx-ai types do not leak (I-330)
 }

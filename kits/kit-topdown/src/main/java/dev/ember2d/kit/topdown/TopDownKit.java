@@ -10,8 +10,9 @@ public final class TopDownKit {
     private TopDownKit() {
     }
 
-    /** TopDownBody (the shooter package adds its own in later tasks). */
+    /** TopDownBody and the AI Steering (the shooter package registers its own with ShooterKit). */
     public static void register(ComponentRegistry registry) {
-        registry.register(TopDownBody.class, TopDownBody::new);
+        registry.register(TopDownBody.class, TopDownBody::new)
+                .register(dev.ember2d.kit.topdown.ai.Steering.class, dev.ember2d.kit.topdown.ai.Steering::new);
     }
 }

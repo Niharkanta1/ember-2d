@@ -58,6 +58,11 @@ public final class TopDownSystem extends EntitySystem {
         TopDownBody body = world().get(entity, TopDownBody.class);
         if (body.locked) {
             move.setZero();
+        } else if (!body.useInput) {
+            move.set(body.moveX, body.moveY);
+            if (move.len2() > 1f) {
+                move.nor();
+            }
         } else {
             input.axis2(MOVE_AXIS, move);
             if (move.len2() > 1f) {
