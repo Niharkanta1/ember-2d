@@ -10,8 +10,9 @@ public final class RpgKit {
     private RpgKit() {
     }
 
-    /** Interactable and Interactor. */
+    /** Interactable, Interactor, Inventory and ItemPickup. */
     public static void register(ComponentRegistry registry) {
-        registry.register(Interactable.class, Interactable::new).register(Interactor.class, Interactor::new);
+        registry.register(Interactable.class, Interactable::new).register(Interactor.class, Interactor::new)
+                .register(Inventory.class, Inventory::new).register(ItemPickup.class, ItemPickup::new);
     }
 }
