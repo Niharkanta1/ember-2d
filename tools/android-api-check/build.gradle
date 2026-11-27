@@ -42,5 +42,6 @@ android {
 dependencies {
     implementation libs.gdx.core
     implementation libs.gdx.freetype
+    implementation libs.gdx.ai   // kit-topdown's AI adapter (I-330)
     coreLibraryDesugaring libs.android.desugar
 }
