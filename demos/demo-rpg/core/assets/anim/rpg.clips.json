@@ -1,0 +1,76 @@
+{
+ "version": 1,
+ "defaults": {
+  "frameDuration": 0.1
+ },
+ "clips": {
+  "knight_idle": {
+   "sheet": "tex.knight_idle",
+   "frameWidth": 16,
+   "frameHeight": 16,
+   "frames": [
+    0,
+    5
+   ]
+  },
+  "knight_run": {
+   "sheet": "tex.knight_run",
+   "frameWidth": 16,
+   "frameHeight": 16,
+   "frames": [
+    0,
+    5
+   ],
+   "frameDuration": 0.08
+  },
+  "goblin_idle": {
+   "sheet": "tex.goblin_idle",
+   "frameWidth": 16,
+   "frameHeight": 16,
+   "frames": [
+    0,
+    5
+   ],
+   "frameDuration": 0.12
+  },
+  "slime_idle": {
+   "sheet": "tex.slime_idle",
+   "frameWidth": 16,
+   "frameHeight": 16,
+   "frames": [
+    0,
+    5
+   ],
+   "frameDuration": 0.12
+  },
+  "door_closed": {
+   "sheet": "tex.door",
+   "frameWidth": 32,
+   "frameHeight": 32,
+   "frames": [
+    0,
+    0
+   ]
+  },
+  "door_open": {
+   "sheet": "tex.door",
+   "frameWidth": 32,
+   "frameHeight": 32,
+   "frames": [
+    0,
+    13
+   ],
+   "frameDuration": 0.05,
+   "mode": "once"
+  },
+  "door_opened": {
+   "sheet": "tex.door",
+   "frameWidth": 32,
+   "frameHeight": 32,
+   "frames": [
+    13,
+    13
+   ]
+  }
+ }
+}

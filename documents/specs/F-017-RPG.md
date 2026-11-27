@@ -88,6 +88,44 @@ Status: Ready. Approved 2026-11-27 under the developer's standing approval for P
 - Save and load round-trip, skipping unknown items and clamping stacks.
 - Pickups: a full pickup despawns, a partial one stays with the rest, and an entity without an inventory is ignored.
 
+## RPG demo (I-450)
+Status: Done. Approved 2026-11-27 under the developer's standing approval for Phases 3 to 6. Module `demos/demo-rpg` (`core`, `desktop`, `android`); data from `assets-src/demo-rpg/make_assets.py`, sounds from `sound/make_sounds.py`, stories in `assets-src/demo-rpg/ink`.
+
+**What it shows:**
+- **Areas:** Millbrook (the town) and the cellar, two Tiled maps from the `rpg-rpg` art pack. Travel zones (`Travel` component: area and arrival marker) lead between them with a fade.
+- **Conversation:** the elder Grik (an `Interactable` whose `action` names a knot in `ink/town.ink`). The story calls `has`, `give`, `take`, `flag` and `set_flag`, which are bound to the inventory and the world flags. A sticky choice gives the cellar key.
+- **The door and the chest:** their knots set the flags `door.cellar` and `chest.cellar`. The scene listens for `FlagChanged`: the door plays its opening, loses its `Solid` and stops being interactable; the chest turns dull and offers "Search" (`chest_empty`). On entering an area both are shown as their flags say, so they stay open after travel and after loading.
+- **The cutscene:** the first visit to the cellar plays `ink/cellar.ink` with `NovelDirector` and `NovelView` over the game world (no background), with a choice, a shake, a sound, a slide and a flash. The flag `cutscene.cellar` keeps it from playing again.
+- **Saving:** slot 0 holds the area, the position, the inventory, the flags and the town story's state. The game saves on arriving in an area, from the pause menu, and when Android puts the app in the background (`setSuspendSave`). The menu offers Continue when the slot has a save.
+- **HUD:** the carried items (icon and count) at the top left, the interaction prompt ("E: Talk" / "A: Talk") at the bottom.
+
+**Ink build step:** `gradlew :demos:demo-rpg:core:compileInk` compiles `assets-src/demo-rpg/ink/*.ink` into `assets/ink/*.ink.json` with inklecate from the Gradle property `ember.inklecate`. Without the property the task is skipped. The compiled stories are committed, so building needs no inklecate.
+
+**Tests (`RpgDataTest`):**
+- The quest runs through the story functions: refusing, accepting, the locked and the open door, the chest, handing over the tonic, the slime.
+- A saved play-through loads its flags, items, story state and place.
+- The cutscene uses only known characters and tags (dev mode, both choices).
+- Every map object is a prefab with registered components; every travel arrives at a marker that exists; every interaction names a knot.
+
+## Decisions in I-450
+- **`ember.ui.DialogueBox` (F-012):** the dialogue box widget planned for Phase 5 arrived with its first user. It has a name plate, typewriter text, and a confirm action or click that completes the line first, then advances. Choices sit inside the box. A press in the frame a line appears is ignored, so the press that starts a conversation does not also skip its first line. `NovelView` uses the same widget.
+- **Lookahead fix in `DialogueRunner.bind` (F-021):** blade-ink may call an external function while looking ahead past a line, then call it again for real. Game functions with side effects ran twice (the elder took two tonics). `bind` now registers functions as not lookahead-safe. `DialogueRunnerTest` covers a function between two lines.
+- **`NovelView.setCharacterArea(bottom, height)` (F-023):** full-screen characters (85 % of the height) are too large over a game's world. The RPG cutscene stands them on the dialogue box at half the height.
+- **Art pack:** `rpg-rpg` has dungeon tiles only, no outdoor tiles, so the town is a paved square with walled buildings, built from the same tile sheet as the cellar.
+- **The elder and the slime** are the pack's goblin and slime, as friendly characters. There is no combat (not in scope).
+- **Inventory** lives in the play-through (`Game`) and is added to each area's player entity, so it is the same object across scenes.
+- **Checked on the emulator** (API 23, debug build):
+  - The menu, a new game, the town, talking to the elder through both lines and the choice, the key in the HUD.
+  - Opening the door, travelling to the cellar, the cutscene with its choice and the backlog, talking to the slime, opening the chest.
+  - Saving from the pause menu, killing the app, Continue: the cellar at the saved place, the chest still open, no cutscene again.
+  - Back up the stairs: the door still open. Handing the tonic to the elder.
+  - This was the first Android run of blade-ink; no errors were logged.
+- **Found on the emulator and fixed:**
+  - The dialogue box was built before the scene's skin was set and drew as a black panel.
+  - Choices overflowed the fixed-height box; the box now grows.
+  - The new-game confirmation was too long for `ConfirmDialog` (it does not wrap) and promised to keep the save, which arriving in the town overwrites.
+- **Not checked:** a release (R8) build on the emulator, the desktop build by hand (it is built and its tests run), and a real phone.
+
 ## Non-goals
 Quest system (needs its own spec), combat stats/levelling, equipment, shops, cutscene editor (cutscenes use Ink + `kit-novel` tags).
 

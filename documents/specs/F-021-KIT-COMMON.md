@@ -175,6 +175,8 @@ Status: Ready. Approved 2026-11-27 under the developer's standing approval for P
 - **The Android API guard:** blade-ink was added to its classpath, as gdx-ai was in I-330.
 - **External function fallbacks (found in I-440):** blade-ink refuses to run a story with an unbound `EXTERNAL` function, even when the story has an Ink fallback, because fallbacks are off by default. `DialogueRunner` turns them on (`setAllowExternalFunctionFallbacks(true)`), so an unbound function runs its Ink fallback, as in Inky.
 - **Not checked on a device:** the first run on the emulator is with the RPG demo (I-450).
+- **Lookahead (found in I-450):** blade-ink's two-argument `bindExternalFunction` marks a function lookahead-safe, so it may run while the story looks ahead past a line and then run again. `bind` now passes `lookaheadSafe=false`, so game code runs once per call. `DialogueRunnerTest.aBoundFunctionBetweenTwoLinesRunsOnce` fails without the fix.
+- **Checked on a device in I-450:** the RPG demo ran its conversations and the cutscene on the API 23 emulator.
 
 ## Non-goals
 Stats systems, buffs/debuffs, AI (kits own AI hooks), inventory (RPG package).

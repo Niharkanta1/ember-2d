@@ -1,0 +1,100 @@
+{
+ "version": 1,
+ "contexts": {
+  "gameplay": {
+   "actions": {
+    "interact": [
+     "E",
+     "SPACE",
+     "ENTER"
+    ],
+    "pause": [
+     "P"
+    ],
+    "menu": [
+     "ESCAPE",
+     "BACK"
+    ]
+   },
+   "axes": {
+    "move": {
+     "left": [
+      "A",
+      "LEFT"
+     ],
+     "right": [
+      "D",
+      "RIGHT"
+     ],
+     "up": [
+      "W",
+      "UP"
+     ],
+     "down": [
+      "S",
+      "DOWN"
+     ]
+    }
+   }
+  },
+  "ui": {
+   "actions": {
+    "ui_back": [
+     "ESCAPE",
+     "BACK",
+     "P"
+    ],
+    "ui_confirm": [
+     "ENTER",
+     "SPACE",
+     "E"
+    ]
+   },
+   "axes": {
+    "ui_nav": {
+     "left": [
+      "LEFT",
+      "A"
+     ],
+     "right": [
+      "RIGHT",
+      "D"
+     ],
+     "up": [
+      "UP",
+      "W"
+     ],
+     "down": [
+      "DOWN",
+      "S"
+     ]
+    }
+   }
+  }
+ },
+ "touchControls": {
+  "opacity": 0.35,
+  "joystick": {
+   "axis": "move",
+   "mode": "floating",
+   "radius": 52,
+   "deadZone": 0.2
+  },
+  "buttons": [
+   {
+    "action": "interact",
+    "label": "A",
+    "x": 56,
+    "y": 64,
+    "radius": 32
+   },
+   {
+    "action": "pause",
+    "label": "II",
+    "x": 40,
+    "y": -40,
+    "radius": 24
+   }
+  ]
+ }
+}

@@ -1,0 +1,21 @@
+{
+ "version": 1,
+ "characters": {
+  "knight": {
+   "name": "Knight",
+   "color": "#9FD3FF",
+   "position": "left",
+   "expressions": {
+    "normal": "atlas.rpg/knight"
+   }
+  },
+  "slime": {
+   "name": "Slime",
+   "color": "#8BE38B",
+   "position": "right",
+   "expressions": {
+    "normal": "atlas.rpg/slime"
+   }
+  }
+ }
+}

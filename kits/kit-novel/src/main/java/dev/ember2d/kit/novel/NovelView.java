@@ -13,13 +13,13 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 import dev.ember2d.assets.Assets;
 import dev.ember2d.audio.Audio;
 import dev.ember2d.camera.CameraRig;
 import dev.ember2d.core.PublicApi;
 import dev.ember2d.input.Input;
+import dev.ember2d.ui.DialogueBox;
 import dev.ember2d.ui.MenuList;
 import dev.ember2d.ui.Ui;
 import java.util.LinkedHashMap;
@@ -48,16 +48,12 @@ public final class NovelView implements StageListener {
     private final Group people = new Group();
     private final Image cg = new Image();
     private final Image flash = new Image();
-    private final Table box;
-    private final Label name;
-    private final Label text;
+    private final DialogueBox box;
     private final Table buttons;
     private final Table choices;
     private final Map<String, Image> shown = new LinkedHashMap<>();
     private NovelDirector director;
     private Runnable onFinished;
-    private String full = "";
-    private float typed;
     private float wait;
     private float autoWait;
     private boolean lineShown;
@@ -67,6 +63,9 @@ public final class NovelView implements StageListener {
     private boolean read;
     private boolean finished = true;
     private Table backlog;
+    private NovelLine pending;
+    private float characterHeight = 0.85f;
+    private float characterBottom;
 
     /**
      * @param camera shakes for {@code shake:}; may be null
@@ -98,18 +97,16 @@ public final class NovelView implements StageListener {
                 tap();
             }
         });
-        box = new Table(ui.skin());
-        box.setBackground("panel");
-        box.pad(4f, 8f, 6f, 8f);
-        name = new Label("", ui.skin(), "title");
-        text = new Label("", ui.skin());
-        text.setWrap(true);
-        text.setAlignment(Align.topLeft);
-        box.add(name).left().row();
-        box.add(text).width(w - 40f).height(h * 0.17f).left().top();
+        box = new DialogueBox(ui);
+        box.setConfirmActions("ui_confirm", "fire");
+        box.setOnAdvance(() -> {
+            if (backlog == null && lineShown) {
+                auto = false;
+                advance();
+            }
+        });
         box.setSize(w - 16f, h * 0.3f);
         box.setPosition(8f, 6f);
-        box.setTouchable(com.badlogic.gdx.scenes.scene2d.Touchable.disabled);
         buttons = new Table(ui.skin());
         buttons.add(button("Auto", () -> {
             auto = !auto;
@@ -147,6 +144,20 @@ public final class NovelView implements StageListener {
         return b;
     }
 
+    /**
+     * Where characters stand, as fractions of the screen height: their feet at {@code bottom} and their height
+     * (default 0 and 0.85, a full-screen novel). A story scene over a game's world suits smaller characters standing
+     * on the dialogue box, such as (0.33, 0.5). Applies to characters shown from now on.
+     */
+    public void setCharacterArea(float bottom, float height) {
+        if (height <= 0f || bottom < 0f || bottom + height > 1f) {
+            throw new IllegalArgumentException("character area from " + bottom + " with height " + height
+                    + " must lie within the screen (0 to 1)");
+        }
+        characterBottom = bottom;
+        characterHeight = height;
+    }
+
     /** Starts presenting a director's story; {@code onFinished} runs at its end (the view is removed). */
     public void play(NovelDirector director, Runnable onFinished) {
         this.director = director;
@@ -173,16 +184,14 @@ public final class NovelView implements StageListener {
         if (!lineShown) {
             return;
         }
-        if (typed < full.length()) {
-            typed = settings.textSpeed <= 0f || skip ? full.length() : Math.min(full.length(),
-                    typed + settings.textSpeed * delta);
-            text.setText(full.substring(0, (int) typed));
-        }
-        if (input != null && (input.justPressed("ui_confirm") || input.justPressed("fire"))) {
-            tap();
+        if (hidden && (pressed("ui_confirm") || pressed("fire"))) {
+            setHidden(false);
             return;
         }
-        if (typed >= full.length()) {
+        if (skip) {
+            box.complete();
+        }
+        if (box.isComplete()) {
             if (skip) {
                 autoWait += delta;
                 if (autoWait >= SKIP_STEP) {
@@ -195,6 +204,10 @@ public final class NovelView implements StageListener {
                 }
             }
         }
+    }
+
+    private boolean pressed(String action) {
+        return input != null && input.hasAction(action) && input.justPressed(action);
     }
 
     /** Whether a story is being presented. */
@@ -210,13 +223,7 @@ public final class NovelView implements StageListener {
             setHidden(false);
             return;
         }
-        if (typed < full.length()) {
-            typed = full.length();   // complete the line first
-            text.setText(full);
-            return;
-        }
-        auto = false;
-        advance();
+        box.press();   // completes the line first, then advances
     }
 
     private void advance() {
@@ -230,11 +237,9 @@ public final class NovelView implements StageListener {
                 if (skip && !read && !settings.skipUnread) {
                     skip = false;   // skip stops at unread text
                 }
-                full = line.text();
-                name.setText(line.name());
-                name.setColor(line.color());
-                name.setVisible(!line.name().isEmpty());
+                pending = line;
                 wait = skip ? 0f : line.delay();
+                box.setVisible(false);
                 if (wait <= 0f) {
                     showLine();
                 }
@@ -246,9 +251,12 @@ public final class NovelView implements StageListener {
 
     private void showLine() {
         wait = 0f;
+        box.setTextSpeed(settings.textSpeed);
+        box.show(pending.name(), pending.color(), pending.text());
+        if (skip) {
+            box.complete();
+        }
         box.setVisible(!hidden);
-        typed = settings.textSpeed <= 0f || skip ? full.length() : 0f;
-        text.setText(full.substring(0, (int) typed));
         lineShown = true;
     }
 
@@ -335,7 +343,7 @@ public final class NovelView implements StageListener {
         if (region != null) {
             TextureRegion r = assets.region(region);
             image.setDrawable(new com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable(r));
-            float h = ui.height() * 0.85f;
+            float h = ui.height() * characterHeight;
             float w = h * r.getRegionWidth() / r.getRegionHeight();
             image.setSize(w, h);
         }
@@ -343,12 +351,12 @@ public final class NovelView implements StageListener {
         image.clearActions();
         if (transition.equals("slide") && seconds > 0f) {
             if (fresh) {
-                image.setPosition(x < 0.5f ? -image.getWidth() : ui.width(), 0f);
+                image.setPosition(x < 0.5f ? -image.getWidth() : ui.width(), characterBottom * ui.height());
             }
             image.getColor().a = 1f;
-            image.addAction(Actions.moveTo(targetX, 0f, seconds));
+            image.addAction(Actions.moveTo(targetX, characterBottom * ui.height(), seconds));
         } else {
-            image.setPosition(targetX, 0f);
+            image.setPosition(targetX, characterBottom * ui.height());
             if (fresh && transition.equals("fade") && seconds > 0f) {
                 image.getColor().a = 0f;
                 image.addAction(Actions.fadeIn(seconds));

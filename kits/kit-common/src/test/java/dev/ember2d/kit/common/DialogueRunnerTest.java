@@ -82,6 +82,16 @@ class DialogueRunnerTest {
     }
 
     @Test
+    void aBoundFunctionBetweenTwoLinesRunsOnce() throws Exception {
+        DialogueRunner r = runner();
+        r.jumpTo("between");
+        assertThat(r.next()).isEqualTo("Elder: First.");
+        assertThat(given).as("not run ahead while showing the first line").isEmpty();
+        assertThat(r.next()).isEqualTo("Elder: Second.");
+        assertThat(given).as("Ink lookahead must not run game code twice").containsExactly("tonic");
+    }
+
+    @Test
     void stateRoundTripsThroughASaveSlot() throws Exception {
         DialogueRunner r = runner();
         r.setVariable("gold", 7);   // before the choices are made: their texts use it

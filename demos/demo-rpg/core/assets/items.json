@@ -1,0 +1,20 @@
+{
+ "version": 1,
+ "items": {
+  "key.cellar": {
+   "name": "Cellar key",
+   "icon": "atlas.rpg/key",
+   "tags": [
+    "key"
+   ]
+  },
+  "tonic": {
+   "name": "Tonic",
+   "icon": "atlas.rpg/tonic",
+   "stack": 9,
+   "tags": [
+    "consumable"
+   ]
+  }
+ }
+}

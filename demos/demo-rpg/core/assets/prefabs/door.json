@@ -1,0 +1,32 @@
+{
+ "version": 1,
+ "components": {
+  "Sprite": {
+   "regionId": "atlas.rpg/chest",
+   "origin": [
+    16,
+    0
+   ],
+   "z": 0
+  },
+  "Animator": {
+   "clipSet": "anim.rpg",
+   "clip": "door_closed"
+  },
+  "Collider": {
+   "box": {
+    "x": -1,
+    "y": 0,
+    "width": 2,
+    "height": 1
+   }
+  },
+  "Solid": {},
+  "Interactable": {
+   "prompt": "Open",
+   "action": "cellar_door",
+   "range": 1.6
+  },
+  "Door": {}
+ }
+}

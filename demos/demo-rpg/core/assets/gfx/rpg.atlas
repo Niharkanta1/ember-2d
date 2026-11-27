@@ -1,0 +1,35 @@
+tiles.png
+size: 144,128
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+chest
+  bounds: 80,16,16,16
+key
+  bounds: 80,0,16,16
+tonic
+  bounds: 112,0,16,16
+
+knight_idle.png
+size: 96,16
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+knight
+  bounds: 0,0,16,16
+
+goblin_idle.png
+size: 96,16
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+goblin
+  bounds: 0,0,16,16
+
+slime_idle.png
+size: 96,16
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+slime
+  bounds: 0,0,16,16

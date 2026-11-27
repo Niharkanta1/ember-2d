@@ -275,4 +275,48 @@ class UiTest {
         assertThat(ui.height()).isEqualTo(180f);
         assertThat(ui.stage().getViewport().getScreenWidth()).isEqualTo(2400);
     }
+
+    @Test
+    void theDialogueBoxTypesThenCompletesThenAdvances() {
+        DialogueBox box = new DialogueBox(ui);
+        ui.root().add(box).width(300f).height(60f);
+        int[] advanced = {0};
+        box.setOnAdvance(() -> advanced[0]++);
+        box.setTextSpeed(30f);
+        box.show("Elder", null, "Welcome home.");
+        assertThat(box.shownText()).isEmpty();
+        for (int i = 0; i < 10; i++) {
+            frame();   // 1/6 s at 30 per second: 5 characters
+        }
+        assertThat(box.shownText()).isEqualTo("Welco");
+        pressed.add("ui_confirm");
+        frame();
+        assertThat(box.isComplete()).as("the first press completes the line").isTrue();
+        assertThat(box.shownText()).isEqualTo("Welcome home.");
+        assertThat(advanced[0]).isZero();
+        pressed.add("ui_confirm");
+        frame();
+        assertThat(advanced[0]).as("the second press advances").isEqualTo(1);
+    }
+
+    @Test
+    void dialogueChoicesTakeTheConfirmAndDoNotAdvance() {
+        DialogueBox box = new DialogueBox(ui);
+        ui.root().add(box).width(300f).height(80f);
+        int[] advanced = {0};
+        List<Integer> chosen = new ArrayList<>();
+        box.setOnAdvance(() -> advanced[0]++);
+        box.setTextSpeed(0f);
+        box.show(null, null, "Help us?");
+        assertThat(box.isComplete()).as("speed 0 shows the line at once").isTrue();
+        box.showChoices(List.of("Yes", "No"), i -> box.show("Elder", null, "Thank you, " + i));
+        nav.set(0f, -1f);
+        frame();
+        nav.set(0f, 0f);
+        pressed.add("ui_confirm");
+        frame();
+        assertThat(box.hasChoices()).isFalse();
+        assertThat(box.text()).isEqualTo("Thank you, 1");
+        assertThat(advanced[0]).as("the choice's press is not also an advance").isZero();
+    }
 }

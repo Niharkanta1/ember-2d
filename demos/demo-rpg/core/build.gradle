@@ -1,0 +1,55 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'RPG demo: game code shared by all launchers (I-450).'
+
+dependencies {
+    testImplementation testFixtures(project(':ember-core'))
+    api project(':ember-core')
+    api project(':kits:kit-common')
+    api project(':kits:kit-topdown')
+    api project(':kits:kit-novel')
+}
+
+// ----------------------------------------------------------------------------------------------------
+// Ink stories (I-450): assets-src/demo-rpg/ink/*.ink are compiled by inklecate into assets/ink/*.ink.json, which
+// are committed. inklecate is not a build dependency: set its path in ~/.gradle/gradle.properties as
+//     ember.inklecate=C:/tools/inklecate/inklecate.exe
+// and run `gradlew :demos:demo-rpg:core:compileInk` after editing a story. Without the property the task is skipped.
+// ----------------------------------------------------------------------------------------------------
+abstract class CompileInk extends DefaultTask {
+    @InputFiles
+    abstract ConfigurableFileCollection getSources()
+
+    @OutputDirectory
+    abstract DirectoryProperty getOutputDir()
+
+    @Input
+    @Optional
+    abstract Property<String> getInklecate()
+
+    @Inject
+    abstract ExecOperations getExecOperations()
+
+    @TaskAction
+    void compile() {
+        String compiler = inklecate.get()
+        sources.files.sort { it.name }.each { File story ->
+            File out = outputDir.file(story.name + '.json').get().asFile
+            execOperations.exec {
+                commandLine compiler, '-o', out.absolutePath, story.absolutePath
+            }
+            logger.lifecycle("Compiled ${story.name} -> ${out.name}")
+        }
+    }
+}
+
+tasks.register('compileInk', CompileInk) {
+    group = 'build'
+    description = 'Compiles the demo Ink stories with inklecate (property ember.inklecate).'
+    sources.from(rootProject.fileTree('assets-src/demo-rpg/ink') { include '*.ink' })
+    outputDir = layout.projectDirectory.dir('assets/ink')
+    inklecate = providers.gradleProperty('ember.inklecate')
+    onlyIf('ember.inklecate is set') { inklecate.isPresent() }
+}

@@ -1,0 +1,31 @@
+{
+ "version": 1,
+ "components": {
+  "Sprite": {
+   "regionId": "atlas.rpg/knight",
+   "origin": [
+    8,
+    0
+   ],
+   "z": 2
+  },
+  "Animator": {
+   "clipSet": "anim.rpg",
+   "clip": "knight_idle"
+  },
+  "Collider": {
+   "box": {
+    "x": -0.3,
+    "y": 0,
+    "width": 0.6,
+    "height": 0.5
+   },
+   "layer": 1
+  },
+  "Actor": {},
+  "TopDownBody": {
+   "maxSpeed": 4.5
+  },
+  "Interactor": {}
+ }
+}

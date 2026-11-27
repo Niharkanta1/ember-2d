@@ -215,11 +215,15 @@ public final class DialogueRunner {
         }
     }
 
-    /** Runs game code for an Ink {@code EXTERNAL} function; it replaces the Ink fallback. */
+    /**
+     * Runs game code for an Ink {@code EXTERNAL} function; it replaces the Ink fallback. The function runs exactly
+     * once per call in the story: it is bound as not safe for Ink's lookahead, so game code with side effects (giving
+     * an item) is never run ahead and run again.
+     */
     public void bind(String function, DialogueFunction body) {
         Objects.requireNonNull(body, "body");
         try {
-            story.bindExternalFunction(function, args -> body.call(args));
+            story.bindExternalFunction(function, args -> body.call(args), false);
         } catch (Exception e) {
             throw new IllegalArgumentException("Ink function \"" + function + "\" cannot be bound: " + e.getMessage(),
                     e);

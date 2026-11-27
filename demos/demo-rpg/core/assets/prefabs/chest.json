@@ -1,0 +1,28 @@
+{
+ "version": 1,
+ "components": {
+  "Sprite": {
+   "regionId": "atlas.rpg/chest",
+   "origin": [
+    8,
+    0
+   ],
+   "z": 1
+  },
+  "Collider": {
+   "box": {
+    "x": -0.5,
+    "y": 0,
+    "width": 1,
+    "height": 0.8
+   }
+  },
+  "Solid": {},
+  "Interactable": {
+   "prompt": "Open",
+   "action": "chest",
+   "range": 1.5
+  },
+  "Chest": {}
+ }
+}

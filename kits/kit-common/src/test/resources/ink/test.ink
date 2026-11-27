@@ -18,6 +18,12 @@ Elder: Take this, you will need it. #speaker:elder
 ~ give("potion")
 -> END
 
+=== between ===
+Elder: First.
+~ give("tonic")
+Elder: Second.
+-> END
+
 === function greet(name) ===
 ~ return "Hello, " + name + "."
 

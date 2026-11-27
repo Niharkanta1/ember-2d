@@ -127,6 +127,8 @@ The kit has two layers, so the staging logic is testable without a screen:
 - Skip mode does not wait for `wait:` delays.
 - Deviations: save thumbnails and a scene-replay gallery are not built (follow-ups for I-470 if the demo needs them). The view has no automated test; it is checked in the novel demo on desktop and Android (I-470).
 
+- **In I-450:** the dialogue box is now the shared `ember.ui.DialogueBox` (F-012). `setCharacterArea(bottom, height)` places smaller characters for story scenes over a game (the RPG cutscene uses 0.33 and 0.5). The view was checked on the emulator in the RPG cutscene: the typewriter, a choice, the backlog, a slide, a shake and a flash.
+
 ## Non-goals
 - A visual novel editor (Ink + Inky are the editor). Lip sync, Live2D. Branching flowchart viewer.
 
