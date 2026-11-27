@@ -284,7 +284,7 @@ public final class InputBindings {
                 problem(path, "must be an object with opacity, joystick or dpad, buttons");
                 return null;
             }
-            fields(json, path, List.of("opacity", "joystick", "dpad", "buttons"));
+            fields(json, path, List.of("opacity", "joystick", "dpad", "buttons", "aimStick"));
             float opacity = number(json, "opacity", 0.35f, path, 0f, 1f);
             TouchControlsConfig.Joystick joystick = null;
             JsonValue j = json.get("joystick");
@@ -380,7 +380,37 @@ public final class InputBindings {
                     }
                 }
             }
-            return new TouchControlsConfig(opacity, joystick, dpad, buttons);
+            TouchControlsConfig.AimStick aim = null;
+            JsonValue s = json.get("aimStick");
+            if (s != null) {
+                String sp = path + ".aimStick";
+                if (!s.isObject()) {
+                    problem(sp, "must be an object");
+                } else {
+                    fields(s, sp, List.of("axis", "x", "y", "radius", "deadZone", "fire", "fireAt"));
+                    String axis = s.getString("axis", null);
+                    Axis a = axis == null ? null : axes.get(axis);
+                    if (axis == null) {
+                        problem(sp + ".axis", "required (a 2D axis name)");
+                    } else if (a == null) {
+                        problem(sp + ".axis", "unknown axis \"" + axis + "\"");
+                    } else if (!a.twoD()) {
+                        problem(sp + ".axis", "axis \"" + axis + "\" must be 2D (left/right/up/down)");
+                    }
+                    if (joystick != null && axis != null && axis.equals(joystick.axis())
+                            || dpad != null && axis != null && axis.equals(dpad.axis())) {
+                        problem(sp + ".axis", "must differ from the joystick's or D-pad's axis");
+                    }
+                    String fire = s.getString("fire", null);
+                    if (fire != null && !actionNames.contains(fire)) {
+                        problem(sp + ".fire", "unknown action \"" + fire + "\"");
+                    }
+                    aim = new TouchControlsConfig.AimStick(axis, number(s, "x", 120f, sp, 0f, Float.MAX_VALUE),
+                            number(s, "y", 120f, sp, 0f, Float.MAX_VALUE), positive(s, "radius", 56f, sp),
+                            number(s, "deadZone", 0.2f, sp, 0f, 0.95f), fire, number(s, "fireAt", 0.5f, sp, 0f, 1f));
+                }
+            }
+            return new TouchControlsConfig(opacity, joystick, dpad, buttons, aim);
         }
 
         private void fields(JsonValue json, String path, List<String> allowed) {

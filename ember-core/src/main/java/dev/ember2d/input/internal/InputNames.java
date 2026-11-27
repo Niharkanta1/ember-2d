@@ -42,7 +42,9 @@ public final class InputNames {
     /** The first on-screen button (I-122); buttons are not bindable by name, the controls config binds them. */
     public static final int VIRTUAL_BASE = TOUCH_BASE + 9;
     /** Number of physical codes. */
-    public static final int COUNT = VIRTUAL_BASE + dev.ember2d.input.TouchControlsConfig.MAX_BUTTONS;
+    /** Held while the aim stick (I-320) is pushed past its fire threshold; bound to its fire action. */
+    public static final int AIM_FIRE = VIRTUAL_BASE + dev.ember2d.input.TouchControlsConfig.MAX_BUTTONS;
+    public static final int COUNT = AIM_FIRE + 1;
 
     private static final String[] MOUSE_NAMES = {"MOUSE_LEFT", "MOUSE_RIGHT", "MOUSE_MIDDLE", "MOUSE_BACK",
         "MOUSE_FORWARD"};

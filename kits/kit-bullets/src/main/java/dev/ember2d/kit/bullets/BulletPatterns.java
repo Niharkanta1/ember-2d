@@ -89,6 +89,24 @@ public final class BulletPatterns {
         return new Pattern(id, emitters);
     }
 
+    /**
+     * Parses one emitter (weapon files, F-016).
+     *
+     * @param where names the file and place in messages
+     * @throws IllegalArgumentException listing every problem
+     */
+    public static Emitter parseEmitter(JsonValue json, String where, BulletTypes types) {
+        List<String> problems = new ArrayList<>();
+        Emitter e = json == null ? null : emitter(json, where, types, problems);
+        if (json == null) {
+            problems.add(where + ": an emitter is required");
+        }
+        if (!problems.isEmpty()) {
+            throw new IllegalArgumentException("Bad emitter:\n  " + String.join("\n  ", problems));
+        }
+        return e;
+    }
+
     private static Emitter emitter(JsonValue e, String where, BulletTypes types, List<String> problems) {
         if (!e.isObject()) {
             problems.add(where + ": must be an object");

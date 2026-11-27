@@ -165,7 +165,7 @@ class InputBindingsTest {
                 """);
 
         assertThat(e.problems()).containsExactlyInAnyOrder(
-                "input.json: touchControls.size: unknown field (expected opacity, joystick, dpad, buttons)",
+                "input.json: touchControls.size: unknown field (expected opacity, joystick, dpad, buttons, aimStick)",
                 "input.json: touchControls.opacity: must be a number from 0 to 1",
                 "input.json: touchControls.joystick.axis: axis \"steer\" must be 2D (left/right/up/down)",
                 "input.json: touchControls.joystick.mode: must be \"floating\" or \"fixed\"",

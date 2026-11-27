@@ -23,6 +23,7 @@ public final class TouchControls {
     /** Names of the stick controls in a {@link TouchLayout}. */
     public static final String JOYSTICK = "joystick";
     public static final String DPAD = "dpad";
+    public static final String AIM_STICK = "aimStick";
     /** Fraction of the D-pad radius that reads as no direction. */
     static final float DPAD_DEAD = 0.25f;
     private static final float DIAGONAL = (float) Math.sqrt(0.5);
@@ -49,6 +50,16 @@ public final class TouchControls {
     private float valueX;
     private float valueY;
     private boolean stickLive = true;
+
+    private int aimPointer = -1;
+    private float aimOriginX;
+    private float aimOriginY;
+    private float aimKnobX;
+    private float aimKnobY;
+    private float aimValueX;
+    private float aimValueY;
+    private boolean aimFiring;
+    private boolean aimLive = true;
 
     private final int[] buttonPointer = new int[TouchControlsConfig.MAX_BUTTONS];
     private final boolean[] pressed = new boolean[TouchControlsConfig.MAX_BUTTONS];
@@ -130,6 +141,15 @@ public final class TouchControls {
      * release through the sink).
      */
     void setLive(boolean stick, boolean[] buttons, TouchTracker.Sink sink) {
+        setLive(stick, buttons, aimLive, sink);
+    }
+
+    /** Like {@link #setLive(boolean, boolean[], TouchTracker.Sink)}, with the aim stick (I-320). */
+    void setLive(boolean stick, boolean[] buttons, boolean aim, TouchTracker.Sink sink) {
+        if (!aim && aimLive && aimPointer >= 0) {
+            releaseAim(sink);
+        }
+        aimLive = aim;
         if (!stick && stickLive && stickPointer >= 0) {
             releaseStick();
         }
@@ -220,6 +240,59 @@ public final class TouchControls {
         return r * density * layout.scaleOf(stickName());
     }
 
+    // ---- aim stick (I-320) ----
+
+    public boolean hasAim() {
+        return config != null && config.aimStick() != null;
+    }
+
+    /** Whether the aim stick is drawn now (its idle base, or the base and knob while held). */
+    public boolean aimShown() {
+        return hasAim() && layout.visibleOf(AIM_STICK) && (editing || aimLive);
+    }
+
+    public boolean aimHeld() {
+        return aimPointer >= 0;
+    }
+
+    public float aimRadius() {
+        return config.aimStick().radius() * density * layout.scaleOf(AIM_STICK);
+    }
+
+    /** Where the aim base is drawn: its touch origin while held, else its idle home. */
+    public float aimBaseX() {
+        if (aimHeld()) {
+            return aimOriginX;
+        }
+        TouchLayout.Entry e = layout.get(AIM_STICK);
+        return screenWidth - insetRight - (e != null && e.moved() ? e.x() : config.aimStick().x()) * density;
+    }
+
+    public float aimBaseY() {
+        if (aimHeld()) {
+            return aimOriginY;
+        }
+        TouchLayout.Entry e = layout.get(AIM_STICK);
+        return insetBottom + (e != null && e.moved() ? e.y() : config.aimStick().y()) * density;
+    }
+
+    public float aimKnobX() {
+        return aimHeld() ? aimKnobX : aimBaseX();
+    }
+
+    public float aimKnobY() {
+        return aimHeld() ? aimKnobY : aimBaseY();
+    }
+
+    /** The aim value, x right and y up, length 0-1; zero while idle. */
+    public float aimValueX() {
+        return aimValueX;
+    }
+
+    public float aimValueY() {
+        return aimValueY;
+    }
+
     /** The stick value, x right and y up, length 0-1; zero while idle. */
     public float valueX() {
         return valueX;
@@ -305,7 +378,7 @@ public final class TouchControls {
             float y = screenHeight - touches.items[i + 3];
             boolean claimed = switch (type) {
                 case GdxInputSource.TOUCH_DOWN -> !captured && down(p, x, y, sink);
-                case GdxInputSource.TOUCH_DRAG -> drag(p, x, y);
+                case GdxInputSource.TOUCH_DRAG -> p == aimPointer ? aim(p, x, y, sink) : drag(p, x, y);
                 default -> up(p, sink);
             };
             if (!claimed) {
@@ -321,6 +394,10 @@ public final class TouchControls {
 
     /** Lets go of every control without reporting (the caller releases the inputs). */
     void reset() {
+        aimPointer = -1;
+        aimValueX = 0f;
+        aimValueY = 0f;
+        aimFiring = false;
         stickPointer = -1;
         valueX = 0f;
         valueY = 0f;
@@ -345,6 +422,14 @@ public final class TouchControls {
                 }
                 return true;
             }
+        }
+        boolean rightHalf = x >= insetLeft + (screenWidth - insetLeft - insetRight) / 2f;
+        if (rightHalf && aimShown() && aimPointer < 0) {
+            aimPointer = p;
+            aimOriginX = x;
+            aimOriginY = y;
+            aim(p, x, y, sink);
+            return true;
         }
         if (!stickShown() || stickPointer >= 0) {
             return false;
@@ -449,7 +534,52 @@ public final class TouchControls {
         }
     }
 
+    /** Moves the aim knob; holds or lets go of the fire input at the threshold. */
+    private boolean aim(int p, float x, float y, TouchTracker.Sink sink) {
+        TouchControlsConfig.AimStick a = config.aimStick();
+        float dx = x - aimOriginX;
+        float dy = y - aimOriginY;
+        float r = aimRadius();
+        float len = (float) Math.sqrt(dx * dx + dy * dy);
+        if (len > r) {
+            dx *= r / len;
+            dy *= r / len;
+            len = r;
+        }
+        aimKnobX = aimOriginX + dx;
+        aimKnobY = aimOriginY + dy;
+        float magnitude = len / r;
+        if (magnitude <= a.deadZone() || len == 0f) {
+            aimValueX = 0f;
+            aimValueY = 0f;
+        } else {
+            float scaled = (magnitude - a.deadZone()) / (1f - a.deadZone());
+            aimValueX = dx / len * scaled;
+            aimValueY = dy / len * scaled;
+        }
+        boolean fire = a.fireAction() != null && magnitude >= a.fireAt() && magnitude > a.deadZone();
+        if (fire != aimFiring) {
+            aimFiring = fire;
+            sink.input(InputNames.AIM_FIRE, fire);
+        }
+        return true;
+    }
+
+    private void releaseAim(TouchTracker.Sink sink) {
+        aimPointer = -1;
+        aimValueX = 0f;
+        aimValueY = 0f;
+        if (aimFiring) {
+            aimFiring = false;
+            sink.input(InputNames.AIM_FIRE, false);
+        }
+    }
+
     private boolean up(int p, TouchTracker.Sink sink) {
+        if (p == aimPointer) {
+            releaseAim(sink);
+            return true;
+        }
         if (p == stickPointer) {
             releaseStick();
             return true;

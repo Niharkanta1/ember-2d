@@ -11,9 +11,10 @@ import java.util.List;
  * @param joystick the joystick, or null for none
  * @param dpad the D-pad (I-225), or null for none; a game has a joystick or a D-pad, not both
  * @param buttons the action buttons (at most {@value #MAX_BUTTONS})
+ * @param aimStick a second stick on the right half for twin-stick aiming (I-320), or null for none
  */
 @PublicApi
-public record TouchControlsConfig(float opacity, Joystick joystick, Dpad dpad, List<Button> buttons) {
+public record TouchControlsConfig(float opacity, Joystick joystick, Dpad dpad, List<Button> buttons, AimStick aimStick) {
 
     /** Most buttons per game. */
     public static final int MAX_BUTTONS = 8;
@@ -23,7 +24,27 @@ public record TouchControlsConfig(float opacity, Joystick joystick, Dpad dpad, L
     }
 
     public TouchControlsConfig(float opacity, Joystick joystick, List<Button> buttons) {
-        this(opacity, joystick, null, buttons);
+        this(opacity, joystick, null, buttons, null);
+    }
+
+    public TouchControlsConfig(float opacity, Joystick joystick, Dpad dpad, List<Button> buttons) {
+        this(opacity, joystick, dpad, buttons, null);
+    }
+
+    /**
+     * A floating stick on the right half of the screen for twin-stick aiming (I-320): it appears where the thumb lands
+     * (outside the buttons) and drives a 2D axis; pushed past {@code fireAt} it also holds an action.
+     *
+     * @param axis the 2D axis it drives (for example {@code aim})
+     * @param x idle centre in dp from the right edge (where the faint base is drawn)
+     * @param y idle centre in dp from the bottom edge
+     * @param radius how far the knob travels, in dp
+     * @param deadZone fraction of the radius that reads as 0
+     * @param fireAction the action held while pushed past {@code fireAt}, or null for none
+     * @param fireAt fraction of the radius, 0-1
+     */
+    public record AimStick(String axis, float x, float y, float radius, float deadZone, String fireAction,
+            float fireAt) {
     }
 
     /**

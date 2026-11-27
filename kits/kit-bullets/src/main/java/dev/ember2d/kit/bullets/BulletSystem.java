@@ -146,6 +146,14 @@ public final class BulletSystem extends EntitySystem {
         }
     }
 
+    /**
+     * Fires one volley of an emitter now, with its angle replaced by {@code angleDeg} (weapons, F-016): spread, count,
+     * speed and bullet come from the emitter; {@code repeat} and {@code delay} are ignored. No allocation.
+     */
+    public void fire(Emitter emitter, float x, float y, float angleDeg, int target, int team) {
+        volley(emitter, 0, x, y, target, team, angleDeg);
+    }
+
     public void stop(int handle) {
         for (int i = 0; i < runners.size; i++) {
             if (runners.get(i).handle == handle) {
@@ -307,7 +315,7 @@ public final class BulletSystem extends EntitySystem {
             y = t.position.y;
         }
         while (r.volley < e.repeat && r.time >= e.delay + r.volley * e.interval) {
-            volley(e, r.volley, x, y, r.target, r.team);
+            volley(e, r.volley, x, y, r.target, r.team, Float.NaN);
             r.volley++;
         }
         if (r.volley >= e.repeat) {
@@ -315,9 +323,9 @@ public final class BulletSystem extends EntitySystem {
         }
     }
 
-    private void volley(Emitter e, int volley, float x, float y, int target, int team) {
-        float base = e.angle + e.angleStep * volley;
-        if (e.type == Emitter.Type.AIMED) {
+    private void volley(Emitter e, int volley, float x, float y, int target, int team, float angleOverride) {
+        float base = (Float.isNaN(angleOverride) ? e.angle : angleOverride) + e.angleStep * volley;
+        if (e.type == Emitter.Type.AIMED && Float.isNaN(angleOverride)) {
             Transform t = target != World.NONE && world().isAlive(target) ? world().get(target, Transform.class) : null;
             if (t != null) {
                 base = (float) Math.toDegrees(Math.atan2(t.position.y - y, t.position.x - x)) + e.angleStep * volley;

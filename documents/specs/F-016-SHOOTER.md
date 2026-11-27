@@ -1,6 +1,6 @@
 # F-016 — Top-down Movement and Shooter Package
 
-- Status: Top-down movement Ready (I-310, approved 2026-11-27 under the developer's standing approval for Phases 3 to 6; see "Top-down movement (I-310)"); shooter package, AI hooks and demo: Draft
+- Status: Top-down movement Ready (I-310, approved 2026-11-27 under the developer's standing approval for Phases 3 to 6; see "Top-down movement (I-310)"); shooter package Ready (I-320, approved 2026-11-27 under the standing approval; see "Shooter package (I-320)"); AI hooks and demo: Draft
 - Phase: 4
 - Module / package: `kit-topdown` (movement + `shooter` package)
 - Depends on: F-003, F-004 (Y-sort), F-005, F-006, F-021, F-024 (bullets); gdx-ai (optional)
@@ -78,6 +78,76 @@ Status: Ready. Approved 2026-11-27 under the developer's standing approval for P
 - **Registration:** `CameraScroll` is registered by games, like `CameraFollow`. It is not pre-registered.
 - **Friction:** it slows the body along its velocity, so a diagonal stop stays diagonal.
 - **Not checked on a device:** no demo uses this yet. The shooter demo (I-340) will.
+
+## Shooter package (I-320)
+Status: Ready. Approved 2026-11-27 under the developer's standing approval for Phases 3 to 6. Package `dev.ember2d.kit.topdown.shooter`. It was built after I-325, because weapons fire through `kit-bullets`.
+
+**Aiming (`Aim` component, `AimSystem`, in `UPDATE`):**
+- **Where the aim comes from,** in this order:
+  1. the 2D axis `Aim.axis` (default `aim`) when it is not zero: the touch aim stick, or keys bound to it;
+  2. the mouse, when `Aim.mouse` is true: the direction from the entity to `input.pointerWorld`;
+  3. otherwise the aim stays where it was. For a new entity that is its `TopDownBody` facing.
+- **Runtime fields:** `aimX` and `aimY` (unit length) and `angle` (degrees).
+- **Platform choice:** games set `mouse` on desktop and leave it off on touch screens, so the last touch does not become the aim.
+
+**Twin-stick touch controls (F-022 extension, `ember.input`):**
+- **Configuring it:** the bindings file's `touchControls` section can add an aim stick:
+  ```json
+  "aimStick": { "axis": "aim", "x": 120, "y": 120, "radius": 56, "deadZone": 0.2, "fire": "fire", "fireAt": 0.5 }
+  ```
+- **Behaviour:**
+  - It is a floating stick on the right half of the screen. A touch that lands on a button still goes to the button.
+  - It drives the 2D axis, and pushed past `fireAt` of its radius it holds the `fire` action (a new virtual input, `InputNames.AIM_FIRE`).
+  - It works only while its axis's context is on top, like the other controls.
+  - The overlay draws a faint idle base at (`x`, `y`) dp from the bottom right, and the base and knob while it is held.
+- **Validation:** the axis must be 2D and differ from the movement stick's axis, and `fire` must be a known action.
+- **Layout editor:** it cannot move the aim stick yet. The layout file keeps its name, `aimStick`, for later.
+
+**Weapons:**
+- **`WeaponDef`:** a JSON asset (type `json`), loaded and cached by `WeaponLibrary` (hot-reloadable like patterns):
+  ```json
+  { "version": 1, "fireRate": 8, "auto": true, "magazine": 24, "reload": 1.2, "muzzle": 0.6,
+    "emit": { "type": "arc", "bullet": "pellet", "count": 3, "spread": 12, "speed": 14 } }
+  ```
+- **`WeaponDef` fields:**
+  - `fireRate`: shots per second, required, above 0.
+  - `auto` (false): keep firing while the trigger is held.
+  - `magazine` (0 means unlimited).
+  - `reload`: seconds (1).
+  - `muzzle`: spawn distance along the aim (0.5).
+  - `emit`: one `kit-bullets` emitter, required. Its angle is replaced by the aim angle, and one volley is fired per shot; `repeat` and `delay` are ignored for weapons.
+- **`Weapon` component:**
+  - **Fields:** `weapon` (asset ID), `fireAction` and `reloadAction`. With an action name set, the system reads the trigger from input; empty means AI or code sets `trigger`.
+  - **Runtime fields:** `trigger`, `cooldown`, `ammo` (-1 means full), `reloadLeft` and `reloading`.
+- **`WeaponSystem(world, bullets, weapons, events, input)`, in `FIXED`:**
+  - **Timers:** it counts down the cooldown and the reload; a finished reload fills the magazine and publishes `Reloaded`.
+  - **Firing:** a pulled trigger fires when the cooldown is over and no reload runs. With `auto` off, firing again needs a new pull.
+  - **What a shot does:** it calls `BulletSystem.fire(emitter, x, y, angle, team)` at the muzzle, with the shooter's `Team`. It uses one ammo, sets the cooldown to `1 / fireRate` and publishes `Fired`.
+  - **Reloading:** an empty magazine starts a reload by itself, publishing `ReloadStarted`. The reload action starts one when the magazine is not full; `reload(entity)` does the same from code.
+- **No per-shot allocation:** `Fired`, `ReloadStarted` and `Reloaded` are reused, mutable event objects. They are published synchronously and are valid only inside the handler. Hits are `kit-bullets` `BulletHit` events.
+
+**Engine and kit additions:**
+- `BulletSystem.fire(Emitter, x, y, angle, target, team)` fires one volley of an emitter with its angle replaced.
+- `BulletPatterns.parseEmitter(JsonValue, where, types)` parses an emitter on its own; it is public for weapon files.
+
+**Registration:** `ShooterKit.register(registry)` registers `Aim` and `Weapon`.
+
+**Tests (headless):**
+- The fire rate and automatic mode are right.
+- Single shots need a new pull.
+- Ammo runs down, the reload starts by itself, takes its time and fills the magazine; a manual reload works.
+- A shot spawns its bullets at the muzzle along the aim, with the shooter's team.
+- No allocation over many shots after warm-up.
+- The aim comes from the axis, the mouse or the facing.
+- Aim stick parsing errors are reported.
+- The aim stick drives its axis and holds fire past the threshold.
+- The aim stick yields to buttons and to the left half.
+
+## Decisions in I-320
+- **Event names:** the reused event objects are nested classes, `ShotEvents.Fired`, `ShotEvents.ReloadStarted` and `ShotEvents.Reloaded`, so their mutable, handler-only nature is visible at the call site.
+- **Input in fixed steps:** `WeaponSystem` reads the trigger with `input.pressed(fireAction)`. Edges inside `FIXED` follow the input's fixed-step rules (F-005).
+- **Allocation test:** the "no allocation" test pulls the trigger directly, because the test's proxy-based fake `Input` allocates an argument array on every call. The real input does not.
+- **Not checked on a device:** the aim stick on a touch screen is checked with the shooter demo (I-340).
 
 ## Non-goals (deferred)
 Weapon switching UI, burst mode, hitscan, melee combos, a visual bullet pattern editor (patterns are JSON, F-024).

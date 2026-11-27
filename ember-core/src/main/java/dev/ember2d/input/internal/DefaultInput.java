@@ -37,6 +37,7 @@ public final class DefaultInput implements Input {
     private final TouchTracker touch = new TouchTracker();
     private final TouchControls controls = new TouchControls();
     private int stickAxis = -1;
+    private int aimAxis = -1;
     private int[] buttonActions = new int[0];
     private final boolean[] buttonLive = new boolean[TouchControlsConfig.MAX_BUTTONS];
     private boolean autoHide;
@@ -233,6 +234,10 @@ public final class DefaultInput implements Input {
         } else if (bindings.touchControls() != null && bindings.touchControls().dpad() != null) {
             stickAxis = axisIndex.get(bindings.touchControls().dpad().axis(), -1);
         }
+        aimAxis = -1;
+        if (bindings.touchControls() != null && bindings.touchControls().aimStick() != null) {
+            aimAxis = axisIndex.get(bindings.touchControls().aimStick().axis(), -1);
+        }
         buttonActions = new int[bindings.touchControls() == null ? 0 : bindings.touchControls().buttons().size()];
         for (int b = 0; b < buttonActions.length; b++) {
             buttonActions[b] = actionIndex.get(bindings.touchControls().buttons().get(b).action(), -1);
@@ -386,6 +391,9 @@ public final class DefaultInput implements Input {
         int ctx = axisContext[x];
         if (x == stickAxis && controls.stickHeld() && stack.peek() == ctx) {
             return out.set(controls.valueX(), controls.valueY());   // analog, already within the unit circle
+        }
+        if (x == aimAxis && controls.aimHeld() && stack.peek() == ctx) {
+            return out.set(controls.aimValueX(), controls.aimValueY());   // the aim stick (I-320)
         }
         float dx = direction(axisCodes[x][1], ctx) - direction(axisCodes[x][0], ctx);
         float dy = direction(axisCodes[x][2], ctx) - direction(axisCodes[x][3], ctx);
@@ -602,13 +610,14 @@ public final class DefaultInput implements Input {
         for (int b = 0; b < buttonActions.length; b++) {
             buttonLive[b] = buttonActions[b] >= 0 && actionContext[buttonActions[b]] == top;
         }
-        controls.setLive(stick, buttonLive, touchSink);
+        boolean aim = aimAxis >= 0 && axisContext[aimAxis] == top;
+        controls.setLive(stick, buttonLive, aim, touchSink);
     }
 
     /** Lets go of every pressed on-screen control, reporting button releases. */
     private void releaseControls() {
         boolean[] none = new boolean[TouchControlsConfig.MAX_BUTTONS];
-        controls.setLive(false, none, touchSink);
+        controls.setLive(false, none, false, touchSink);
         controls.reset();
     }
 
@@ -758,6 +767,9 @@ public final class DefaultInput implements Input {
             if (action.equals(config.buttons().get(b).action())) {
                 all.add(InputNames.VIRTUAL_BASE + b);
             }
+        }
+        if (config.aimStick() != null && action.equals(config.aimStick().fireAction())) {
+            all.add(InputNames.AIM_FIRE);
         }
         return all.toArray();
     }

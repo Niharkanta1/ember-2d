@@ -57,6 +57,14 @@ final class TouchControlsOverlay implements Disposable {
                 draw(batch, drawable("touch-knob"), controls.knobX(), controls.knobY(), r * 0.45f);
             }
         }
+        if (controls.aimShown()) {   // the twin-stick aim stick (I-320): faint while idle
+            float r = controls.aimRadius();
+            boolean held = controls.aimHeld();
+            batch.setColor(1f, 1f, 1f, Math.min(1f, alpha * (held ? 1.6f : 0.6f)));
+            draw(batch, drawable("touch-base"), controls.aimBaseX(), controls.aimBaseY(), r);
+            batch.setColor(1f, 1f, 1f, Math.min(1f, alpha * (held ? 2.2f : 0.8f)));
+            draw(batch, drawable("touch-knob"), controls.aimKnobX(), controls.aimKnobY(), r * 0.45f);
+        }
         font.getData().setScale(Math.max(1f, Math.round(controls.density() * 1.5f)));
         for (int i = 0; i < controls.buttonCount(); i++) {
             if (!controls.buttonShown(i)) {
