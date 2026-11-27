@@ -59,6 +59,7 @@ public class EmberGame implements ApplicationListener {
     private GdxRenderer renderer;
     private GdxDebugCanvas debugCanvas;
     private TouchControlsOverlay controlsOverlay;
+    private TransitionOverlay transitionOverlay;
     private AppState state = AppState.CREATED;
     private EngineContext context;
     private GameLoop loop;
@@ -308,6 +309,9 @@ public class EmberGame implements ApplicationListener {
         if (controlsOverlay != null) {
             controlsOverlay.dispose();
         }
+        if (transitionOverlay != null) {
+            transitionOverlay.dispose();
+        }
         if (renderer != null) {
             renderer.dispose();   // engine-owned; after the game's services (reverse boot order)
         }
@@ -385,6 +389,7 @@ public class EmberGame implements ApplicationListener {
         }
         renderer.endFrame();
         drawUi();
+        drawTransition();
         if (debug.isVisible()) {
             debug.renderPanel(debugCanvas, renderer.screenWidth(), renderer.screenHeight());
         }
@@ -398,6 +403,20 @@ public class EmberGame implements ApplicationListener {
             controlsOverlay.draw(input.touchControls(), renderer.batch(), Gdx.graphics.getWidth(),
                     Gdx.graphics.getHeight());
         }
+    }
+
+    /** The scene transition cover and the loading screen, while a transition runs (F-010, I-240). */
+    private void drawTransition() {
+        SceneManager scenes = context.scenes();
+        float alpha = scenes.coverAlpha();
+        if (alpha <= 0f) {
+            return;
+        }
+        if (transitionOverlay == null) {
+            transitionOverlay = new TransitionOverlay();   // created on first use
+        }
+        transitionOverlay.draw(renderer.batch(), renderer.screenWidth(), renderer.screenHeight(), scenes.coverColor(),
+                alpha, config.loadingScreen, scenes.loadingProgress());
     }
 
     /** The top scene's UI, if it has one: laid out, advanced on real time and drawn above the world (F-012). */

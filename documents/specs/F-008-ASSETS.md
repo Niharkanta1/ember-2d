@@ -1,6 +1,6 @@
 # F-008 — Assets and Hot Reload
 
-- Status: Part 1 Ready (IDs, manifest, loading, groups, fallbacks: expanded and approved in I-050, 2026-11-26); hot reload Ready (I-150: expanded and approved 2026-11-26, see "Hot reload (I-150)"); scene preloading (I-240): Draft
+- Status: Part 1 Ready (IDs, manifest, loading, groups, fallbacks: expanded and approved in I-050, 2026-11-26); hot reload Ready (I-150: expanded and approved 2026-11-26, see "Hot reload (I-150)"); scene preloading Ready (I-240, approved 2026-11-27; specified in F-010 "Transitions, loading screen and preloading (I-240)")
 - Phase: 1 (IDs, manifest, loading), 2 (hot reload), 3 (scene groups/preloading)
 - Module / package: `ember-core` / `ember.assets`; hot reload driver in `ember-devtools`
 - Depends on: F-001, F-019

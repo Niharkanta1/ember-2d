@@ -3,7 +3,10 @@ package dev.ember2d.app;
 import com.badlogic.gdx.InputProcessor;
 import dev.ember2d.ui.Ui;
 
-/** Passes input to the current scene's UI first (F-012); unhandled events go on to the game's input. */
+/**
+ * Passes input to the current scene's UI first (F-012); unhandled events go on to the game's input. While a scene
+ * transition covers the screen (I-240) presses and touches are swallowed; releases still pass, so nothing sticks.
+ */
 final class UiInputRouter implements InputProcessor {
 
     private final SceneManager scenes;
@@ -19,6 +22,9 @@ final class UiInputRouter implements InputProcessor {
 
     @Override
     public boolean keyDown(int keycode) {
+        if (scenes.blocksInput()) {
+            return true;
+        }
         InputProcessor t = target();
         return t != null && t.keyDown(keycode);
     }
@@ -31,12 +37,18 @@ final class UiInputRouter implements InputProcessor {
 
     @Override
     public boolean keyTyped(char character) {
+        if (scenes.blocksInput()) {
+            return true;
+        }
         InputProcessor t = target();
         return t != null && t.keyTyped(character);
     }
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        if (scenes.blocksInput()) {
+            return true;
+        }
         InputProcessor t = target();
         return t != null && t.touchDown(screenX, screenY, pointer, button);
     }

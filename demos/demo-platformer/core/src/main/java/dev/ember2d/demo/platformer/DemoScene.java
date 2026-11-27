@@ -11,6 +11,7 @@ import dev.ember2d.animation.AsmLibrary;
 import dev.ember2d.animation.AsmSystem;
 import dev.ember2d.app.EngineContext;
 import dev.ember2d.app.Scene;
+import dev.ember2d.app.Transition;
 import dev.ember2d.audio.Audio;
 import dev.ember2d.camera.CameraFollow;
 import dev.ember2d.camera.CameraFollowSystem;
@@ -71,11 +72,18 @@ final class DemoScene extends Scene {
     private HudCounter time;
     private HudCounter deaths;
     private Table pausePanel;
+    /** The level's asset group (the map), preloaded by the main menu (I-240). */
+    static final String GROUP = "level1";
     /** Global-data key of level 1's best time in seconds (I-230). */
     static final String BEST_TIME_KEY = "best.level1";
 
     private boolean paused;
     private boolean dashShown = true;
+
+    @Override
+    protected String assetGroup() {
+        return GROUP;
+    }
 
     @Override
     protected void enter(EngineContext context) {
@@ -170,7 +178,7 @@ final class DemoScene extends Scene {
         menu.add("Restart level", () -> context().scenes().restart());
         menu.add("Settings", this::showPauseSettings);
         menu.add("Main menu", () -> ConfirmDialog.show(ui, "Quit to the main menu?", "Yes", "No",
-                () -> context().scenes().replace(new MenuScene())));
+                () -> context().scenes().replace(new MenuScene(), Transition.fade(0.5f))));
         menu.onBack(this::closePause);
         DemoUi.show(pausePanel, "Paused", menu);
     }
@@ -199,8 +207,8 @@ final class DemoScene extends Scene {
         input.pushContext("ui");
         Table panel = DemoUi.overlay(ui);
         MenuList menu = new MenuList(ui);
-        menu.add("Play again", () -> context().scenes().restart());
-        menu.add("Main menu", () -> context().scenes().replace(new MenuScene()));
+        menu.add("Play again", () -> context().scenes().replace(new DemoScene(), Transition.fade(0.5f)));
+        menu.add("Main menu", () -> context().scenes().replace(new MenuScene(), Transition.fade(0.5f)));
         DemoUi.show(panel, "Level complete!", menu);
         Table stats = new Table(ui.skin());
         stats.add(new Label("Time   " + LevelSystem.clock(e.seconds()), ui.skin())).left().row();

@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.TiledDrawable;
 import dev.ember2d.app.EngineContext;
 import dev.ember2d.app.Scene;
+import dev.ember2d.app.Transition;
 import dev.ember2d.input.Input;
 import dev.ember2d.ui.MenuList;
 import dev.ember2d.ui.Ui;
@@ -29,6 +30,7 @@ final class MenuScene extends Scene {
     protected void enter(EngineContext context) {
         input = context.input();
         input.pushContext("ui");
+        context.scenes().preload(DemoScene.GROUP);   // the level loads while the player reads the menu (I-240)
         context.audio().playMusic("music.level", 0.5f);
         Ui ui = ui();
         DemoUi.useSkin(ui, context.assets());
@@ -44,7 +46,7 @@ final class MenuScene extends Scene {
 
     private void showMain(EngineContext context, Ui ui) {
         MenuList menu = new MenuList(ui);
-        menu.add("Play", () -> context.scenes().replace(new DemoScene()));
+        menu.add("Play", () -> context.scenes().replace(new DemoScene(), Transition.fade(0.5f)));
         menu.add("Settings", () -> showSettings(context, ui));
         boolean android = Gdx.app != null && Gdx.app.getType() == Application.ApplicationType.Android;
         if (!android) {

@@ -117,6 +117,12 @@ public final class EngineConfig {
     /** The current save version; older saves are upgraded by the store's migrations (F-013). */
     public int saveVersion = 1;
 
+    /**
+     * Drawn while a scene transition waits for the incoming scene's asset group (F-010, I-240); {@code null} shows only
+     * the transition's cover colour.
+     */
+    public LoadingScreen loadingScreen = LoadingScreen.bar();
+
     /** When the on-screen controls of the bindings file are shown (F-022, I-122). */
     public TouchControlsMode touchControls = TouchControlsMode.AUTO;
 

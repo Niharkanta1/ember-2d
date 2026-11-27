@@ -1,6 +1,6 @@
 # F-010 — Scenes, Data and Prefabs
 
-- Status: Scene lifecycle Ready (expanded and approved in I-070, 2026-11-26; see "Scene lifecycle (I-070)"); component registry, prefabs and Tiled placement Ready (I-112, approved 2026-11-26; see "Prefabs and placement (I-112)" and "Decisions in I-112"); transitions and loading screens (I-240), carrying entities, scene data files: Draft
+- Status: Scene lifecycle Ready (expanded and approved in I-070, 2026-11-26; see "Scene lifecycle (I-070)"); component registry, prefabs and Tiled placement Ready (I-112, approved 2026-11-26; see "Prefabs and placement (I-112)" and "Decisions in I-112"); transitions, loading screen and preloading Ready (I-240, approved 2026-11-27; see "Transitions, loading screen and preloading (I-240)"); carrying entities, scene data files: Draft
 - Phase: 1 (scene lifecycle), 2 (JSON prefabs and Tiled spawning), 3 (transitions, preloading)
 - Module / package: `ember-core` / `ember.app` (`Scene`, `SceneManager`; ADR-022), `ember.scene` (scene data, transitions: later), `ember.data`
 - Depends on: F-001, F-003, F-008, F-009, F-019
@@ -195,6 +195,97 @@ The defaults were approved as proposed. Details settled while implementing:
 - **Demo:**
   - The player, two patrollers (template `maps/patroller.tx`; one overrides `Patrol.speed`, `minX`, `maxX` and `Sprite.tint`) and the camera (`CameraFollow.target` is an object reference to the player) come from the map. A third patroller is spawned from code.
   - The demo's release build is minified with R8 and signed with the debug key.
+
+## Transitions, loading screen and preloading (I-240)
+Status: Ready. Expanded in I-240 and approved under the developer's standing approval for Phases 3 to 6 (2026-11-27). Carrying entities between scenes (`carry`) and scene data files (`*.scene.json`) are not part of I-240; they stay Draft until a demo needs them.
+
+**Transitions.**
+- `push`, `pop` and `replace` gain an overload that takes a `Transition`. The plain methods keep their I-070 behaviour: the change happens at the start of the next frame and the asset group loads blocking.
+- `Transition.fade(seconds)` (black) or `fade(seconds, color)`:
+  - **Fade-out:** the cover goes from clear to opaque over the first half. The outgoing scene is still drawn, but it is frozen: only its `RENDER` systems run, and its timers, tweens and `update` stop.
+  - **At full cover:** the outgoing scene exits (`pop`, `replace`), or it stays below the new one (`push`).
+  - **Wait for the group:** the incoming scene waits until its asset group has loaded.
+  - **Fade-in:** the incoming scene enters and runs normally while the cover fades back out over the second half.
+- `Transition.cut()` is a fade of 0 seconds. The switch happens at the next frame, but the group loads in the background behind the loading screen instead of blocking.
+- **Timing:** transitions run on real (unscaled) time, so they work while the game is paused.
+- **Loading starts early:** the incoming scene's group starts loading when the transition starts, so it loads during the fade-out.
+
+**Loading screen.**
+- **When it shows:** while the cover is opaque and the incoming group is still loading, the engine draws the cover colour and, after 0.1 s (so quick loads do not flash), the loading screen.
+- **What draws it:** `EngineConfig.loadingScreen` (`LoadingScreen`). The default is `LoadingScreen.bar()`, a progress bar in the middle of the screen; `null` shows only the cover colour.
+- **How it is drawn:** in window pixels, with a white pixel region the engine owns, so an implementation needs no textures of its own.
+
+**Input during a transition.**
+- While the cover fades out or waits for loading, presses and touches do not reach the outgoing scene's UI. Releases still pass, so nothing sticks.
+- Game systems do not run in that time anyway.
+- During the fade-in the new scene gets input normally.
+
+**Queued changes.**
+- Scene changes requested during a transition (including the plain methods and `restart`) wait until it has finished, then run in order.
+- `inTransition()` tells whether a transition is running.
+
+**Preloading.**
+- `preload(group)` starts loading a group in the background and returns its `AsyncLoad`. For example, a menu preloads the first level while the player reads it.
+- **Who owns the group:** the scene manager holds a preloaded group until a scene that uses it enters (then that scene owns it) or `cancelPreload(group)` releases it.
+- **When a group is not unloaded:** while a scene in the stack uses it, while it is preloaded, or when it is the group of the scene that replaces the exiting one. This also stops a `replace` between two scenes with the same group from unloading the group and loading it again.
+
+**Errors.**
+- A missing required file fails as in F-008 (at `loadGroup` or in the frame that loads it).
+- An `enter` that throws during a transition ends the transition and propagates, as in I-070.
+- `pop(transition)` follows the same rule as `pop()`.
+- A negative or non-finite duration throws `IllegalArgumentException`.
+
+**API sketch** (`ember.app`):
+```java
+@PublicApi public final class Transition {
+    public static Transition cut();
+    public static Transition fade(float seconds);                // black
+    public static Transition fade(float seconds, Color color);   // the colour is copied
+    public float seconds();  public Color color();
+}
+@PublicApi public interface LoadingScreen {
+    /** Window pixels; the batch is begun with a window projection; pixel is a white 1x1 region. */
+    void draw(Batch batch, TextureRegion pixel, float width, float height, float progress);
+    static LoadingScreen bar();
+}
+// SceneManager additions
+public void push(Scene scene, Transition transition);
+public void pop(Transition transition);
+public void replace(Scene scene, Transition transition);
+public boolean inTransition();
+public AsyncLoad preload(String group);
+public void cancelPreload(String group);
+// EngineConfig
+public LoadingScreen loadingScreen = LoadingScreen.bar();
+```
+**Internal pieces:**
+- `SceneManager` exposes package-private `coverAlpha()`, `coverColor()` and `loadingProgress()`, which is -1 when no loading screen shows.
+- A new `TransitionOverlay` in `app` draws the cover and the loading screen after the scene UI and before the debug panel and on-screen controls. It is created on first use.
+- `UiInputRouter` swallows presses while the cover fades out or waits for loading.
+
+**Demo:**
+- Menu to level, level to menu and "Play again" use `fade(0.5)`.
+- The level map moves to a `level1` asset group, which the main menu preloads.
+
+**Tests (headless, `SceneManagerTest` with fake assets and a fixed clock):**
+- A fade freezes the outgoing scene and switches at full cover; the cover alpha rises and falls.
+- A loading group holds the cover until it is done; `loadingProgress` shows only after the delay.
+- `cut()` with a loaded group switches in one frame.
+- Changes requested during a transition wait.
+- `pop` and `push` with transitions.
+- A preloaded group is not loaded again and survives `replace`; `cancelPreload` unloads it.
+- A same-group `replace` does not unload the group.
+- Bad durations are rejected.
+- Input routing during a fade.
+- `LoadingScreen.bar()` drawing on a recording batch.
+
+## Decisions in I-240
+- **The new scene runs during the fade-in.** It runs from the frame it enters, and that frame is fully covered.
+- **Order on screen:** the cover is drawn above the scene UI. The debug panel and the on-screen controls stay above it.
+- **Reloading the level map:** when the level returns to the menu, the level's group is unloaded and the menu then preloads it again. The menu's preload runs only in its `enter`, after the level has exited. For the demo's single map this costs a few milliseconds. A game that wants to avoid it can preload from the outgoing scene.
+- **Checked on the emulator (API 23):**
+  - Menu to level and level to menu (from the pause menu, with game time paused) both fade.
+  - The preloaded `level1` group is not loaded a second time on Play.
 
 ## Acceptance criteria (I-112)
 - **Registry and prefabs:**
