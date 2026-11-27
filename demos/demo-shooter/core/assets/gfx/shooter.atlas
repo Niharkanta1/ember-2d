@@ -1,0 +1,79 @@
+characters.png
+size: 64,64
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+player
+  bounds: 0,0,16,16
+
+guns.png
+size: 64,128
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+gun.smg
+  bounds: 2,106,21,20
+
+player_bullets.png
+size: 32,32
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+bullet.player
+  bounds: 4,10,10,5
+
+enemy_bullets.png
+size: 16,16
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+orb.magenta
+  bounds: 0,0,8,8
+orb.red
+  bounds: 8,0,8,8
+orb.blue
+  bounds: 0,8,8,8
+orb.green
+  bounds: 8,8,8,8
+
+enemies.png
+size: 64,64
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+skeleton
+  bounds: 16,0,16,16
+flame
+  bounds: 32,0,16,16
+slime
+  bounds: 48,0,16,16
+
+boss.png
+size: 64,64
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+boss
+  bounds: 0,0,48,48
+boss.shadow
+  bounds: 0,52,48,10
+
+splatter.png
+size: 64,64
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+splat
+  bounds: 0,0,16,16
+splat2
+  bounds: 16,0,16,16
+
+pickups.png
+size: 64,64
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+coin
+  bounds: 0,0,16,16
+heart
+  bounds: 16,0,16,16

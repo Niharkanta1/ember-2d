@@ -1,0 +1,45 @@
+{
+ "version": 1,
+ "types": {
+  "player": {
+   "region": "atlas.shooter/bullet.player",
+   "radius": 0.12,
+   "damage": 1,
+   "lifetime": 1.5,
+   "walls": true,
+   "rotate": true
+  },
+  "pellet": {
+   "region": "atlas.shooter/orb.red",
+   "radius": 0.16,
+   "lifetime": 6,
+   "walls": true
+  },
+  "orb_magenta": {
+   "region": "atlas.shooter/orb.magenta",
+   "radius": 0.16,
+   "lifetime": 9
+  },
+  "orb_red": {
+   "region": "atlas.shooter/orb.red",
+   "radius": 0.16,
+   "lifetime": 9
+  },
+  "orb_blue": {
+   "region": "atlas.shooter/orb.blue",
+   "radius": 0.16,
+   "lifetime": 9
+  },
+  "orb_green": {
+   "region": "atlas.shooter/orb.green",
+   "radius": 0.16,
+   "lifetime": 9
+  },
+  "stress": {
+   "region": "atlas.shooter/orb.blue",
+   "radius": 0.16,
+   "lifetime": 6,
+   "graze": false
+  }
+ }
+}

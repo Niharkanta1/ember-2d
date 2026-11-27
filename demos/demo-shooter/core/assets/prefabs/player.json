@@ -1,0 +1,45 @@
+{
+ "version": 1,
+ "components": {
+  "Sprite": {
+   "regionId": "atlas.shooter/player",
+   "origin": [
+    8,
+    0
+   ],
+   "z": 2
+  },
+  "Collider": {
+   "box": {
+    "x": -0.35,
+    "y": 0,
+    "width": 0.7,
+    "height": 0.6
+   },
+   "layer": 1
+  },
+  "Actor": {},
+  "TopDownBody": {
+   "maxSpeed": 6
+  },
+  "Aim": {},
+  "Weapon": {
+   "weapon": "weapon.smg",
+   "fireAction": "fire",
+   "reloadAction": "reload"
+  },
+  "Health": {
+   "max": 5,
+   "invulnerableSeconds": 1.0
+  },
+  "Team": {
+   "id": 1
+  },
+  "BulletTarget": {
+   "radius": 0.18,
+   "grazeRadius": 0.9,
+   "offsetY": 0.45
+  },
+  "Hurtbox": {}
+ }
+}

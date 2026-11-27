@@ -1,0 +1,14 @@
+{
+ "version": 1,
+ "fireRate": 10,
+ "auto": true,
+ "magazine": 24,
+ "reload": 1.0,
+ "muzzle": 0.6,
+ "emit": {
+  "type": "random",
+  "bullet": "player",
+  "spread": 6,
+  "speed": 14
+ }
+}

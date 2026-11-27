@@ -1,0 +1,12 @@
+{
+ "version": 1,
+ "emit": {
+  "type": "spiral",
+  "bullet": "stress",
+  "count": 30,
+  "speed": 1.2,
+  "repeat": 100000,
+  "interval": 0.06,
+  "angleStep": 7
+ }
+}

@@ -35,5 +35,9 @@ include 'demos:demo-platformer:core'
 include 'demos:demo-platformer:desktop'
 include 'demos:demo-platformer:android'
 
+include 'demos:demo-shooter:core'
+include 'demos:demo-shooter:desktop'
+include 'demos:demo-shooter:android'
+
 // Build tools
 include 'tools:android-api-check'   // Android API guard (I-016)

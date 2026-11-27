@@ -1,0 +1,29 @@
+{
+ "version": 1,
+ "emit": [
+  {
+   "type": "random",
+   "bullet": "orb_red",
+   "count": 6,
+   "spread": 140,
+   "speed": 4,
+   "repeat": 60,
+   "interval": 0.15
+  },
+  {
+   "type": "aimed",
+   "bullet": "orb_magenta",
+   "speed": 2.5,
+   "repeat": 6,
+   "interval": 1.4,
+   "delay": 0.5,
+   "child": {
+    "type": "ring",
+    "bullet": "orb_blue",
+    "count": 16,
+    "speed": 3
+   },
+   "childAfter": 1.2
+  }
+ ]
+}

@@ -1,0 +1,24 @@
+{
+ "version": 1,
+ "emit": [
+  {
+   "type": "ring",
+   "bullet": "orb_blue",
+   "count": 24,
+   "speed": 3,
+   "repeat": 6,
+   "interval": 1.6
+  },
+  {
+   "type": "wave",
+   "bullet": "orb_green",
+   "count": 3,
+   "spread": 60,
+   "speed": 4,
+   "repeat": 50,
+   "interval": 0.18,
+   "amplitude": 35,
+   "frequency": 12
+  }
+ ]
+}

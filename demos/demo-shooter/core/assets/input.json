@@ -1,0 +1,120 @@
+{
+ "version": 1,
+ "contexts": {
+  "gameplay": {
+   "actions": {
+    "fire": [
+     "MOUSE_LEFT",
+     "SPACE"
+    ],
+    "reload": [
+     "R"
+    ],
+    "pause": [
+     "P"
+    ],
+    "menu": [
+     "ESCAPE",
+     "BACK"
+    ]
+   },
+   "axes": {
+    "move": {
+     "left": [
+      "A"
+     ],
+     "right": [
+      "D"
+     ],
+     "up": [
+      "W"
+     ],
+     "down": [
+      "S"
+     ]
+    },
+    "aim": {
+     "left": [
+      "LEFT"
+     ],
+     "right": [
+      "RIGHT"
+     ],
+     "up": [
+      "UP"
+     ],
+     "down": [
+      "DOWN"
+     ]
+    }
+   }
+  },
+  "ui": {
+   "actions": {
+    "ui_back": [
+     "ESCAPE",
+     "BACK",
+     "P"
+    ],
+    "ui_confirm": [
+     "ENTER",
+     "SPACE"
+    ]
+   },
+   "axes": {
+    "ui_nav": {
+     "left": [
+      "LEFT",
+      "A"
+     ],
+     "right": [
+      "RIGHT",
+      "D"
+     ],
+     "up": [
+      "UP",
+      "W"
+     ],
+     "down": [
+      "DOWN",
+      "S"
+     ]
+    }
+   }
+  }
+ },
+ "touchControls": {
+  "opacity": 0.35,
+  "joystick": {
+   "axis": "move",
+   "mode": "floating",
+   "radius": 52,
+   "deadZone": 0.2
+  },
+  "aimStick": {
+   "axis": "aim",
+   "x": 150,
+   "y": 110,
+   "radius": 52,
+   "deadZone": 0.15,
+   "fire": "fire",
+   "fireAt": 0.5
+  },
+  "buttons": [
+   {
+    "action": "reload",
+    "label": "R",
+    "x": 48,
+    "y": 150,
+    "radius": 28
+   },
+   {
+    "action": "pause",
+    "label": "II",
+    "x": 48,
+    "y": -48,
+    "radius": 24
+   }
+  ]
+ }
+}

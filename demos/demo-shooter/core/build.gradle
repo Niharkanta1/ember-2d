@@ -1,0 +1,13 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Shooter demo: game code shared by all launchers (I-340).'
+
+dependencies {
+    testImplementation testFixtures(project(':ember-core'))
+    api project(':ember-core')
+    api project(':kits:kit-common')
+    api project(':kits:kit-bullets')
+    api project(':kits:kit-topdown')
+}

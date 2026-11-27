@@ -1,0 +1,26 @@
+{
+ "version": 1,
+ "components": {
+  "Sprite": {
+   "regionId": "atlas.shooter/coin",
+   "origin": [
+    8,
+    0
+   ],
+   "z": 0
+  },
+  "Collider": {
+   "box": {
+    "x": -1,
+    "y": 0,
+    "width": 2,
+    "height": 1
+   },
+   "trigger": true
+  },
+  "TriggerZone": {
+   "tag": "player"
+  },
+  "Exit": {}
+ }
+}

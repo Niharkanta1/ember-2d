@@ -1,0 +1,24 @@
+{
+ "version": 1,
+ "emit": [
+  {
+   "type": "spiral",
+   "bullet": "orb_magenta",
+   "count": 4,
+   "speed": 3.5,
+   "repeat": 80,
+   "interval": 0.12,
+   "angleStep": 13
+  },
+  {
+   "type": "aimed",
+   "bullet": "orb_red",
+   "count": 5,
+   "spread": 40,
+   "speed": 5,
+   "repeat": 6,
+   "interval": 1.5,
+   "delay": 0.6
+  }
+ ]
+}

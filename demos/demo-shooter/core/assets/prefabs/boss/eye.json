@@ -1,0 +1,35 @@
+{
+ "version": 1,
+ "components": {
+  "Sprite": {
+   "regionId": "atlas.shooter/boss",
+   "origin": [
+    24,
+    0
+   ],
+   "z": 1
+  },
+  "Health": {
+   "max": 300,
+   "invulnerableSeconds": 0
+  },
+  "Team": {
+   "id": 2
+  },
+  "BulletTarget": {
+   "radius": 1.2,
+   "offsetY": 1.5
+  },
+  "Hitbox": {
+   "box": {
+    "x": -1.2,
+    "y": 0.3,
+    "width": 2.4,
+    "height": 2.4
+   },
+   "damage": 1,
+   "knockback": 10
+  },
+  "Boss": {}
+ }
+}

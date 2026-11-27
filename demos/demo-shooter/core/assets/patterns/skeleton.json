@@ -1,0 +1,10 @@
+{
+ "version": 1,
+ "emit": {
+  "type": "aimed",
+  "bullet": "pellet",
+  "count": 3,
+  "spread": 30,
+  "speed": 5
+ }
+}

@@ -1,0 +1,16 @@
+{
+ "version": 1,
+ "components": {
+  "Sprite": {
+   "regionId": "atlas.shooter/splat",
+   "origin": [
+    8,
+    4
+   ],
+   "z": 0
+  },
+  "Lifetime": {
+   "seconds": 0.8
+  }
+ }
+}
