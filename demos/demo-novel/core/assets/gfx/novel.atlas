@@ -1,0 +1,55 @@
+frog_idle.png
+size: 352,32
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+kero_normal
+  bounds: 0,0,32,32
+
+frog_hit.png
+size: 224,32
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+kero_surprised
+  bounds: 64,0,32,32
+
+frog_jump.png
+size: 32,32
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+kero_happy
+  bounds: 0,0,32,32
+
+bunny_idle.png
+size: 272,44
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+pip_normal
+  bounds: 0,0,34,44
+
+bunny_hit.png
+size: 170,44
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+pip_surprised
+  bounds: 68,0,34,44
+
+bunny_jump.png
+size: 34,44
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+pip_happy
+  bounds: 0,0,34,44
+
+cherries.png
+size: 544,32
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+cherries
+  bounds: 0,0,32,32

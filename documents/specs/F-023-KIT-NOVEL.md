@@ -129,6 +129,39 @@ The kit has two layers, so the staging logic is testable without a screen:
 
 - **In I-450:** the dialogue box is now the shared `ember.ui.DialogueBox` (F-012). `setCharacterArea(bottom, height)` places smaller characters for story scenes over a game (the RPG cutscene uses 0.33 and 0.5). The view was checked on the emulator in the RPG cutscene: the typewriter, a choice, the backlog, a slide, a shake and a flash.
 
+## Novel demo (I-470)
+Status: Done. Approved 2026-11-27 under the developer's standing approval for Phases 3 to 6. Module `demos/demo-novel` (`core`, `desktop`, `android`). Data from `assets-src/demo-novel/make_assets.py` (it also composes the backgrounds and the CG from the Pixel Adventure tiles), sounds from `sound/make_sounds.py`, the story in `assets-src/demo-novel/ink/chapter1.ink` (compiled by `compileInk`, as in the RPG demo).
+
+**What it shows:**
+- **"Kero and the Lost Cherries":** one chapter with two characters (Kero, Pip) with three expressions each, and a choice that changes the ending. Helping leads to the dusk search, a shake, a flash, the sunset CG and "Friends at sunset". Refusing leads to night, the music stopping and "A quiet evening".
+- **Title screen:** Continue (with a save), Start, Gallery, Settings (text speed, auto wait, skip read only / all text), Quit on desktop. It shows the endings seen.
+- **Story scene:** the full-screen `NovelView` with Auto, Skip, Log and Hide. A Menu button (or Escape / Back) offers Resume, Save, Load and Title. The end panel records the ending (from the plain game tags `ending_together` / `ending_alone`, read through `NovelView.setOnLine`).
+- **Gallery:** the unlocked CG as a thumbnail (tap for full screen); locked pictures show "?".
+- **Read lines and CGs** are kept in the global save data (`NovelMemory`), so Skip passes text read in any earlier play-through.
+
+**Tests (`ChapterTest`):**
+- Both endings: their tags, final stage and music; only the happy ending unlocks the CG.
+- Read tracking across play-throughs.
+- Saving mid-scene restores the background, music, characters with expression and position, the line on screen and the backlog.
+- Every background, music, sound and CG the story names, and every expression region, exists.
+
+## Decisions in I-470
+- **Saving restores the line on screen (kit change):** `NovelDirector.save` now also writes the current line and the backlog. `load` hands the line back through `resumeLine()`, and `NovelView.play` shows it before continuing. Before, a loaded story started at the line after the saved one, with an empty backlog.
+- **`NovelView.setOnLine(listener)`:** lets a game see each line's game tags; the demo records endings with it.
+- **Tag parsing fix:** a staging tag with options but no colon (`# stopmusic fade=2`) was taken for a plain game tag and ignored. The command name now ends at the colon or the first space. The chapter test found it.
+- **Skip fix:** turning Skip on while an unread line was on screen skipped that line. Skip now stops at any unread line, including the one on screen (found on the emulator).
+- **`DialogueBox` and menus:** the box ignores its confirm action while a menu has the keyboard, so confirming in the pause menu does not also advance the story.
+- **Game tags with a colon** (`ending:x`) are treated as unknown staging tags and fail in dev builds, as the spec says for unknown tags. Games use plain tags (`ending_x`) or the dialogue tags.
+- **Art:** the pack has no visual novel art. The characters are Ninja Frog and Bunny frames (idle, hit, jump as normal, surprised, happy). The backgrounds and the CG are composed from the pack's tiles. Hit frames 0 and 1 are white flashes, so "surprised" uses frame 2 (found on the emulator).
+- **Not built:** save thumbnails, scene replay, text size setting, voice acting (the voice tag is covered by the kit's test story).
+- **Checked on the emulator** (API 23, debug build):
+  - The title screen and the opening scene.
+  - Saving mid-line, killing the app and Continue: the same background, characters, expressions and line.
+  - The choice, the happy ending with the CG, the end panel, the gallery unlock.
+  - On a second play, Skip raced through read text to the choice and through the read branch to the end; on the unread branch it stopped at the first unread line.
+  - The backlog was checked in the RPG cutscene (I-450), not again here.
+- **Not checked:** Auto and Hide on a device, the "alone" ending on the device (it is covered by the test), the settings screen on the device, a release (R8) build, a real phone.
+
 ## Non-goals
 - A visual novel editor (Ink + Inky are the editor). Lip sync, Live2D. Branching flowchart viewer.
 

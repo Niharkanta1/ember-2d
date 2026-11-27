@@ -97,6 +97,10 @@ def emberKeepRules = tasks.register('emberKeepRules', JavaExec) {
 tasks.named('preBuild') {
     dependsOn emberKeepRules
 }
+// When the Ink stories are compiled in the same build, they are written before the assets are merged.
+tasks.matching { it.name.startsWith('merge') && it.name.endsWith('Assets') }.configureEach {
+    mustRunAfter ':demos:demo-rpg:core:compileInk'
+}
 
 // libGDX ships its Android .so files inside jars; extract them per ABI so they are packed into the APK.
 // ABIs: phones (arm64-v8a, armeabi-v7a) and emulators (x86_64). 32-bit x86 is not shipped.

@@ -45,6 +45,9 @@ public final class NovelDirector {
     private final boolean devMode;
     private final StageState stage = new StageState();
     private final ArrayDeque<Logged> backlog = new ArrayDeque<>();
+    /** The line on screen (saved with the story), and the one to show again after loading. */
+    private NovelLine current;
+    private NovelLine resume;
 
     public NovelDirector(DialogueRunner runner, NovelCharacters characters, StageListener listener, NovelMemory memory,
             boolean devMode) {
@@ -113,10 +116,14 @@ public final class NovelDirector {
                 backlog.removeFirst();
             }
             backlog.addLast(new Logged(name, text, voice));
-            return new Step(Kind.LINE, new NovelLine(character == null ? null : character.id(), name, color, text,
-                    voice, Collections.unmodifiableList(gameTags), read, delay), List.of());
+            current = new NovelLine(character == null ? null : character.id(), name, color, text, voice,
+                    Collections.unmodifiableList(gameTags), read, delay);
+            return new Step(Kind.LINE, current, List.of());
         }
         List<String> choices = runner.choices();
+        if (choices.isEmpty()) {
+            current = null;
+        }
         return choices.isEmpty() ? new Step(Kind.END, null, List.of()) : new Step(Kind.CHOICES, null, choices);
     }
 
@@ -130,19 +137,80 @@ public final class NovelDirector {
         return List.copyOf(backlog);
     }
 
-    /** Saves the story position (key {@code ink}) and the stage (key {@code stage}). */
+    /**
+     * Saves the story position (key {@code ink}), the stage (key {@code stage}), the line on screen (key
+     * {@code line}) and the backlog (key {@code backlog}).
+     */
     public void save(SaveData out) {
         runner.save(out);
         SaveData s = new SaveData();
         stage.save(s);
         out.set("stage", s);
+        out.remove("line");
+        if (current != null) {
+            SaveData line = new SaveData().set("name", current.name()).set("text", current.text())
+                    .set("color", current.color().toString());
+            if (current.speakerId() != null) {
+                line.set("speaker", current.speakerId());
+            }
+            if (current.voice() != null) {
+                line.set("voice", current.voice());
+            }
+            out.set("line", line);
+        }
+        List<SaveData> log = out.list("backlog");
+        log.clear();
+        for (Logged l : backlog) {
+            SaveData entry = new SaveData().set("name", l.name()).set("text", l.text());
+            if (l.voice() != null) {
+                entry.set("voice", l.voice());
+            }
+            log.add(entry);
+        }
     }
 
-    /** Restores {@link #save}d data and redraws the whole stage at once ({@link StageListener#restore}). */
+    /**
+     * Restores {@link #save}d data and redraws the whole stage at once ({@link StageListener#restore}). The line that
+     * was on screen is handed out again by {@link #resumeLine()}.
+     */
     public void load(SaveData in) {
         runner.load(in);
         stage.load(in.has("stage") ? in.child("stage") : new SaveData());
+        backlog.clear();
+        if (in.has("backlog")) {
+            for (SaveData l : in.list("backlog")) {
+                if (backlog.size() == BACKLOG) {
+                    backlog.removeFirst();
+                }
+                backlog.addLast(new Logged(l.getString("name", ""), l.getString("text", ""),
+                        l.getString("voice", null)));
+            }
+        }
+        current = null;
+        resume = null;
+        if (in.has("line")) {
+            SaveData l = in.child("line");
+            Color color;
+            try {
+                color = Color.valueOf(l.getString("color", "ffffffff"));
+            } catch (RuntimeException e) {
+                color = new Color(Color.WHITE);
+            }
+            current = new NovelLine(l.getString("speaker", null), l.getString("name", ""), color,
+                    l.getString("text", ""), l.getString("voice", null), List.of(), true, 0f);
+            resume = current;
+        }
         listener.restore(stage, characters);
+    }
+
+    /**
+     * After {@link #load}: the line that was on screen when the story was saved, once (then null). A view shows it
+     * again before calling {@link #next()}.
+     */
+    public NovelLine resumeLine() {
+        NovelLine line = resume;
+        resume = null;
+        return line;
     }
 
     // ---- staging ----

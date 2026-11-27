@@ -168,6 +168,14 @@ class NovelDirectorTest {
         assertThat(back.stage().music()).isEqualTo("theme_calm");
         assertThat(back.stage().characters().get("alice").expression()).isEqualTo("sad");
         assertThat(back.stage().characters().get("bob").position()).isEqualTo("right");
+        NovelLine resume = back.resumeLine();
+        assertThat(resume.text()).as("the line on screen is shown again").isEqualTo("It is.");
+        assertThat(resume.name()).isEqualTo("Bob");
+        assertThat(resume.color()).isEqualTo(Color.valueOf("88CCFF"));
+        assertThat(back.resumeLine()).as("only once").isNull();
+        assertThat(back.backlog()).extracting(NovelDirector.Logged::text).containsExactly("What a lovely evening.",
+                "It is.");
+        assertThat(back.backlog().get(0).voice()).isEqualTo("alice_001");
         assertThat(back.next().choices()).containsExactly("Agree", "Leave");
     }
 
@@ -242,6 +250,11 @@ class NovelDirectorTest {
         assertThat(t.options).containsEntry("transition", "fade").containsEntry("time", "1.5");
         assertThat(NovelTag.parse("speaker:guard")).isNull();
         assertThat(NovelTag.parse("chapter_end")).isNull();
+        NovelTag stop = NovelTag.parse("stopmusic fade=2");
+        assertThat(stop.name).as("options without a colon").isEqualTo("stopmusic");
+        assertThat(stop.options).containsEntry("fade", "2");
+        assertThat(NovelTag.parse("hidecg").name).isEqualTo("hidecg");
+        assertThat(NovelTag.parse("chapter end")).as("a plain tag with a space").isNull();
         assertThatThrownBy(() -> NovelTag.parse("bg: park fade=x").number("fade", 0f))
                 .hasMessageContaining("\"x\" is not a number");
     }

@@ -173,7 +173,9 @@ public final class DialogueBox extends Table {
         Input input = ui.input();
         boolean ignore = fresh;
         fresh = false;
-        if (!ignore && isVisible() && choices == null && input != null && getStage() != null) {
+        // A menu on screen (a pause menu, a dialog) owns the confirm action.
+        if (!ignore && isVisible() && choices == null && ui.activeMenu() == null && input != null
+                && getStage() != null) {
             for (String action : confirmActions) {
                 if (input.hasAction(action) && input.justPressed(action)) {
                     press();

@@ -18,6 +18,10 @@ sourceSets {
         resources.srcDir rootProject.file('demos/demo-rpg/core/assets')
     }
 }
+// When the Ink stories are compiled in the same build, they are written before the assets are copied.
+tasks.named('processResources') {
+    mustRunAfter ':demos:demo-rpg:core:compileInk'
+}
 
 application {
     mainClass = 'dev.ember2d.demo.rpg.desktop.DesktopLauncher'

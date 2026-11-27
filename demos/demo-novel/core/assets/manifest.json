@@ -1,0 +1,16 @@
+{ "version": 1, "assets": [
+  {"id": "atlas.novel", "path": "gfx/novel.atlas", "type": "atlas", "group": "global"},
+  {"id": "font.pixel", "path": "fonts/PressStart2P-Regular.ttf", "type": "freetype", "group": "global", "font": {"size": 8, "mono": true, "shadowOffsetX": 1, "shadowOffsetY": 1, "shadowColor": "#000000A0"}},
+  {"id": "input", "path": "input.json", "type": "json", "group": "global"},
+  {"id": "cast", "path": "cast.json", "type": "json", "group": "global"},
+  {"id": "ink.chapter1", "path": "ink/chapter1.ink.json", "type": "json", "group": "global"},
+  {"id": "bg.meadow", "path": "bg/meadow.png", "type": "texture", "group": "global"},
+  {"id": "bg.dusk", "path": "bg/dusk.png", "type": "texture", "group": "global"},
+  {"id": "bg.night", "path": "bg/night.png", "type": "texture", "group": "global"},
+  {"id": "cg.sunset", "path": "cg/sunset.png", "type": "texture", "group": "global"},
+  {"id": "sfx.pop", "path": "sfx/pop.wav", "type": "sound", "group": "global"},
+  {"id": "sfx.rustle", "path": "sfx/rustle.wav", "type": "sound", "group": "global"},
+  {"id": "sfx.blip", "path": "sfx/blip.wav", "type": "sound", "group": "global"},
+  {"id": "music.meadow", "path": "music/meadow.wav", "type": "music", "group": "global"},
+  {"id": "music.sunset", "path": "music/sunset.wav", "type": "music", "group": "global"}
+] }

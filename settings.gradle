@@ -43,5 +43,9 @@ include 'demos:demo-rpg:core'
 include 'demos:demo-rpg:desktop'
 include 'demos:demo-rpg:android'
 
+include 'demos:demo-novel:core'
+include 'demos:demo-novel:desktop'
+include 'demos:demo-novel:android'
+
 // Build tools
 include 'tools:android-api-check'   // Android API guard (I-016)

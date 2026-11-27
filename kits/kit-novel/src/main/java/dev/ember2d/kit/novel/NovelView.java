@@ -25,6 +25,7 @@ import dev.ember2d.ui.Ui;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * The standard novel presentation (F-023) on a scene's {@link Ui}: background, characters at their anchors, CG, a
@@ -66,6 +67,7 @@ public final class NovelView implements StageListener {
     private NovelLine pending;
     private float characterHeight = 0.85f;
     private float characterBottom;
+    private Consumer<NovelLine> onLine;
 
     /**
      * @param camera shakes for {@code shake:}; may be null
@@ -144,6 +146,11 @@ public final class NovelView implements StageListener {
         return b;
     }
 
+    /** Called with each line as it appears (its game tags, its speaker); null for none. */
+    public void setOnLine(Consumer<NovelLine> listener) {
+        onLine = listener;
+    }
+
     /**
      * Where characters stand, as fractions of the screen height: their feet at {@code bottom} and their height
      * (default 0 and 0.85, a full-screen novel). A story scene over a game's world suits smaller characters standing
@@ -158,13 +165,23 @@ public final class NovelView implements StageListener {
         characterHeight = height;
     }
 
-    /** Starts presenting a director's story; {@code onFinished} runs at its end (the view is removed). */
+    /**
+     * Starts presenting a director's story; {@code onFinished} runs at its end (the view is removed). After
+     * {@link NovelDirector#load}, it starts with the line that was on screen when the story was saved.
+     */
     public void play(NovelDirector director, Runnable onFinished) {
         this.director = director;
         this.onFinished = onFinished;
         finished = false;
         if (root.getStage() == null) {
             ui.stage().addActor(root);
+        }
+        NovelLine resume = director.resumeLine();   // a loaded story shows its saved line again
+        if (resume != null) {
+            pending = resume;
+            read = true;
+            showLine();
+            return;
         }
         advance();
     }
@@ -187,6 +204,9 @@ public final class NovelView implements StageListener {
         if (hidden && (pressed("ui_confirm") || pressed("fire"))) {
             setHidden(false);
             return;
+        }
+        if (skip && !read && !settings.skipUnread) {
+            skip = false;   // skip mode never passes unread text, also the line on screen when it was turned on
         }
         if (skip) {
             box.complete();
@@ -258,6 +278,9 @@ public final class NovelView implements StageListener {
         }
         box.setVisible(!hidden);
         lineShown = true;
+        if (onLine != null) {
+            onLine.accept(pending);
+        }
     }
 
     private void showChoices(List<String> options) {

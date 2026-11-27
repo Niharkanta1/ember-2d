@@ -38,17 +38,20 @@ final class NovelTag {
     static NovelTag parse(String tag) {
         String text = tag.trim();
         int colon = text.indexOf(':');
-        String name = (colon < 0 ? text : text.substring(0, colon)).trim().toLowerCase(Locale.ROOT);
+        int space = text.indexOf(' ');
+        // The name ends at the colon, or (for "stopmusic fade=2") at the first space when there is no colon.
+        int end = colon >= 0 ? colon : space >= 0 ? space : text.length();
+        String name = text.substring(0, end).trim().toLowerCase(Locale.ROOT);
         if (DIALOGUE.contains(name)) {
             return null;
         }
         if (!COMMANDS.contains(name)) {
             if (colon < 0 || name.contains(" ")) {
-                return null;   // a plain tag for the game
+                return null;   // a plain tag for the game ("chapter_end", "chapter end")
             }
             throw new IllegalArgumentException("unknown staging tag \"" + name + ":\" (tags: " + COMMANDS + ")");
         }
-        String rest = colon < 0 ? "" : text.substring(colon + 1);
+        String rest = text.substring(Math.min(text.length(), end + 1));
         rest = rest.replace('[', ' ').replace(']', ' ').trim();
         List<String> args = new ArrayList<>();
         Map<String, String> options = new LinkedHashMap<>();

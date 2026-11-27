@@ -1,0 +1,27 @@
+{
+ "version": 1,
+ "characters": {
+  "kero": {
+   "name": "Kero",
+   "color": "#8BE38B",
+   "position": "left",
+   "expressions": {
+    "normal": "atlas.novel/kero_normal",
+    "surprised": "atlas.novel/kero_surprised",
+    "happy": "atlas.novel/kero_happy"
+   },
+   "default": "normal"
+  },
+  "pip": {
+   "name": "Pip",
+   "color": "#FFB3D1",
+   "position": "right",
+   "expressions": {
+    "normal": "atlas.novel/pip_normal",
+    "surprised": "atlas.novel/pip_surprised",
+    "happy": "atlas.novel/pip_happy"
+   },
+   "default": "normal"
+  }
+ }
+}
