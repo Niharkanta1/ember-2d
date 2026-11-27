@@ -4,6 +4,26 @@ plugins {
 
 description = 'Platformer demo: Android launcher (F-022).'
 
+// Version code from MAJOR.MINOR.PATCH (I-255): 0.1.0 -> 100, 1.2.3 -> 10203. A suffix such as -SNAPSHOT is ignored.
+static int emberVersionCode(String version) {
+    def m = version =~ /^(\d+)\.(\d+)\.(\d+)(-.*)?$/
+    if (!m.matches()) {
+        throw new GradleException("Version '${version}' must look like MAJOR.MINOR.PATCH[-SUFFIX] for the Android version code")
+    }
+    int major = m.group(1) as int, minor = m.group(2) as int, patch = m.group(3) as int
+    if (minor > 99 || patch > 99) {
+        throw new GradleException("Version '${version}': MINOR and PATCH must be below 100 for the Android version code")
+    }
+    return major * 10000 + minor * 100 + patch
+}
+
+// Upload-key signing (I-255) from Gradle properties kept outside the repository (~/.gradle/gradle.properties or
+// ORG_GRADLE_PROJECT_ember.signing.* in CI). Without them the release build is signed with the debug key.
+def signingKeys = ['storeFile', 'storePassword', 'keyAlias', 'keyPassword'].collectEntries {
+    [(it): providers.gradleProperty("ember.signing.${it}").orNull]
+}
+def hasUploadKey = signingKeys.values().every { it != null && !it.isEmpty() }
+
 android {
     namespace = 'dev.ember2d.demo.platformer.android'
     compileSdk = libs.versions.androidCompileSdk.get().toInteger()
@@ -12,16 +32,26 @@ android {
         applicationId = 'dev.ember2d.demo.platformer'
         minSdk = libs.versions.androidMinSdk.get().toInteger()
         targetSdk = libs.versions.androidTargetSdk.get().toInteger()
-        versionCode = 1                                 // real scheme with the release build (I-255)
+        versionCode = emberVersionCode(project.version.toString())
         versionName = project.version.toString()
+    }
+
+    signingConfigs {
+        if (hasUploadKey) {
+            upload {
+                storeFile = file(signingKeys.storeFile)
+                storePassword = signingKeys.storePassword
+                keyAlias = signingKeys.keyAlias
+                keyPassword = signingKeys.keyPassword
+            }
+        }
     }
 
     buildTypes {
         release {
-            // R8 on (F-010 acceptance: prefabs in a minified build). Signed with the debug key until real signing
-            // arrives with the release build (I-255).
+            // R8 with the generated keep rules (F-010); the mapping file is build/outputs/mapping/release/mapping.txt.
             minifyEnabled = true
-            signingConfig = signingConfigs.debug
+            signingConfig = hasUploadKey ? signingConfigs.upload : signingConfigs.debug
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro',
                     layout.buildDirectory.file('generated/ember-keep-rules.pro').get().asFile
         }
@@ -99,4 +129,14 @@ def copyAndroidNatives = tasks.register('copyAndroidNatives', Sync) {
 
 tasks.matching { it.name.contains('merge') && it.name.contains('JniLibFolders') }.configureEach {
     dependsOn copyAndroidNatives
+}
+
+// Release bundles signed with the debug key cannot be uploaded to Google Play (I-255).
+tasks.matching { it.name == 'bundleRelease' || it.name == 'assembleRelease' }.configureEach {
+    doFirst {
+        if (!hasUploadKey) {
+            logger.warn("${name}: no upload key (ember.signing.* properties); signed with the debug key - fine for testing, "
+                    + "not for Google Play.")
+        }
+    }
 }

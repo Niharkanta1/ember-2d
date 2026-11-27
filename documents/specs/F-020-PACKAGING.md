@@ -1,6 +1,6 @@
 # F-020 — Packaging and Release Builds
 
-- Status: Desktop part Ready (expanded and approved in the I-009 plan, 2026-11-25); complete demo and desktop release Ready (I-250, approved 2026-11-27 under the standing approval for Phases 3 to 6; see "Complete demo and desktop release (I-250)"); Android release Draft
+- Status: Desktop part Ready (expanded and approved in the I-009 plan, 2026-11-25); complete demo and desktop release Ready (I-250, approved 2026-11-27 under the standing approval for Phases 3 to 6; see "Complete demo and desktop release (I-250)"); Android release Ready (I-255, approved 2026-11-27 under the standing approval; see "Android release build (I-255)")
 - Phase: 0 (desktop empty window), 1 (Android smoke build), 3 (MVP demo release on desktop and Android)
 - Module / package: `ember-desktop`, `ember-android`, demo build scripts
 - Depends on: F-001, F-022
@@ -100,6 +100,48 @@ Status: Ready. Approved 2026-11-27 under the developer's standing approval for P
 - **Not checked:**
   - Nobody has played levels 2 and 3 to the end, so the "Next level" and "You finished the demo!" panels have not been seen. The reachability test covers whether the levels can be finished.
   - Playing the desktop zip through is left to the developer at the phase gate.
+
+## Android release build (I-255)
+Status: Ready. Approved 2026-11-27 under the developer's standing approval for Phases 3 to 6.
+
+**Version code.**
+- **The formula:** the code comes from the Gradle version `MAJOR.MINOR.PATCH` (a `-SUFFIX` such as `-SNAPSHOT` is ignored): `MAJOR * 10000 + MINOR * 100 + PATCH`. For example, 0.1.0 is 100 and 1.2.3 is 10203.
+- **Limits:** MINOR and PATCH must be below 100; anything else fails the build with a message.
+- **Version name:** the full Gradle version.
+
+**Signing (the keystore is never committed).**
+- **The upload key:** the release build type signs with an upload key read from four Gradle properties:
+  - `ember.signing.storeFile` (path)
+  - `ember.signing.storePassword`
+  - `ember.signing.keyAlias`
+  - `ember.signing.keyPassword`
+- **Where the values live:** the developer keeps them in `~/.gradle/gradle.properties` (outside the repository). CI has no upload key yet; adding one (the keystore as a repository secret, passed as `ORG_GRADLE_PROJECT_ember.signing.*`) is a later step for the developer.
+- **Without the properties:** the release build falls back to the debug key, so `./gradlew build` and CI work without secrets. The build then logs a warning that the bundle cannot be uploaded to Google Play.
+- **Making the key:** a one-off manual step with `keytool`, documented in the guide (G-3). The agent does not create keys.
+
+**Outputs.**
+- **The bundle:** `./gradlew :demos:demo-platformer:android:bundleRelease` writes `build/outputs/bundle/release/android-release.aab`, minified with R8 and the generated keep rules (F-010).
+- **The mapping file:** R8 writes `build/outputs/mapping/release/mapping.txt`, which de-obfuscates crash stack traces. Keep it with each uploaded bundle.
+- **Checking it on a device:** a bundle cannot be installed directly without `bundletool`. That is a new download, so it is not used here. The emulator check uses `assembleRelease` instead, which builds the same build type with the same R8 rules and signing.
+- **CI:** builds the bundle on pushes to `main` and uploads the bundle and the mapping file as the `platformer-demo-android-release` artifact.
+
+**Device test (emulator, API 23):** install the release APK, then:
+- check that the menu, all three levels (prefabs spawned in the minified build), the on-screen controls, settings and progress survive a force-stop;
+- check that log lines show real scene names (`-keepnames`, I-120).
+A real phone is still open from Phase 2; it is listed as a risk for the gate.
+
+## Decisions in I-255
+- **Outputs, as built:** `bundleRelease` gives a 3.6 MB bundle with the three ABIs, two dex files, all assets and the generated project file. `assembleRelease` gives a 4.6 MB APK with version code 100 and version name 0.1.0-SNAPSHOT (checked with `aapt dump badging`). R8 writes `mapping.txt`.
+- **Checked on the emulator (API 23), release APK:**
+  - It installs and starts in release mode.
+  - Log lines name `MenuScene` and `DemoScene`, so the keep-names rules work under R8.
+  - Level 1 spawns its 30 prefab entities, including `pig_2`'s class-typed `Patroller` property.
+  - The level list and the version label show.
+- **Not checked:**
+  - Levels 2 and 3 in the release build: the release APK is not debuggable, so no save could be pushed to unlock them. They use the same prefabs and the same class-property path as level 1.
+  - Signing with a real upload key: the agent does not create keys. The wiring is the standard `signingConfigs` block, chosen when all four properties are set. The developer creates the key, sets the properties, and checks that `bundleRelease` stops warning.
+  - A real phone: still open from Phase 2, and part of the Phase 3 exit gate ("running on an Android phone").
+- **No downloads:** `bundletool` was not downloaded. The bundle's contents were checked by listing it, and the runtime check used the release APK.
 
 ## Non-goals
 - Desktop installers, code signing and notarisation (document as later steps), Steam integration, iOS and web packaging, Play Store listing automation.

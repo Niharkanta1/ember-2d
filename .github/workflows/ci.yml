@@ -73,3 +73,17 @@ jobs:
           name: platformer-demo-desktop
           path: demos/demo-platformer/desktop/build/construo/dist/*.zip
           if-no-files-found: error
+
+      # Android release bundle (F-020, I-255), minified with R8. No upload key is configured in CI yet, so it is signed
+      # with the debug key: for testing, not for Google Play (see F-020 "Android release build").
+      - name: Build Android release bundle
+        run: ./gradlew :demos:demo-platformer:android:bundleRelease --stacktrace
+
+      - name: Upload Android release bundle and R8 mapping
+        uses: actions/upload-artifact@v4
+        with:
+          name: platformer-demo-android-release
+          path: |
+            demos/demo-platformer/android/build/outputs/bundle/release/*.aab
+            demos/demo-platformer/android/build/outputs/mapping/release/mapping.txt
+          if-no-files-found: error
