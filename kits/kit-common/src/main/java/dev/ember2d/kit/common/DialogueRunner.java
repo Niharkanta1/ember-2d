@@ -68,6 +68,11 @@ public final class DialogueRunner {
         return fromJson(json.toJson(JsonWriter.OutputType.json), assets.path(id));
     }
 
+    /** The story's name for messages (its file). */
+    public String name() {
+        return name;
+    }
+
     // ---- lines ----
 
     public boolean canContinue() {
