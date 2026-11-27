@@ -57,7 +57,7 @@ public final class EmberArchitectureRules {
     private static final List<String> TIER_1 = List.of("core");
     private static final List<String> TIER_2 = List.of("event", "ecs", "assets", "input");
     private static final List<String> TIER_3 = List.of(
-            "render", "camera", "animation", "collision", "audio", "ui", "particles", "debug");
+            "render", "camera", "animation", "collision", "audio", "ui", "particles", "debug", "i18n");
     private static final List<String> TIER_4 = List.of("tilemap");
     private static final List<String> TIER_5 = List.of("scene", "data", "save");
     /** Composition root (ADR-022): may depend on everything; nothing depends on it. */

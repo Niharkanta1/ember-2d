@@ -5,6 +5,7 @@ import dev.ember2d.assets.Assets;
 import dev.ember2d.audio.Audio;
 import dev.ember2d.audio.internal.GdxAudio;
 import dev.ember2d.save.SaveResult;
+import dev.ember2d.i18n.Strings;
 import dev.ember2d.save.SaveStore;
 import dev.ember2d.save.WorldFlags;
 import dev.ember2d.save.internal.FileSaveStore;
@@ -65,12 +66,13 @@ public final class EngineContext {
     private final Audio audio;
     private final SaveStore saves;
     private final WorldFlags flags;
+    private final Strings strings;
     private final Map<Class<?>, Object> services;
     private final List<Object> instancesInOrder;
 
     private EngineContext(EngineConfig config, TimeState time, Timers timers, Tweens tweens, DefaultEventBus events,
             DefaultInput input, Assets assets, PrefabLibrary prefabs, Renderer renderer, SceneManager scenes,
-            DebugOverlay debug, Audio audio, SaveStore saves, WorldFlags flags, Map<Class<?>, Object> services) {
+            DebugOverlay debug, Audio audio, SaveStore saves, WorldFlags flags, Strings strings, Map<Class<?>, Object> services) {
         this.config = config;
         this.time = time;
         this.timers = timers;
@@ -85,6 +87,7 @@ public final class EngineContext {
         this.audio = audio;
         this.saves = saves;
         this.flags = flags;
+        this.strings = strings;
         this.services = Collections.unmodifiableMap(new LinkedHashMap<>(services));
         Set<Object> seen = Collections.newSetFromMap(new IdentityHashMap<>());
         List<Object> ordered = new ArrayList<>();
@@ -175,6 +178,19 @@ public final class EngineContext {
                     + "Builder.assets(...)");
         }
         return audio;
+    }
+
+    /**
+     * Localised text (F-025).
+     *
+     * @throws IllegalStateException for a context without assets
+     */
+    public Strings strings() {
+        if (strings == null) {
+            throw new IllegalStateException("This EngineContext has no assets, so no localised text; set them with "
+                    + "Builder.assets(...)");
+        }
+        return strings;
     }
 
     /** The world flags of this play-through (F-013, I-430); save them into a slot with {@code flags().save(data)}. */
@@ -371,7 +387,9 @@ public final class EngineContext {
             EngineContext context = new EngineContext(config, time, timers, tweens, events, input, assets, prefabs,
                     renderer, scenes, debug, sound, saves != null ? saves
                             : new FileSaveStore(new MemorySaveFiles(), config.saveSlots, config.saveVersion,
-                                    System::currentTimeMillis), flags, services);
+                                    System::currentTimeMillis), flags,
+                    assets == null ? null : new Strings(assets, events, config.defaultLanguage, config.devMode),
+                    services);
             scenes.attach(context);
             return context;
         }

@@ -24,12 +24,13 @@ Specifications define feature scope, behaviour, API boundaries and acceptance cr
 | F-013 | Save slots, world flags, settings | 3, 5 | `ember.save` | Draft |
 | F-015 | Platformer kit | 2, 3 | `kit-platformer` | Draft |
 | F-021 | Common gameplay kit (incl. dialogue runner) | 4, 5 | `kit-common` | Draft |
-| F-024 | Bullet kit (projectiles, bullet hell) | 4 | `kit-bullets` | Draft |
+| F-024 | Bullet kit (projectiles, bullet hell) | 4 | `kit-bullets` | Ready |
+| F-025 | Localisation (string tables, language setting, translated Ink stories) | 5 | `ember-core` / `ember.i18n` | Ready |
 | F-016 | Top-down movement and shooter | 4 | `kit-topdown` | Draft |
 | F-017 | RPG package | 5 | `kit-topdown` | Draft |
 | F-023 | Visual novel kit | 5 | `kit-novel` | Draft |
 | F-006B | Optional Box2D module | 6 | `ember-box2d` | Draft |
 
-Not yet written (Phase 6 candidates): shaders/materials, localisation, gamepad details (in F-005), Spine adapter details (in F-007, ADR-021).
+Not yet written (Phase 6 candidates): shaders/materials, gamepad details (in F-005), Spine adapter details (in F-007, ADR-021).
 
 File names are kept from revision 1 for continuity: `F-006-PHYSICS.md` now specifies kinematic collision, `F-014-PARTICLES-DEBUG.md` covers the debug overlay and the particle wrapper, and `F-018-EDITOR.md` specifies in-game dev tools instead of a JavaFX editor. Revision 1 versions are in `../old-files/specs/`.

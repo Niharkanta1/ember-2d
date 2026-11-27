@@ -4,6 +4,7 @@ import dev.ember2d.audio.Audio;
 import dev.ember2d.audio.AudioCategory;
 import dev.ember2d.core.Log;
 import dev.ember2d.core.PublicApi;
+import dev.ember2d.i18n.Strings;
 import dev.ember2d.input.Input;
 import dev.ember2d.input.TouchLayout;
 import dev.ember2d.save.SaveData;
@@ -30,6 +31,8 @@ public final class EngineSettings {
     public static final String BINDINGS = "input.bindings";
     /** {@code EngineConfig.uiScale}, read at boot only (float, 0 = from density). */
     public static final String UI_SCALE = "ui.scale";
+    /** The player's language (F-025), a code with a string table. */
+    public static final String LANGUAGE = "ui.language";
 
     private static final Log LOG = Log.get("save");
 
@@ -50,6 +53,14 @@ public final class EngineSettings {
                 config.uiScale = scale;
             } else {
                 skip(UI_SCALE, "must be from 0 to 16");
+            }
+        }
+        Strings strings = findStrings(context);
+        if (strings != null && s.has(LANGUAGE)) {
+            try {
+                strings.setLanguage(s.getString(LANGUAGE, ""));
+            } catch (IllegalArgumentException e) {
+                skip(LANGUAGE, e.getMessage());
             }
         }
         Audio audio = findAudio(context);
@@ -110,6 +121,10 @@ public final class EngineSettings {
                 s.set(volumeKey(category), audio.volume(category));
             }
         }
+        Strings strings = findStrings(context);
+        if (strings != null && !strings.languages().isEmpty()) {
+            s.set(LANGUAGE, strings.language());
+        }
         Input input = context.input();
         s.set(HAPTICS, input.hapticsEnabled());
         TouchLayout layout = input.touchLayout();
@@ -133,6 +148,14 @@ public final class EngineSettings {
             return context.audio();
         } catch (IllegalStateException e) {
             return null;   // a context without audio (tests, headless tools)
+        }
+    }
+
+    private static Strings findStrings(EngineContext context) {
+        try {
+            return context.strings();
+        } catch (IllegalStateException e) {
+            return null;   // a context without assets
         }
     }
 

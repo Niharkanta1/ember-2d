@@ -111,6 +111,9 @@ public final class EngineConfig {
      */
     public String saveFolder = null;
 
+    /** The language used when a text has no translation in the current one (F-025): its table is {@code strings.<code>}. */
+    public String defaultLanguage = "en";
+
     /** The number of save slots (1 to 99). */
     public int saveSlots = 3;
 
@@ -171,6 +174,9 @@ public final class EngineConfig {
         }
         if (touchControls == null) {
             problems.add("touchControls must be set (was null)");
+        }
+        if (defaultLanguage == null || defaultLanguage.isBlank()) {
+            problems.add("defaultLanguage must be a language code such as \"en\" (was " + quote(defaultLanguage) + ")");
         }
         if (tiledProject != null && tiledProject.isBlank()) {
             problems.add("tiledProject must be null or a path (was " + quote(tiledProject) + ")");

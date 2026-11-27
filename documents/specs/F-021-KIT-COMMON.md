@@ -173,6 +173,7 @@ Status: Ready. Approved 2026-11-27 under the developer's standing approval for P
 - **Choice texts:** they are fixed when the choices appear. A variable changed after that shows up only in later text (the test sets the variable first).
 - **`fromAsset`:** it reads the `json` asset through libGDX and serialises it back to text for blade-ink. The round trip keeps the story intact, as the tests show.
 - **The Android API guard:** blade-ink was added to its classpath, as gdx-ai was in I-330.
+- **External function fallbacks (found in I-440):** blade-ink refuses to run a story with an unbound `EXTERNAL` function, even when the story has an Ink fallback, because fallbacks are off by default. `DialogueRunner` turns them on (`setAllowExternalFunctionFallbacks(true)`), so an unbound function runs its Ink fallback, as in Inky.
 - **Not checked on a device:** the first run on the emulator is with the RPG demo (I-450).
 
 ## Non-goals

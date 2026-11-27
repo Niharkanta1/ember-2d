@@ -76,13 +76,14 @@ Base package `dev.ember2d` (chosen in I-000). Package names in the documents are
 | `ember.save` | Save slots, world flags, global data, settings store | F-013 |
 | `ember.debug` | Debug overlay: frame metrics, collider and ray drawing (no ImGui) | F-014 |
 | `ember.particles` | Wrapper over libGDX `ParticleEffect` | F-014 |
+| `ember.i18n` | Localisation: string tables per language, the language setting, localised asset IDs | F-025 |
 
 ## Dependency rules
 Enforced by ArchUnit tests that run in CI (`ember-core/src/test/.../ArchitectureTest`).
 
 1. `ember.core` depends on no other engine package.
 2. `ember.event`, `ember.ecs`, `ember.assets`, `ember.input` depend only on `ember.core` (and `ember.event`).
-3. `ember.render`, `ember.camera`, `ember.animation`, `ember.collision`, `ember.audio`, `ember.ui`, `ember.particles`, `ember.debug` depend only on packages in rules 1–2 (`ember.render` may use `ember.camera`; `ember.ui` may use `ember.render`; `ember.collision` may use `ember.debug` and `ember.render` for its debug view, I-120; `ember.animation` may use `ember.render` to write `Sprite` frames, I-130).
+3. `ember.render`, `ember.camera`, `ember.animation`, `ember.collision`, `ember.audio`, `ember.ui`, `ember.particles`, `ember.debug`, `ember.i18n` (I-440) depend only on packages in rules 1–2 (`ember.render` may use `ember.camera`; `ember.ui` may use `ember.render`; `ember.collision` may use `ember.debug` and `ember.render` for its debug view, I-120; `ember.animation` may use `ember.render` to write `Sprite` frames, I-130).
 4. `ember.tilemap` may depend on `render` and `collision`. `ember.scene`, `ember.data` and `ember.save` may depend on anything in `ember-core` except `ember.app`.
 4a. `ember.app` is the composition root (ADR-022): it may depend on every package; no other engine package depends on it.
 5. No engine package names a genre concept (`jump`, `weapon`, `quest`, `inventory`, `bullet`…).

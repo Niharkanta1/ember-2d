@@ -23,6 +23,7 @@ import java.util.regex.Pattern;
  * while (talk.canContinue()) { box.show(talk.speaker(), talk.next()); }
  * List<String> options = talk.choices();
  * }</pre>
+ * An {@code EXTERNAL} function that is not bound runs its Ink fallback, as in Inky.
  * The speaker comes from a {@code speaker:name} tag, or a {@code Name: text} prefix; {@link #text()} is the line
  * without that prefix. No Ink type is part of this API.
  */
@@ -52,7 +53,10 @@ public final class DialogueRunner {
         Objects.requireNonNull(json, "json");
         String text = json.startsWith("﻿") ? json.substring(1) : json;
         try {
-            return new DialogueRunner(new Story(text), name);
+            Story story = new Story(text);
+            // An EXTERNAL function not bound (yet) uses its Ink fallback, as in Inky (blade-ink refuses by default).
+            story.setAllowExternalFunctionFallbacks(true);
+            return new DialogueRunner(story, name);
         } catch (Exception e) {
             throw new IllegalArgumentException("Ink story " + name + " cannot be loaded: " + e.getMessage(), e);
         }

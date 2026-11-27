@@ -101,6 +101,25 @@ class DialogueRunnerTest {
     }
 
     @Test
+    void aTranslatedStoryLoadsTheStateSavedInTheOriginal() throws Exception {
+        DialogueRunner en = runner();
+        en.setVariable("gold", 9);
+        en.next();
+        String saved = en.saveState();
+        String german;
+        try (java.io.InputStream in = getClass().getResourceAsStream("/ink/test.de.ink.json")) {
+            german = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+        }
+        DialogueRunner de = DialogueRunner.fromJson(german, "test.de.ink.json");
+        de.loadState(saved);
+        assertThat(de.choices()).as("the choice texts were made in English when saved")
+                .containsExactly("I'm a traveller.", "Bribe him (9 gold)");
+        de.choose(1);
+        assertThat(de.next()).isEqualTo("Wache: Nun gut...");
+        assertThat(de.next()).isEqualTo("Ihr habt noch 7 Gold.");
+    }
+
+    @Test
     void badStoriesAreReported() {
         assertThatThrownBy(() -> DialogueRunner.fromJson("{ \"not\": \"ink\" }", "bad.json"))
                 .isInstanceOf(IllegalArgumentException.class).hasMessageStartingWith("Ink story bad.json cannot be loaded");
