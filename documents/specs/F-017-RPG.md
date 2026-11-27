@@ -124,7 +124,8 @@ Status: Done. Approved 2026-11-27 under the developer's standing approval for Ph
   - The dialogue box was built before the scene's skin was set and drew as a black panel.
   - Choices overflowed the fixed-height box; the box now grows.
   - The new-game confirmation was too long for `ConfirmDialog` (it does not wrap) and promised to keep the save, which arriving in the town overwrites.
-- **Not checked:** a release (R8) build on the emulator, the desktop build by hand (it is built and its tests run), and a real phone.
+- **Release build (checked later, during the I-520 work):** the R8-minified release APK (debug key) ran on the API 23 emulator through a new game and the elder's conversation, so blade-ink survives minification.
+- **Not checked:** the desktop build by hand (it is built and its tests run), and a real phone.
 
 ## Non-goals
 Quest system (needs its own spec), combat stats/levelling, equipment, shops, cutscene editor (cutscenes use Ink + `kit-novel` tags).

@@ -160,7 +160,8 @@ Status: Done. Approved 2026-11-27 under the developer's standing approval for Ph
   - The choice, the happy ending with the CG, the end panel, the gallery unlock.
   - On a second play, Skip raced through read text to the choice and through the read branch to the end; on the unread branch it stopped at the first unread line.
   - The backlog was checked in the RPG cutscene (I-450), not again here.
-- **Not checked:** Auto and Hide on a device, the "alone" ending on the device (it is covered by the test), the settings screen on the device, a release (R8) build, a real phone.
+- **Release build (checked later, during the I-520 work):** the R8-minified release APK (debug key) ran on the API 23 emulator from the title through the opening lines.
+- **Not checked:** Auto and Hide on a device, the "alone" ending on the device (it is covered by the test), the settings screen on the device, a real phone.
 
 ## Non-goals
 - A visual novel editor (Ink + Inky are the editor). Lip sync, Live2D. Branching flowchart viewer.
