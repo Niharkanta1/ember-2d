@@ -1,6 +1,6 @@
 # F-013 — Save Slots, World Flags and Settings
 
-- Status: Settings, save slots and global data (I-230) Ready: expanded and approved 2026-11-27 under the developer's blanket approval up to Phase 6 (see "Design (I-230)"); world flags (I-430): Draft
+- Status: Settings, save slots and global data (I-230) Ready: expanded and approved 2026-11-27 under the developer's blanket approval up to Phase 6 (see "Design (I-230)"); world flags Ready (I-430, approved 2026-11-27; see "World flags (I-430)")
 - Phase: 3 (settings, save slots), 5 (world flags)
 - Module / package: `ember-core` / `ember.save`
 - Depends on: F-001, F-010 (`ember.data` migrations)
@@ -120,6 +120,35 @@ package dev.ember2d.save;
 // app: EngineConfig.saveFolder/saveSlots/saveVersion; EngineContext.saves(), saveSettings(); EngineSettings keys
 // input: InputBindings.withActionInputs(action, inputs); Input.rebindAction/resetBinding/bindingOverrides
 ```
+
+## World flags (I-430)
+Status: Ready. Approved 2026-11-27 under the developer's standing approval for Phases 3 to 6.
+
+**What they are:**
+- **The store:** `WorldFlags` (in `ember.save`, available as `context.flags()`) is the persistent state of the world in the current play-through. For example `chest.town.01.opened = true`, `npc.elder.talked = 2` or `door.cellar = "open"`.
+- **Values:** bool, int and String.
+- **Keys:** non-empty strings. Dotted names are a convention, not a structure, so the keys are flat.
+
+**API:**
+- **Getters with defaults:** `getBool(key, def)`, `getInt(key, def)`, `getString(key, def)`. A flag of another type gives the default.
+- **Changing flags:** `set(key, bool/int/String)`, `has(key)`, `remove(key)`, `clear()`, `keys()`.
+- **`toggle(key)`:** flips a bool.
+- **`add(key, delta)`:** for int counters.
+- **Events:** setting a different value publishes `FlagChanged(key)` on the event bus, so doors and chests can react. Setting the same value publishes nothing.
+
+**Saving:**
+- **Into a slot:** flags are per play-through, so they belong in a save slot, not in global data. `save(SaveData out)` writes them under the child `flags`, and `load(SaveData in)` replaces them. A slot without flags clears them.
+- **New game:** `clear()` empties them; no event is published.
+
+**Wiring:** the `EngineContext.Builder` creates one `WorldFlags` per context. `Builder.flags()` exposes it for tests.
+
+**Tests:**
+- Typed getters with defaults, and a type mismatch giving the default.
+- Toggle and add.
+- Events only on change.
+- The round trip through a slot.
+- `load` replaces the flags, and a slot without flags clears them.
+- Bad keys are rejected.
 
 ## Decisions in I-230
 Implemented under the blanket approval of 2026-11-27. Settled while implementing:

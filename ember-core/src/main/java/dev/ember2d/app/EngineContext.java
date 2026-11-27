@@ -6,6 +6,7 @@ import dev.ember2d.audio.Audio;
 import dev.ember2d.audio.internal.GdxAudio;
 import dev.ember2d.save.SaveResult;
 import dev.ember2d.save.SaveStore;
+import dev.ember2d.save.WorldFlags;
 import dev.ember2d.save.internal.FileSaveStore;
 import dev.ember2d.save.internal.MemorySaveFiles;
 import dev.ember2d.core.Log;
@@ -63,12 +64,13 @@ public final class EngineContext {
     private final DebugOverlay debug;
     private final Audio audio;
     private final SaveStore saves;
+    private final WorldFlags flags;
     private final Map<Class<?>, Object> services;
     private final List<Object> instancesInOrder;
 
     private EngineContext(EngineConfig config, TimeState time, Timers timers, Tweens tweens, DefaultEventBus events,
             DefaultInput input, Assets assets, PrefabLibrary prefabs, Renderer renderer, SceneManager scenes,
-            DebugOverlay debug, Audio audio, SaveStore saves, Map<Class<?>, Object> services) {
+            DebugOverlay debug, Audio audio, SaveStore saves, WorldFlags flags, Map<Class<?>, Object> services) {
         this.config = config;
         this.time = time;
         this.timers = timers;
@@ -82,6 +84,7 @@ public final class EngineContext {
         this.debug = debug;
         this.audio = audio;
         this.saves = saves;
+        this.flags = flags;
         this.services = Collections.unmodifiableMap(new LinkedHashMap<>(services));
         Set<Object> seen = Collections.newSetFromMap(new IdentityHashMap<>());
         List<Object> ordered = new ArrayList<>();
@@ -174,6 +177,11 @@ public final class EngineContext {
         return audio;
     }
 
+    /** The world flags of this play-through (F-013, I-430); save them into a slot with {@code flags().save(data)}. */
+    public WorldFlags flags() {
+        return flags;
+    }
+
     /** Save slots, global data and settings (F-013). */
     public SaveStore saves() {
         return saves;
@@ -262,6 +270,7 @@ public final class EngineContext {
         private Renderer renderer;
         private Audio audio;
         private SaveStore saves;
+        private final WorldFlags flags;
         private final SceneManager scenes;
         private final DebugOverlay debug;
         private final Map<Class<?>, Object> services = new LinkedHashMap<>();
@@ -272,6 +281,7 @@ public final class EngineContext {
             this.timers = new Timers(time);
             this.tweens = new Tweens(time);
             this.events = new DefaultEventBus(config.devMode);
+            this.flags = new WorldFlags(events);
             this.input = new DefaultInput(time, events);
             if (config.components != null) {
                 config.components.register(components);
@@ -350,13 +360,18 @@ public final class EngineContext {
             return this;
         }
 
+        /** The context's world flags (I-430), created with the builder (tests can preset flags). */
+        public WorldFlags flags() {
+            return flags;
+        }
+
         public EngineContext build() {
             PrefabLibrary prefabs = assets == null ? null : new PrefabLibrary(components, assets, events);
             Audio sound = audio != null ? audio : assets == null ? null : new GdxAudio(assets);
             EngineContext context = new EngineContext(config, time, timers, tweens, events, input, assets, prefabs,
                     renderer, scenes, debug, sound, saves != null ? saves
                             : new FileSaveStore(new MemorySaveFiles(), config.saveSlots, config.saveVersion,
-                                    System::currentTimeMillis), services);
+                                    System::currentTimeMillis), flags, services);
             scenes.attach(context);
             return context;
         }
