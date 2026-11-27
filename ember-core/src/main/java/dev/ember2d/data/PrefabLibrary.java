@@ -66,6 +66,11 @@ public final class PrefabLibrary {
     private final Assets assets;
     private final EventBus events;
     private final Map<String, Prefab> cache = new HashMap<>();
+    /** Clean component copies per prefab for {@link #reset}; rebuilt when the prefab object changes (hot reload). */
+    private final Map<String, Pristine> pristine = new HashMap<>();
+
+    private record Pristine(Prefab prefab, Object[] components) {
+    }
     private int generation;
     private final Map<Integer, UnaryOperator<JsonValue>> migrations = new HashMap<>();
     private int version = 1;
@@ -130,6 +135,50 @@ public final class PrefabLibrary {
         }
         finish(world, instance);
         return instance.entity;
+    }
+
+    /**
+     * Puts component instances back to a prefab's values (pools, F-021): for each instance whose type is one of the
+     * prefab's components, every settable field is copied from a clean copy (a new instance with the prefab's values,
+     * made once per prefab). Instances of other types, and {@code Transform}, are left as they are. Works on instances
+     * that are not attached to a world (a pool resets them before attaching them again).
+     *
+     * @throws PrefabException if the prefab is invalid
+     * @throws IllegalArgumentException if the manifest does not list it
+     */
+    public void reset(String prefabId, List<?> components) {
+        Prefab prefab = prefab(prefabId);
+        Pristine clean = pristine.get(prefabId);
+        if (clean == null || clean.prefab() != prefab) {
+            Object[] made = new Object[prefab.components().size()];
+            for (int i = 0; i < made.length; i++) {
+                ComponentData data = prefab.components().get(i);
+                made[i] = data.type().create();
+                apply(data, made[i]);
+            }
+            clean = new Pristine(prefab, made);
+            pristine.put(prefabId, clean);
+        }
+        for (int c = 0; c < components.size(); c++) {
+            Object to = components.get(c);
+            if (to == null || to instanceof Transform) {
+                continue;
+            }
+            for (int i = 0; i < clean.components().length; i++) {
+                ComponentData data = prefab.components().get(i);
+                if (data.type().type != to.getClass()) {
+                    continue;
+                }
+                Object from = clean.components()[i];
+                for (FieldSetter field : data.type().fields.values()) {
+                    Object value = field.get(from);
+                    if (value instanceof float[] floats) {
+                        value = floats.clone();   // never share an array between the clean copy and a live entity
+                    }
+                    field.set(to, value);
+                }
+            }
+        }
     }
 
     // ---- used by MapSpawner (two passes) ----
