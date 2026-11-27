@@ -14,6 +14,8 @@ imgui = "1.92.7.1"
 lwjgl = "3.4.1"
 # Kit AI (I-330, F-016): steering and pathfinding behind the kit-topdown AI adapter; approved for download 2026-11-27.
 gdxAi = "1.8.2"
+# Ink runtime (S-03, I-420, F-021): dialogue and novels; approved for download 2026-11-27.
+bladeInk = "1.2.1"
 
 # Android SDK levels. minSdk 23 (Android 6) decided in I-015 (ADR-015).
 androidCompileSdk = "36"  # gdx-backend-android 1.14.2 pulls androidx.core 1.17.0, which requires 36+
@@ -35,6 +37,7 @@ gdx-backend-android = { module = "com.badlogicgames.gdx:gdx-backend-android", ve
 gdx-freetype = { module = "com.badlogicgames.gdx:gdx-freetype", version.ref = "gdx" }
 gdx-freetype-platform = { module = "com.badlogicgames.gdx:gdx-freetype-platform", version.ref = "gdx" }
 gdx-ai = { module = "com.badlogicgames.gdx:gdx-ai", version.ref = "gdxAi" }
+blade-ink = { module = "com.bladecoder.ink:blade-ink", version.ref = "bladeInk" }
 android-desugar = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugarJdkLibs" }
 
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
