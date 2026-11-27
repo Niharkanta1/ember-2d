@@ -1,6 +1,6 @@
 # F-021 — Common Gameplay Kit
 
-- Status: Health, damage, hit and hurt boxes, triggers, pools, spawners, lifetime and teams Ready (I-300, approved 2026-11-27 under the developer's standing approval for Phases 3 to 6; see "Common kit (I-300)"); dialogue runner (I-420): Draft
+- Status: Health, damage, hit and hurt boxes, triggers, pools, spawners, lifetime and teams Ready (I-300, approved 2026-11-27 under the developer's standing approval for Phases 3 to 6; see "Common kit (I-300)"); dialogue runner Ready (I-420, approved 2026-11-27; see "Dialogue runner (I-420)")
 - Phase: 4 (some parts may be pulled into Phase 3 by the platformer demo); `DialogueRunner` in Phase 5
 - Module / package: `kit-common` (shared kit)
 - Depends on: F-003, F-006, F-019, F-002, F-013; blade-ink (dialogue)
@@ -126,6 +126,54 @@ public record SpawnerFinished(int spawner) { }
 - **When an activation is new:** `HitSystem` counts it as new when the hitbox turns on, `restart()` is called, or the entity was away (new, or back from a pool), so a reused entity never carries old targets. A target the activation already tried is not hit again later in that activation, even after the target's invulnerability ends. To hit again, call `restart()`.
 - **`TriggerZoneSystem` is an `EntitySystem`:** it has a family but does no per-entity work, so it is added like the other systems and its subscriptions belong to the scene.
 - **Not checked on a device:** no demo uses the kit yet. The shooter demo (I-340) will.
+
+## Dialogue runner (I-420)
+Status: Ready. Approved 2026-11-27 under the developer's standing approval for Phases 3 to 6. It follows the S-03 findings: blade-ink 1.2.1, an `implementation` dependency of `kit-common`, with no Ink type in the API.
+
+**Stories:**
+- **Compiling:** Ink sources are compiled by inklecate into `.ink.json` assets. A story is loaded with `DialogueRunner.fromAsset(assets, id)`, where the asset is of type `json`, or with `DialogueRunner.fromJson(text)`.
+- **The byte-order mark:** a leading UTF-8 byte-order mark is stripped. inklecate v1.2.1 writes none, but an editor may add one when the file is saved again.
+- **Errors:** a broken story fails with `IllegalArgumentException` naming the asset.
+
+**`DialogueRunner` API:**
+- **Lines:**
+  - `canContinue()`; `next()` advances one line and returns it without its trailing line break.
+  - `line()`, `text()`, `speaker()`, `tags()` and `tag(key)` describe the current line.
+  - `speaker()` comes from a `speaker:<name>` tag; otherwise from a `Name: text` prefix (a name of 1 to 24 letters, digits and spaces); otherwise it is empty.
+  - `text()` is the line without that prefix.
+  - `tag(key)` returns the value of `key:value` (null when the line has no such tag).
+- **Choices:** `choices()` lists the current choice texts; `choose(index)` picks one. A bad index throws `IndexOutOfBoundsException`.
+- **Ending:** `isFinished()` is true when the story can neither continue nor offer choices.
+- **Jumping:** `jumpTo(path)` starts a knot or stitch, for example `elder` or `elder.after_quest`. An unknown path throws `IllegalArgumentException`.
+- **Variables:** `variable(name)` and `setVariable(name, value)` (int, float, boolean, String). An unknown variable throws `IllegalArgumentException`.
+- **External functions:** `bind(name, DialogueFunction)`, where `DialogueFunction` is `Object call(Object... args)`. Ink `EXTERNAL` functions run game code: give an item, set a flag. A bound function replaces the ink fallback.
+- **Saving:**
+  - `saveState()` and `loadState(json)` move the whole story state (position, variables, visit counts) as a string.
+  - `save(SaveData out)` and `load(SaveData in)` store it under the key `ink`.
+- **Ink runtime errors:** they become `IllegalStateException` with the Ink message.
+
+**Gradle task for games (`ember.inklecate`):**
+- A demo's `inkCompile` task compiles `assets-src/<game>/ink/*.ink` into `assets/ink/<name>.ink.json`.
+- It runs only when the Gradle property `ember.inklecate` names the compiler. Otherwise it fails with a message that says how to get inklecate.
+- It is not part of `build`, and the compiled files are committed.
+- The task arrives with the first demo that has stories (I-450).
+
+**Tests (headless, with the S-03 story compiled by inklecate):**
+- Lines, speakers by tag and by prefix, `text()` and tags.
+- Choices, and a bad index.
+- Variables (read, write, unknown).
+- Binding an external function.
+- `jumpTo`, and an unknown path.
+- The state round-trips through `SaveData`.
+- `isFinished`.
+- A leading byte-order mark is stripped.
+
+## Decisions in I-420
+- **The byte-order mark:** the S-03 claim that inklecate writes a byte-order mark was wrong; a check of the files showed none. The spike report is corrected. Stripping a leading mark stays as a precaution.
+- **Choice texts:** they are fixed when the choices appear. A variable changed after that shows up only in later text (the test sets the variable first).
+- **`fromAsset`:** it reads the `json` asset through libGDX and serialises it back to text for blade-ink. The round trip keeps the story intact, as the tests show.
+- **The Android API guard:** blade-ink was added to its classpath, as gdx-ai was in I-330.
+- **Not checked on a device:** the first run on the emulator is with the RPG demo (I-450).
 
 ## Non-goals
 Stats systems, buffs/debuffs, AI (kits own AI hooks), inventory (RPG package).

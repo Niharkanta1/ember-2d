@@ -28,7 +28,7 @@ Does blade-ink load an Inky-compiled story and save and restore its state, on de
   - The external function binding replaces the ink fallback.
   - Tags come per line.
   - The saved state is 937 characters for this story and restores exactly at the choice, with the variables.
-- **The byte-order mark:** inklecate writes the JSON with a UTF-8 byte-order mark, and `new Story(...)` fails on it. The loader must strip it. `DialogueRunner` will do this.
+- **The byte-order mark (corrected in I-420):** an earlier version of this report said inklecate writes a UTF-8 byte-order mark that `new Story(...)` fails on. That was not checked, and it is wrong: inklecate v1.2.1 writes no byte-order mark. The spike test stripped one only as a precaution. `DialogueRunner` still strips a leading mark, since an editor may add one when a file is saved again.
 - **Android (static check only):**
   - The jar is Java 8 bytecode (class version 52).
   - None of its 157 runtime classes use streams, `java.nio.file`, reflection or newer `String` methods (checked with `javap`).
@@ -44,5 +44,5 @@ Does blade-ink load an Inky-compiled story and save and restore its state, on de
 - **Saving:** the story state is saved as its JSON string inside a save slot.
 
 ## Follow-ups
-- I-420: `DialogueRunner` (strips the byte-order mark; lines, tags, choices, variables, external functions, state into `SaveData`), and the inklecate Gradle task.
+- I-420: `DialogueRunner` (strips a leading byte-order mark if present; lines, tags, choices, variables, external functions, state into `SaveData`), and the inklecate Gradle task.
 - I-450: the first run on the emulator; confirm R8 needs no keep rules for blade-ink.

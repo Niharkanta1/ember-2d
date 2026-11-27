@@ -43,5 +43,6 @@ dependencies {
     implementation libs.gdx.core
     implementation libs.gdx.freetype
     implementation libs.gdx.ai   // kit-topdown's AI adapter (I-330)
+    implementation libs.blade.ink   // kit-common's DialogueRunner (I-420)
     coreLibraryDesugaring libs.android.desugar
 }

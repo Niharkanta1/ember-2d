@@ -7,4 +7,5 @@ description = 'Ember2D shared kit: health, damage, triggers, pools, spawners, di
 dependencies {
     testImplementation testFixtures(project(':ember-core'))
     api project(':ember-core')
+    implementation libs.blade.ink   // behind DialogueRunner (I-420); Ink types do not leak
 }
