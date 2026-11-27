@@ -52,6 +52,7 @@ import dev.ember2d.kit.topdown.shooter.ShotEvents;
 import dev.ember2d.kit.topdown.shooter.Weapon;
 import dev.ember2d.kit.topdown.shooter.WeaponLibrary;
 import dev.ember2d.kit.topdown.shooter.WeaponSystem;
+import dev.ember2d.particles.Particles;
 import dev.ember2d.render.RenderLayer;
 import dev.ember2d.render.SortMode;
 import dev.ember2d.render.Sprite;
@@ -99,6 +100,8 @@ abstract class StageScene extends Scene {
     private Family contact;
     private Family hunters;
     private float contactWait;
+    private Particles particles;
+    private float dustWait;
 
     StageScene(Run run) {
         this.run = run;
@@ -121,7 +124,8 @@ abstract class StageScene extends Scene {
         input = context.input();
         audio = context.audio();
         context.renderer().setLayers(new RenderLayer("floor", SortMode.NONE), new RenderLayer("world", SortMode.Y_SORT),
-                new RenderLayer("hand", SortMode.NONE), new RenderLayer("bullets", SortMode.NONE));
+                new RenderLayer("fx", SortMode.NONE), new RenderLayer("hand", SortMode.NONE),
+                new RenderLayer("bullets", SortMode.NONE));
         float ppu = context.renderer().pixelsPerUnit();
         TileMap map = TileMap.load(context.assets(), mapId(), ppu);
         bounds = map.bounds(new Rectangle());
@@ -174,6 +178,8 @@ abstract class StageScene extends Scene {
         world.addSystem(sprites);
         new TileMapRenderer(map, context.renderer(), context.time()).attachTo(sprites);
         sprites.addLayerContent(new BulletRenderer(bulletWorld, context.assets(), "bullets", ppu));
+        particles = new Particles(context.assets(), ppu, "fx");   // hit sparks and dust (I-510)
+        sprites.addLayerContent(particles);
         world.addSystem(new CollisionDebugSystem(world, collision, context.debug(), context.renderer()));
         splats = EntityPool.ofPrefab(world, context.prefabs(), "fx/splat", 8);
         contact = world.family(Hitbox.class);
@@ -214,6 +220,10 @@ abstract class StageScene extends Scene {
                 context.renderer().camera().addTrauma(0.4f);
             } else {
                 audio.playVaried("sfx.hit", 0.15f);
+                Transform t = world.get(e.target(), Transform.class);
+                if (t != null) {
+                    particles.spawn("fx.hit", t.position.x, t.position.y + 0.45f);
+                }
             }
         });
         context.events().on(Grazed.class, e -> {
@@ -288,6 +298,14 @@ abstract class StageScene extends Scene {
                 }
             }
             tick(delta);
+            particles.update(delta);
+            TopDownBody body = world.get(player, TopDownBody.class);
+            dustWait -= delta;
+            if (body.moving && dustWait <= 0f) {   // a puff under running feet
+                dustWait = 0.14f;
+                Transform t = world.get(player, Transform.class);
+                particles.spawn("fx.dust", t.position.x, t.position.y + 0.05f);
+            }
         }
         Health h = world.get(player, Health.class);
         hp.setText("HP " + Math.max(0, h.current));
@@ -369,6 +387,7 @@ abstract class StageScene extends Scene {
 
     @Override
     protected void exit() {
+        particles.clear();
         while (!"gameplay".equals(input.topContext())) {
             input.popContext();
         }

@@ -110,4 +110,22 @@ class ShooterDataTest {
             }
         }
     }
+
+    @Test
+    void theParticleEffectsLoadAndTheirImagesExist() throws Exception {
+        Map<String, String> effects = manifest("particle");
+        assertThat(effects).containsKeys("fx.hit", "fx.dust");
+        for (Map.Entry<String, String> e : effects.entrySet()) {
+            com.badlogic.gdx.graphics.g2d.ParticleEffect effect = new com.badlogic.gdx.graphics.g2d.ParticleEffect();
+            effect.loadEmitters(new com.badlogic.gdx.files.FileHandle(ASSETS.resolve(e.getValue()).toFile()));
+            assertThat(effect.getEmitters().size).as(e.getKey()).isPositive();
+            for (com.badlogic.gdx.graphics.g2d.ParticleEmitter emitter : effect.getEmitters()) {
+                assertThat(emitter.getTransparency().getHighMax()).as(e.getKey() + ": visible (a bare emitter "
+                        + "starts fully transparent)").isPositive();
+                for (String image : emitter.getImagePaths()) {
+                    assertThat(ASSETS.resolve(e.getValue()).resolveSibling(image)).as(e.getKey()).exists();
+                }
+            }
+        }
+    }
 }

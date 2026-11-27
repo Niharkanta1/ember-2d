@@ -30,5 +30,7 @@
   {"id": "sfx.reload", "path": "sfx/reload.wav", "type": "sound", "group": "global"},
   {"id": "sfx.boss_phase", "path": "sfx/boss_phase.wav", "type": "sound", "group": "global"},
   {"id": "sfx.graze", "path": "sfx/graze.wav", "type": "sound", "group": "global", "maxInstances": 3},
+  {"id": "fx.hit", "path": "fx/hit.p", "type": "particle", "group": "global"},
+  {"id": "fx.dust", "path": "fx/dust.p", "type": "particle", "group": "global"},
   {"id": "music.boss", "path": "music/boss.wav", "type": "music", "group": "global"}
 ] }

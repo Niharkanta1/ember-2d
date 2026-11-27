@@ -860,6 +860,43 @@
 				"value": {}
 			}
 		]
+	},
+	{
+		"id": 26,
+		"name": "ParticleSource",
+		"type": "class",
+		"useAs": [
+			"property"
+		],
+		"color": "#ffa0a0a4",
+		"drawFill": true,
+		"members": [
+			{
+				"name": "effect",
+				"type": "string",
+				"value": ""
+			},
+			{
+				"name": "offsetX",
+				"type": "float",
+				"value": 0
+			},
+			{
+				"name": "offsetY",
+				"type": "float",
+				"value": 0
+			},
+			{
+				"name": "despawnWhenDone",
+				"type": "bool",
+				"value": false
+			},
+			{
+				"name": "finished",
+				"type": "bool",
+				"value": false
+			}
+		]
 	}
 ]
 }

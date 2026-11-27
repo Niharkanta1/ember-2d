@@ -95,7 +95,7 @@ class PrefabLibraryTest {
     @Test
     void registryListsComponentsAndTheirSettableFields() {
         assertThat(registry.names()).containsExactly("Transform", "Sprite", "Text", "Collider", "Actor", "Solid", "Animator",
-                "AnimationStateMachine", "Kitchen", "Walker", "Mover", "Health", "Coin");
+                "AnimationStateMachine", "ParticleSource", "Kitchen", "Walker", "Mover", "Health", "Coin");
         assertThat(registry.types()).contains(Transform.class, Sprite.class, Kitchen.class);
         assertThat(registry.fields("Kitchen")).extracting(FieldInfo::name)
                 .containsExactly("i", "l", "f", "d", "b", "s", "mode", "color", "tint", "v", "r", "path", "ref");
@@ -246,7 +246,7 @@ class PrefabLibraryTest {
         assertThat(e.problems()).containsExactly(
                 "prefabs/broken.json: unknown field \"extra\" (expected version, components)",
                 "prefabs/broken.json: unknown component \"Ghost\" (registered: [Transform, Sprite, Text, Collider, Actor, "
-                        + "Solid, Animator, AnimationStateMachine, Kitchen, Walker, Mover, Health, Coin])",
+                        + "Solid, Animator, AnimationStateMachine, ParticleSource, Kitchen, Walker, Mover, Health, Coin])",
                 "prefabs/broken.json: Kitchen.i: expected a whole number for int, got 1.5",
                 "prefabs/broken.json: Kitchen: unknown field \"nope\" of Kitchen (fields: [i, l, f, d, b, s, mode, "
                         + "color, tint, v, r, path, ref])",

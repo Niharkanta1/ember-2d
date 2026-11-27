@@ -9,6 +9,7 @@ import dev.ember2d.collision.Collider;
 import dev.ember2d.collision.Solid;
 import dev.ember2d.core.PublicApi;
 import dev.ember2d.ecs.Transform;
+import dev.ember2d.particles.ParticleSource;
 import dev.ember2d.render.Sprite;
 import dev.ember2d.render.Text;
 import java.util.ArrayList;
@@ -83,6 +84,7 @@ public final class ComponentRegistry {
         register(Solid.class, Solid::new);
         register(Animator.class, Animator::new);
         register(AnimationStateMachine.class, AnimationStateMachine::new);
+        register(ParticleSource.class, ParticleSource::new);
     }
 
     /** Registers a component under its simple class name. Returns this. */

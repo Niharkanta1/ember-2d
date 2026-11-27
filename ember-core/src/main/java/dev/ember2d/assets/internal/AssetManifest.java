@@ -4,6 +4,7 @@ import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -45,7 +46,9 @@ public final class AssetManifest {
         /** A TrueType or OpenType font rendered to a bitmap font when loaded (F-004, I-140). */
         FREETYPE("freetype", BitmapFont.class),
         /** A Scene2D skin: a .json file with its .atlas next to it (F-012, I-220). */
-        SKIN("skin", Skin.class);
+        SKIN("skin", Skin.class),
+        /** A libGDX particle effect file ({@code .p}) with its images next to it (F-014, I-510). */
+        PARTICLE("particle", ParticleEffect.class);
 
         final String manifestName;
         final Class<?> assetClass;

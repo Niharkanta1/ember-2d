@@ -122,6 +122,7 @@ public final class EmberArchitectureRules {
         allowed.put("ui", concat(lower, List.of("render")));
         allowed.put("collision", concat(lower, List.of("debug", "render")));   // debug view (I-120)
         allowed.put("animation", concat(lower, List.of("render")));            // writes Sprite frames (I-130)
+        allowed.put("particles", concat(lower, List.of("render")));            // draws in a render layer (I-510)
         allowed.put("tilemap", concat(lower, List.of("render", "collision")));
         List<String> belowApp = concat(TIER_1, TIER_2, TIER_3, TIER_4, TIER_5);
         for (String p : TIER_5) {
