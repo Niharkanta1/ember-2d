@@ -56,5 +56,7 @@
   {"id": "pickup/pile", "path": "prefabs/pickup/pile.json", "type": "prefab", "group": "global"},
   {"id": "player", "path": "prefabs/player.json", "type": "prefab", "group": "global"},
   {"id": "spikes", "path": "prefabs/spikes.json", "type": "prefab", "group": "global"},
-  {"id": "weapon.rifle", "path": "weapons/rifle.json", "type": "json", "group": "global"}
+  {"id": "weapon.rifle", "path": "weapons/rifle.json", "type": "json", "group": "global"},
+  {"id": "creatures", "path": "creatures.json", "type": "json", "group": "global"},
+  {"id": "pickup/pouch", "path": "prefabs/pickup/pouch.json", "type": "prefab", "group": "global"}
 ] }

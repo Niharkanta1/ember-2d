@@ -1,9 +1,64 @@
 {
   "version": 1,
   "components": {
-    "Sprite": {"origin": [12, 12], "z": 1},
-    "Animator": {"clipSet": "anim.creatures", "clip": "rat"},
-    "Creature": {"kind": "rat", "gold": 5},
-    "HiddenInFog": {"radius": 0.4, "centerY": 0}
+    "Sprite": {
+      "origin": [
+        12,
+        12
+      ],
+      "z": 1
+    },
+    "Animator": {
+      "clipSet": "anim.creatures",
+      "clip": "rat"
+    },
+    "Creature": {
+      "kind": "rat",
+      "gold": 5
+    },
+    "Collider": {
+      "box": {
+        "x": -0.3187,
+        "y": -0.3187,
+        "width": 0.6375,
+        "height": 0.6375
+      },
+      "layer": 2,
+      "mask": 9
+    },
+    "Actor": {},
+    "TopDownBody": {
+      "maxSpeed": 2.1875,
+      "knockbackDecay": 12
+    },
+    "Steering": {
+      "mode": "NONE",
+      "repathSeconds": 0.4
+    },
+    "Health": {
+      "max": 3,
+      "invulnerableSeconds": 0
+    },
+    "Team": {
+      "id": 2
+    },
+    "BulletTarget": {
+      "radius": 0.3687
+    },
+    "Hurtbox": {
+      "box": {
+        "x": -0.3187,
+        "y": -0.3187,
+        "width": 0.6375,
+        "height": 0.6375
+      }
+    },
+    "HitFlash": {
+      "seconds": 0.15
+    },
+    "HiddenInFog": {
+      "radius": 0.4,
+      "centerY": 0
+    }
   }
 }

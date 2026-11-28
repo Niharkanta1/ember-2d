@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "units": "Distances and speeds in the original's pixels (16 per tile); times in seconds. From EnemyCatalog.java.",
+  "creatures": {
+    "rat": {
+      "health": 3, "speed": 35, "acceleration": 10,
+      "detect": 90, "lose": 160, "lineOfSight": true,
+      "stun": 0.15, "knockback": 80, "interruptible": false,
+      "radius": 5.1, "gold": 5,
+      "behavior": {"type": "chase", "stop": 0, "speed": 1},
+      "idle": {"type": "wander", "radius": 32, "minWait": 1, "maxWait": 3, "speed": 0.5, "patrolSpeed": 0.6},
+      "attack": {"type": "melee", "damage": 1, "range": 12, "windup": 0.35, "recovery": 0.3, "cooldown": 0.8,
+                 "lineOfSight": true, "leeway": 4, "lunge": 60},
+      "look": {"walkFrame": 0.1, "idleFrame": 0, "wobble": true, "telegraph": "squash", "dormantAlpha": 1}
+    },
+    "slug": {
+      "health": 8, "speed": 16, "acceleration": 6,
+      "detect": 85, "lose": 150, "lineOfSight": true,
+      "stun": 0.08, "knockback": 30, "interruptible": false,
+      "radius": 6, "gold": 15,
+      "behavior": {"type": "chase", "stop": 52, "speed": 1},
+      "idle": {"type": "wander", "radius": 24, "minWait": 2, "maxWait": 4, "speed": 0.6, "patrolSpeed": 0.8},
+      "attack": {"type": "ranged", "damage": 1, "range": 72, "windup": 0.6, "recovery": 0.4, "cooldown": 1.6,
+                 "lineOfSight": true, "bullet": "spit", "bulletSpeed": 60, "count": 1, "spread": 0, "offset": 7},
+      "look": {"walkFrame": 0.15, "idleFrame": 0.25, "wobble": false, "telegraph": "glow", "dormantAlpha": 1}
+    },
+    "ghoul": {
+      "health": 5, "speed": 42, "acceleration": 3,
+      "detect": 64, "lose": 220, "lineOfSight": true,
+      "stun": 0.1, "knockback": 60, "interruptible": false,
+      "radius": 6, "gold": 20,
+      "behavior": {"type": "chase", "stop": 30, "speed": 1},
+      "idle": {"type": "still", "patrolSpeed": 0.7},
+      "attack": {"type": "dash", "damage": 2, "range": 48, "windup": 0.45, "recovery": 0.7, "cooldown": 1.4,
+                 "lineOfSight": true, "dashSpeed": 190, "padding": 2},
+      "look": {"walkFrame": 0.1, "idleFrame": 0.2, "wobble": true, "telegraph": "shake", "dormantAlpha": 0.35}
+    },
+    "cultist": {
+      "health": 6, "speed": 28, "acceleration": 8,
+      "detect": 110, "lose": 190, "lineOfSight": true,
+      "stun": 0.12, "knockback": 50, "interruptible": true,
+      "radius": 6, "gold": 25,
+      "behavior": {"type": "keepDistance", "preferred": 64, "tolerance": 12, "chaseWithoutSight": true,
+                   "strafe": true, "strafeAngle": 20, "minSwitch": 1, "maxSwitch": 3, "speed": 1},
+      "idle": {"type": "wander", "radius": 28, "minWait": 1.5, "maxWait": 3.5, "speed": 0.5, "patrolSpeed": 0.6},
+      "attack": {"type": "ranged", "damage": 1, "range": 100, "windup": 0.5, "recovery": 0.3, "cooldown": 2,
+                 "lineOfSight": true, "bullet": "bolt", "bulletSpeed": 90, "count": 3, "spread": 30, "offset": 8},
+      "look": {"walkFrame": 0.12, "idleFrame": 0.25, "wobble": false, "telegraph": "glow", "dormantAlpha": 1}
+    }
+  }
+}

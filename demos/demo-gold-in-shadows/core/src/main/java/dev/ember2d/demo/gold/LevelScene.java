@@ -28,6 +28,8 @@ import dev.ember2d.kit.common.HitFlashSystem;
 import dev.ember2d.kit.common.HitSystem;
 import dev.ember2d.kit.common.LifetimeSystem;
 import dev.ember2d.kit.topdown.TopDownSystem;
+import dev.ember2d.kit.topdown.ai.AiSystem;
+import dev.ember2d.kit.topdown.ai.PathPlanner;
 import dev.ember2d.kit.topdown.shooter.Aim;
 import dev.ember2d.kit.topdown.shooter.AimSystem;
 import dev.ember2d.kit.topdown.shooter.ShotEvents;
@@ -62,6 +64,7 @@ final class LevelScene extends Scene {
     private World world;
     private Hud hud;
     private FogLayer fog;
+    private CreatureOverlay overlay;
     private int player;
 
     /** @param level 1, 2 or 3 */
@@ -111,9 +114,15 @@ final class LevelScene extends Scene {
         HeroSystem.equip(world, player);
 
         VisionField field = new VisionField(collision, Walls.SIGHT_MASK, new VisionSettings());
+        PathPlanner planner = new PathPlanner(Walls.navigation(map));
+        TopDownSystem movement = new TopDownSystem(world, collision, input, context.events());
+        CreatureCatalog creatures = new CreatureCatalog(context.assets().get("creatures", JsonValue.class));
         world.addSystem(new AimSystem(world, input));
         world.addSystem(new LifetimeSystem(world));
-        world.addSystem(new TopDownSystem(world, collision, input, context.events()));   // FIXED, in this order
+        world.addSystem(new CreatureSystem(world, creatures, collision, health, bulletWorld, movement,
+                context.prefabs(), planner, context.events(), audio));                     // FIXED, in this order
+        world.addSystem(new AiSystem(world, planner));
+        world.addSystem(movement);
         world.addSystem(new WeaponSystem(world, bullets, new WeaponLibrary(context.assets(), types), context.events(),
                 input));
         world.addSystem(health);
@@ -131,6 +140,8 @@ final class LevelScene extends Scene {
         BulletRenderer bulletRenderer = new BulletRenderer(bulletWorld, context.assets(), "bullets", ppu);
         bulletRenderer.setVisibility(field::isVisible);   // the creatures' shots are hidden in the dark
         sprites.addLayerContent(bulletRenderer);
+        overlay = new CreatureOverlay(world, context.assets(), Effects.LAYER);
+        sprites.addLayerContent(overlay);
         fog = new FogLayer(field, context.renderer().camera(), "fog");
         sprites.addLayerContent(fog);
 
@@ -171,12 +182,24 @@ final class LevelScene extends Scene {
         Hero hero = world.get(player, Hero.class);
         int magazine = 30;
         hud.update(delta, h == null ? 0 : h.current, h == null ? 0 : h.max, 0, hero == null ? 0 : hero.keys,
-                world.family(Creature.class).size(), weapon == null || weapon.ammo < 0 ? magazine : weapon.ammo,
+                creaturesLeft(), weapon == null || weapon.ammo < 0 ? magazine : weapon.ammo,
                 magazine, weapon != null && weapon.reloading);
+    }
+
+    /** Creatures still alive (dying ones fade out first). */
+    private int creaturesLeft() {
+        int alive = 0;
+        for (int e : world.family(Creature.class).entities().toArray()) {
+            if (world.get(e, Creature.class).state != Creature.State.DEAD) {
+                alive++;
+            }
+        }
+        return alive;
     }
 
     @Override
     protected void exit() {
+        overlay.dispose();
         fog.dispose();
     }
 }

@@ -1,9 +1,64 @@
 {
   "version": 1,
   "components": {
-    "Sprite": {"origin": [12, 12], "z": 1},
-    "Animator": {"clipSet": "anim.creatures", "clip": "ghoul"},
-    "Creature": {"kind": "ghoul", "gold": 20},
-    "HiddenInFog": {"radius": 0.4, "centerY": 0}
+    "Sprite": {
+      "origin": [
+        12,
+        12
+      ],
+      "z": 1
+    },
+    "Animator": {
+      "clipSet": "anim.creatures",
+      "clip": "ghoul"
+    },
+    "Creature": {
+      "kind": "ghoul",
+      "gold": 20
+    },
+    "Collider": {
+      "box": {
+        "x": -0.375,
+        "y": -0.375,
+        "width": 0.75,
+        "height": 0.75
+      },
+      "layer": 2,
+      "mask": 9
+    },
+    "Actor": {},
+    "TopDownBody": {
+      "maxSpeed": 2.625,
+      "knockbackDecay": 12
+    },
+    "Steering": {
+      "mode": "NONE",
+      "repathSeconds": 0.4
+    },
+    "Health": {
+      "max": 5,
+      "invulnerableSeconds": 0
+    },
+    "Team": {
+      "id": 2
+    },
+    "BulletTarget": {
+      "radius": 0.425
+    },
+    "Hurtbox": {
+      "box": {
+        "x": -0.375,
+        "y": -0.375,
+        "width": 0.75,
+        "height": 0.75
+      }
+    },
+    "HitFlash": {
+      "seconds": 0.15
+    },
+    "HiddenInFog": {
+      "radius": 0.4,
+      "centerY": 0
+    }
   }
 }

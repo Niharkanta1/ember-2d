@@ -6,6 +6,7 @@ import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.math.Rectangle;
 import dev.ember2d.collision.Collider;
 import dev.ember2d.collision.Solid;
+import dev.ember2d.collision.TileGrid;
 import dev.ember2d.ecs.Transform;
 import dev.ember2d.ecs.World;
 import dev.ember2d.tilemap.TileMap;
@@ -29,6 +30,47 @@ final class Walls {
     static final String DOOR_TAG = "door";
 
     private Walls() {
+    }
+
+    /**
+     * A tile grid for path finding (kit-topdown's A*): a cell is blocked when wall boxes cover at least half of it.
+     * Thin wall overlays and low props leave their cells open (movement still slides along their exact boxes); the
+     * level format keeps passages at least two tiles wide, so routes always exist where the original had them.
+     */
+    static TileGrid navigation(TileMap map) {
+        MapLayer layer = map.tiled().getLayers().get("walls");
+        float tileUnits = map.tileWidth();
+        float tilePixels = map.tiled().getProperties().get("tilewidth", 16, Integer.class);
+        float scale = tileUnits / tilePixels;
+        int w = map.width();
+        int h = map.height();
+        float[] covered = new float[w * h];
+        for (MapObject object : layer.getObjects()) {
+            if (!(object instanceof RectangleMapObject r)) {
+                continue;
+            }
+            Rectangle px = r.getRectangle();
+            float x0 = px.x * scale;
+            float y0 = px.y * scale;
+            float x1 = x0 + px.width * scale;
+            float y1 = y0 + px.height * scale;
+            for (int cy = Math.max(0, (int) Math.floor(y0)); cy < Math.min(h, (int) Math.ceil(y1)); cy++) {
+                for (int cx = Math.max(0, (int) Math.floor(x0)); cx < Math.min(w, (int) Math.ceil(x1)); cx++) {
+                    float ox = Math.min(x1, cx + 1f) - Math.max(x0, cx);
+                    float oy = Math.min(y1, cy + 1f) - Math.max(y0, cy);
+                    if (ox > 0f && oy > 0f) {
+                        covered[cy * w + cx] += ox * oy;
+                    }
+                }
+            }
+        }
+        TileGrid grid = new TileGrid(w, h, tileUnits, tileUnits);
+        for (int cy = 0; cy < h; cy++) {
+            for (int cx = 0; cx < w; cx++) {
+                grid.setSolid(cx, cy, covered[cy * w + cx] >= 0.5f);
+            }
+        }
+        return grid;
     }
 
     /** Adds every wall box of the map as an entity; returns how many. */
