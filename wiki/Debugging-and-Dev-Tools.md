@@ -62,7 +62,10 @@ The demos' Gradle `run` task passes `-Dember.assetsDir=<source assets>`. The dev
 A broken file keeps the old version, and the error is logged and shown in the dev tools. `AssetReloaded` and `AssetReloadFailed` events let game code react.
 
 ## 4. Dev tools (F1)
-`DevTools.wrap(game)` in the dev launcher adds Dear ImGui panels (desktop dev runs only). Open them from the **Panels** menu:
+`DevTools.wrap(game)` in the dev launcher adds Dear ImGui panels (desktop dev runs only). 
+**Screenshots:** F12 saves the frame as `logs/shot-<time>.png`, without the dev panels. For checks with nobody at the screen, `-Dember.screenshotDir=<folder> -Dember.screenshotAt=3,6.5` takes shots at those seconds after start (for example through `JAVA_TOOL_OPTIONS`).
+
+Open the panels from the **Panels** menu:
 
 | Panel | Use |
 | --- | --- |

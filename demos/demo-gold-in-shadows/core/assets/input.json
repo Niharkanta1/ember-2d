@@ -3,18 +3,36 @@
   "contexts": {
     "gameplay": {
       "actions": {
-        "quit": ["ESCAPE", "BACK", "PAD_BACK"]
+        "fire": ["MOUSE_LEFT", "J", "PAD_R2", "PAD_R1"],
+        "reload": ["R", "PAD_X"],
+        "interact": ["E", "PAD_A"],
+        "pause": ["ESCAPE", "P", "BACK", "PAD_START"]
       },
-      "axes": {}
+      "axes": {
+        "move": {"left": ["A", "LEFT", "PAD_LEFT", "PAD_LSTICK_LEFT"], "right": ["D", "RIGHT", "PAD_RIGHT", "PAD_LSTICK_RIGHT"],
+                 "up": ["W", "UP", "PAD_UP", "PAD_LSTICK_UP"], "down": ["S", "DOWN", "PAD_DOWN", "PAD_LSTICK_DOWN"]},
+        "aim": {"left": ["PAD_RSTICK_LEFT"], "right": ["PAD_RSTICK_RIGHT"], "up": ["PAD_RSTICK_UP"], "down": ["PAD_RSTICK_DOWN"]}
+      }
     },
     "ui": {
       "actions": {
         "ui_back": ["ESCAPE", "BACK", "PAD_B"],
-        "ui_confirm": ["ENTER", "SPACE", "PAD_A"]
+        "ui_confirm": ["ENTER", "SPACE", "J", "PAD_A"]
       },
       "axes": {
-        "ui_nav": {"left": ["LEFT", "A", "PAD_LEFT"], "right": ["RIGHT", "D", "PAD_RIGHT"], "up": ["UP", "W", "PAD_UP"], "down": ["DOWN", "S", "PAD_DOWN"]}
+        "ui_nav": {"left": ["LEFT", "A", "PAD_LEFT", "PAD_LSTICK_LEFT"], "right": ["RIGHT", "D", "PAD_RIGHT", "PAD_LSTICK_RIGHT"],
+                   "up": ["UP", "W", "PAD_UP", "PAD_LSTICK_UP"], "down": ["DOWN", "S", "PAD_DOWN", "PAD_LSTICK_DOWN"]}
       }
     }
+  },
+  "touchControls": {
+    "opacity": 0.35,
+    "joystick": {"axis": "move", "mode": "floating", "radius": 52, "deadZone": 0.2},
+    "aimStick": {"axis": "aim", "x": 150, "y": 110, "radius": 52, "deadZone": 0.15, "fire": "fire", "fireAt": 0.5},
+    "buttons": [
+      {"action": "reload", "label": "R", "x": 48, "y": 150, "radius": 28},
+      {"action": "interact", "label": "E", "x": 110, "y": 210, "radius": 28},
+      {"action": "pause", "label": "II", "x": 48, "y": -48, "radius": 24}
+    ]
   }
 }

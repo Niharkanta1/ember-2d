@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "components": {
+    "Sprite": {"origin": [8, 0], "z": 0},
+    "Animator": {"clipSet": "anim.items", "clip": "chest_closed"},
+    "Chest": {},
+    "HiddenInFog": {"radius": 0.4, "centerY": 0.5}
+  }
+}

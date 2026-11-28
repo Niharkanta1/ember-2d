@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "types": {
+    "rifle": {"region": "atlas.gold/bullet.rifle", "radius": 0.125, "damage": 1, "lifetime": 2, "walls": true,
+              "rotate": true, "rotationOffset": -90, "graze": false},
+    "bolt": {"region": "atlas.gold/bullet.pistol", "radius": 0.125, "damage": 1, "lifetime": 3, "walls": true,
+             "rotate": true, "rotationOffset": -90, "tint": "#FF6666", "fogged": true, "graze": false},
+    "spit": {"region": "atlas.gold/orb", "radius": 0.16, "damage": 1, "lifetime": 3, "walls": true,
+             "tint": "#F7E6C2", "fogged": true, "graze": false}
+  }
+}

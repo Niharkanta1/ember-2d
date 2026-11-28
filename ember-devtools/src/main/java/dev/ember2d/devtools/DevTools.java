@@ -9,7 +9,7 @@ import dev.ember2d.devtools.internal.ManualReloadWatcher;
 
 /**
  * In-game developer tools for desktop dev builds (F-018, I-160): Dear ImGui panels over the running game, toggled
- * with F1: entities, inspector with live editing, animation state, time controls, frame times, debug draw, event log,
+ * with F1 (F12 saves a screenshot): entities, inspector with live editing, animation state, time controls, frame times, debug draw, event log,
  * assets with reload and hot reload status. Never part of release or Android builds.
  *
  * <pre>{@code

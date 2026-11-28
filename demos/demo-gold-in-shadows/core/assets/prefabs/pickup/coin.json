@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "components": {
+    "Sprite": {"origin": [8, 8], "z": 0},
+    "Animator": {"clipSet": "anim.items", "clip": "coin"},
+    "Pickup": {"kind": "coin", "amount": 10},
+    "HiddenInFog": {"radius": 0.3, "centerY": 0}
+  }
+}

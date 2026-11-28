@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "components": {
+    "Sprite": {"origin": [8, 8], "z": 2},
+    "Animator": {"clipSet": "anim.player", "clip": "idle"},
+    "Collider": {"box": {"x": -0.375, "y": -0.4375, "width": 0.75, "height": 0.75}, "layer": 1},
+    "Actor": {},
+    "TopDownBody": {"maxSpeed": 3.125, "acceleration": 21, "friction": 21, "knockbackDecay": 28, "flipSprite": false},
+    "Aim": {},
+    "Weapon": {"weapon": "weapon.rifle", "fireAction": "fire", "reloadAction": "reload"},
+    "Health": {"max": 20, "invulnerableSeconds": 0.8, "damageMultiplier": 2},
+    "Team": {"id": 1},
+    "BulletTarget": {"radius": 0.3},
+    "Hurtbox": {"box": {"x": -0.375, "y": -0.4375, "width": 0.75, "height": 0.75}},
+    "Viewer": {},
+    "Hero": {}
+  }
+}

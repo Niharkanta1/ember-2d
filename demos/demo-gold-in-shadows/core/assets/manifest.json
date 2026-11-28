@@ -40,5 +40,21 @@
   {"id": "sfx.reload", "path": "sfx/reload.wav", "type": "sound", "group": "global"},
   {"id": "sfx.shoot", "path": "sfx/shoot.wav", "type": "sound", "group": "global"},
   {"id": "sfx.spikes", "path": "sfx/spikes.wav", "type": "sound", "group": "global"},
-  {"id": "sfx.spit", "path": "sfx/spit.wav", "type": "sound", "group": "global"}
+  {"id": "sfx.spit", "path": "sfx/spit.wav", "type": "sound", "group": "global"},
+  {"id": "bullets", "path": "bullets.json", "type": "json", "group": "global"},
+  {"id": "atlas.gold", "path": "gfx/gold.atlas", "type": "atlas", "group": "global"},
+  {"id": "camera", "path": "prefabs/camera.json", "type": "prefab", "group": "global"},
+  {"id": "chest", "path": "prefabs/chest.json", "type": "prefab", "group": "global"},
+  {"id": "enemy/cultist", "path": "prefabs/enemy/cultist.json", "type": "prefab", "group": "global"},
+  {"id": "enemy/ghoul", "path": "prefabs/enemy/ghoul.json", "type": "prefab", "group": "global"},
+  {"id": "enemy/rat", "path": "prefabs/enemy/rat.json", "type": "prefab", "group": "global"},
+  {"id": "enemy/slug", "path": "prefabs/enemy/slug.json", "type": "prefab", "group": "global"},
+  {"id": "exit", "path": "prefabs/exit.json", "type": "prefab", "group": "global"},
+  {"id": "pickup/coin", "path": "prefabs/pickup/coin.json", "type": "prefab", "group": "global"},
+  {"id": "pickup/key", "path": "prefabs/pickup/key.json", "type": "prefab", "group": "global"},
+  {"id": "pickup/medkit", "path": "prefabs/pickup/medkit.json", "type": "prefab", "group": "global"},
+  {"id": "pickup/pile", "path": "prefabs/pickup/pile.json", "type": "prefab", "group": "global"},
+  {"id": "player", "path": "prefabs/player.json", "type": "prefab", "group": "global"},
+  {"id": "spikes", "path": "prefabs/spikes.json", "type": "prefab", "group": "global"},
+  {"id": "weapon.rifle", "path": "weapons/rifle.json", "type": "json", "group": "global"}
 ] }

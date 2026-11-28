@@ -270,11 +270,19 @@ class BulletsTest {
         int wall = entity(3f, -2f);
         world.add(wall, new Collider()).box.set(0f, 0f, 1f, 4f);
         world.add(wall, new Solid());
+        float[] stop = {-1f, 0f, 0f};
+        system.setWallStopListener((type, x, y) -> {
+            stop[0] = type;
+            stop[1] = x;
+            stop[2] = y;
+        });
         bullets.spawn(types.index("pellet"), 0f, 0f, 0f, 6f, 1);
         bullets.spawn(types.index("orb"), 0f, 0f, 0f, 6f, 1);
         steps(60);
         assertThat(bullets.size()).isEqualTo(1);
         assertThat(bullets.type(0)).isEqualTo(types.index("orb"));
+        assertThat(stop[0]).as("the listener heard the pellet").isEqualTo(types.index("pellet"));
+        assertThat(stop[1]).as("where it met the wall").isEqualTo(3f, org.assertj.core.api.Assertions.within(1e-3f));
     }
 
     // ---- clearing, capacity, culling, errors ----
@@ -321,6 +329,26 @@ class BulletsTest {
         assertThatThrownBy(() -> system.runAt("missing", 0f, 0f, World.NONE, 1))
                 .hasMessageContaining("not in the asset manifest");
         assertThatThrownBy(() -> types.index("x")).hasMessageContaining("known: [orb, pellet, laser]");
+    }
+
+    @Test
+    void rotationOffsetTintAndFogAreParsed() {
+        BulletTypes parsed = BulletTypes.parse(new JsonReader().parse(
+                "{ \"version\": 1, \"types\": { \"rifle\": { \"region\": \"r\", \"rotate\": true, "
+                        + "\"rotationOffset\": -90, \"tint\": \"#FF6666\", \"fogged\": true }, "
+                        + "\"plain\": { \"region\": \"p\" } } }"), "b.json");
+        BulletType rifle = parsed.get(parsed.index("rifle"));
+        assertThat(rifle.rotationOffset).isEqualTo(-90f);
+        assertThat(rifle.tint.r).isEqualTo(1f);
+        assertThat(rifle.tint.g).isCloseTo(0.4f, org.assertj.core.api.Assertions.within(0.01f));
+        assertThat(rifle.fogged).isTrue();
+        BulletType plain = parsed.get(parsed.index("plain"));
+        assertThat(plain.rotationOffset).isZero();
+        assertThat(plain.tint).isEqualTo(com.badlogic.gdx.graphics.Color.WHITE);
+        assertThat(plain.fogged).isFalse();
+        assertThatThrownBy(() -> BulletTypes.parse(new JsonReader().parse(
+                "{ \"version\": 1, \"types\": { \"a\": { \"region\": \"r\", \"tint\": \"red\" } } }"), "b.json"))
+                .hasMessageContaining("\"tint\" must look like");
     }
 
     @Test

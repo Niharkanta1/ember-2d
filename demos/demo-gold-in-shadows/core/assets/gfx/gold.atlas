@@ -1,0 +1,61 @@
+
+weapons.png
+size: 160,144
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+gun.pistol
+  rotate: false
+  xy: 2, 5
+  size: 12, 7
+  orig: 12, 7
+  offset: 0, 0
+  index: -1
+gun.rifle
+  rotate: false
+  xy: 16, 20
+  size: 21, 10
+  orig: 21, 10
+  offset: 0, 0
+  index: -1
+bullet.pistol
+  rotate: false
+  xy: 6, 36
+  size: 4, 7
+  orig: 4, 7
+  offset: 0, 0
+  index: -1
+bullet.rifle
+  rotate: false
+  xy: 22, 36
+  size: 4, 7
+  orig: 4, 7
+  offset: 0, 0
+  index: -1
+reload
+  rotate: false
+  xy: 64, 0
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+
+character.png
+size: 64,80
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+hand
+  rotate: false
+  xy: 0, 0
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+orb
+  rotate: false
+  xy: 6, 7
+  size: 4, 4
+  orig: 4, 4
+  offset: 0, 0
+  index: -1

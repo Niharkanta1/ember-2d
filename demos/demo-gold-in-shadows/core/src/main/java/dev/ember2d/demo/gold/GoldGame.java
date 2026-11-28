@@ -6,6 +6,7 @@ import dev.ember2d.app.EngineConfig;
 public final class GoldGame {
 
     private static String version = "dev";
+    private static Difficulty difficulty = Difficulty.NORMAL;
 
     private GoldGame() {
     }
@@ -22,12 +23,21 @@ public final class GoldGame {
         config.virtualWidth = 160;    // the original's resolution, integer-scaled
         config.virtualHeight = 144;
         config.backgroundColor.set(0x18 / 255f, 0x18 / 255f, 0x30 / 255f, 1f);   // the palette's DARK
-        config.firstScene = MainScene::new;
+        config.firstScene = () -> new LevelScene(1);
         config.inputBindings = "input";
         config.saveFolder = "demo-gold-in-shadows";
         config.components = new GoldComponents();
         config.devMode = devMode;
         return config;
+    }
+
+    /** The chosen difficulty (Settings, I-650). */
+    static Difficulty difficulty() {
+        return difficulty;
+    }
+
+    static void setDifficulty(Difficulty value) {
+        difficulty = value;
     }
 
     static String version() {

@@ -78,6 +78,19 @@ public final class BulletSystem extends EntitySystem {
         return bullets;
     }
 
+    /** Told where a wall bullet stopped at a wall (impact effects); called during the step, allocates nothing. */
+    @FunctionalInterface
+    public interface WallStopListener {
+        void stopped(int type, float x, float y);
+    }
+
+    private WallStopListener wallStops;
+
+    /** Sets who hears wall stops (null: nobody). */
+    public void setWallStopListener(WallStopListener listener) {
+        this.wallStops = listener;
+    }
+
     /** Wall bullets ({@code "walls": true}) stop at tiles and colliders on these layers of the collision. */
     public void setWallMask(int mask, Collision collision) {
         this.wallMask = mask;
@@ -210,6 +223,9 @@ public final class BulletSystem extends EntitySystem {
             for (int i = bullets.size() - 1; i >= 0; i--) {
                 if (bullets.types().get(bullets.type(i)).walls
                         && walls.raycast(bullets.lastX(i), bullets.lastY(i), bullets.x(i), bullets.y(i), wallMask, ray)) {
+                    if (wallStops != null) {
+                        wallStops.stopped(bullets.type(i), ray.x, ray.y);
+                    }
                     bullets.remove(i);
                 }
             }

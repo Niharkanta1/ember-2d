@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "components": {
+    "Sprite": {"origin": [8, 8], "z": 0},
+    "Animator": {"clipSet": "anim.items", "clip": "key"},
+    "Pickup": {"kind": "key", "amount": 1},
+    "HiddenInFog": {"radius": 0.3, "centerY": 0}
+  }
+}

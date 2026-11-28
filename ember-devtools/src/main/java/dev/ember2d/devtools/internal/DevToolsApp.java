@@ -40,6 +40,7 @@ public final class DevToolsApp implements ApplicationListener {
     private DevState state;
     private Panels panels;
     private boolean attached;
+    private Screenshots screenshots;
     private boolean visible;
 
     public DevToolsApp(EmberGame game) {
@@ -90,6 +91,11 @@ public final class DevToolsApp implements ApplicationListener {
     public void render() {
         long start = System.nanoTime();
         game.render();
+        if (screenshots == null) {
+            screenshots = new Screenshots(System.getProperty("ember.screenshotDir"),
+                    System.getProperty("ember.screenshotAt"));
+        }
+        screenshots.afterFrame(Gdx.graphics.getDeltaTime());   // before the panels: they never show in a shot
         if (!attached) {
             return;
         }

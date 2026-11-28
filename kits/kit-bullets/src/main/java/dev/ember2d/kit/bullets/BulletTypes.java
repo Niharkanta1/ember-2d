@@ -1,5 +1,6 @@
 package dev.ember2d.kit.bullets;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.JsonValue;
 import dev.ember2d.core.PublicApi;
 import java.util.ArrayList;
@@ -12,13 +13,14 @@ import java.util.Set;
  * The bullet types of a game (F-024), parsed from a JSON asset:
  * <pre>{@code { "version": 1, "types": { "orb_red": { "region": "tex.orb", "radius": 0.15, "damage": 1 } } } }</pre>
  * Fields: {@code region} (required), {@code radius} 0.15, {@code damage} 1, {@code lifetime} 10, {@code walls} false,
- * {@code pierce} false, {@code graze} true, {@code rotate} false, {@code scale} 1.
+ * {@code pierce} false, {@code graze} true, {@code rotate} false, {@code scale} 1, {@code rotationOffset} 0 (degrees),
+ * {@code tint} "#FFFFFF" ({@code "#RRGGBB"} or {@code "#RRGGBBAA"}), {@code fogged} false.
  */
 @PublicApi
 public final class BulletTypes {
 
     private static final Set<String> FIELDS = Set.of("region", "radius", "damage", "lifetime", "walls", "pierce",
-            "graze", "rotate", "scale");
+            "graze", "rotate", "scale", "rotationOffset", "tint", "fogged");
 
     private final List<BulletType> types;
     private final Map<String, Integer> byName = new LinkedHashMap<>();
@@ -66,9 +68,20 @@ public final class BulletTypes {
                 if (radius <= 0f || lifetime <= 0f || scale <= 0f || damage < 0) {
                     problems.add(where + ": radius, lifetime and scale must be > 0 and damage >= 0");
                 }
+                float rotationOffset = number(t, "rotationOffset", 0f, where, problems);
+                Color tint = Color.WHITE;
+                String tintText = t.getString("tint", null);
+                if (tintText != null) {
+                    String hex = tintText.startsWith("#") ? tintText.substring(1) : tintText;
+                    if (!hex.matches("[0-9a-fA-F]{6}([0-9a-fA-F]{2})?")) {
+                        problems.add(where + ": \"tint\" must look like \"#RRGGBB\" or \"#RRGGBBAA\"");
+                    } else {
+                        tint = Color.valueOf(hex);
+                    }
+                }
                 types.add(new BulletType(t.name, region, radius, damage, lifetime, t.getBoolean("walls", false),
                         t.getBoolean("pierce", false), t.getBoolean("graze", true), t.getBoolean("rotate", false),
-                        scale));
+                        scale, rotationOffset, tint, t.getBoolean("fogged", false)));
             }
         }
         if (!problems.isEmpty()) {

@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "fireRate": 10,
+  "auto": true,
+  "magazine": 30,
+  "reload": 2.0,
+  "muzzle": 1.19,
+  "emit": {"type": "single", "bullet": "rifle", "speed": 18.75}
+}

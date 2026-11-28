@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "components": {
+    "Sprite": {"origin": [12, 12], "z": 1},
+    "Animator": {"clipSet": "anim.creatures", "clip": "ghoul"},
+    "Creature": {"kind": "ghoul", "gold": 20},
+    "HiddenInFog": {"radius": 0.4, "centerY": 0}
+  }
+}
