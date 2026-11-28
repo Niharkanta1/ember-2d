@@ -10,6 +10,8 @@ All games build the same way ([Building for Desktop](Building-for-Desktop), [Bui
 | kit-platformer | none | |
 | kit-topdown | gdx-ai 1.8.2 (steering and A*) | |
 | kit-novel | (blade-ink through kit-common) | |
+| ember-box2d (optional module) | gdx-box2d 1.14.2 | add its natives to desktop and Android and the R8 keep rule ([Physics with Box2D](Physics-Box2D)) |
+| gamepads (engine) | gdx-controllers 2.2.4 | nothing to add: `ember-desktop` and `ember-android` bring the backends, and `ember-android` ships the R8 rule |
 
 - These libraries are already in the dependency register (`documents/TECHNICAL_DECISIONS.md`), in `gradle/libs.versions.toml` and on the Android API check's classpath. You add nothing.
 - A game's `core/build.gradle` lists the kits it uses as `api project(':kits:kit-…')`.

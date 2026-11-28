@@ -32,7 +32,7 @@ Chapters must match the code at the gate; later phases update earlier chapters w
 | 3 | `03-platformer-ui-audio-saves-android.md` — platformer kit, UI, audio, settings and saves, touch controls, releases |
 | 4 | `04-shooter-and-bullet-hell.md` — common kit, top-down movement, weapons, bullet patterns |
 | 5 | `05-rpg-and-visual-novel.md` — interaction, inventory, Ink dialogue, novel staging, world flags, localisation |
-| 6 | One chapter per adopted extra (e.g. `06-box2d.md`, `06-spine.md`) |
+| 6 | One chapter per adopted extra: `06-particles.md`, `06-materials.md`, `06-box2d.md`, `06-gamepad.md`, plus `06-project-and-asset-tools.md` for the generator tools (drafts written 2026-11-28; Spine and iOS skipped) |
 
 ## Phase 0 — Foundation
 **Goal:** reproducible build, module skeleton and a shippable empty game.

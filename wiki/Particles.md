@@ -8,7 +8,7 @@ Effects are libGDX particle editor files (`.p`), with their images next to them.
 { "id": "fx.hit",  "path": "fx/hit.p",  "type": "particle", "group": "global" },
 { "id": "fx.dust", "path": "fx/dust.p", "type": "particle", "group": "global" }
 ```
-Make them with the libGDX particle editor (part of gdx-tools), or build them in code and save them with libGDX itself. The shooter demo does the latter (`assets-src/demo-shooter/fx/MakeEffects.java`):
+The older "2D Particle Editor" from gdx-tools writes the same format. You can also build effects in code and save them with libGDX itself; the shooter demo does that (`assets-src/demo-shooter/fx/MakeEffects.java`):
 ```java
 ParticleEmitter e = new ParticleEmitter();
 e.setName("sparks");

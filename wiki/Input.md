@@ -1,6 +1,6 @@
 # Input
 
-Package `ember.input` (`Input`, `InputContextChanged`, `TouchLayout`). Specs F-005, F-022. Games read **named actions and axes**, never raw keys, so the same code works with keyboards, mice, touch screens and on-screen controls.
+Package `ember.input` (`Input`, `InputContextChanged`, `TouchLayout`). Specs F-005, F-022. Games read **named actions and axes**, never raw keys, so the same code works with keyboards, mice, touch screens, on-screen controls and gamepads.
 
 ## 1. The bindings file
 Listed in the manifest (`"id": "input"`, type `json`) and named in the config (`config.inputBindings = "input"`). From the shooter demo:
@@ -21,7 +21,7 @@ Listed in the manifest (`"id": "input"`, type `json`) and named in the config (`
     "buttons": [ { "action": "reload", "label": "R", "x": 48, "y": 150, "radius": 28 },
                  { "action": "pause", "label": "II", "x": 48, "y": -48, "radius": 24 } ] } }
 ```
-- **Bindings:** libGDX key names in upper case (`SPACE`, `L_SHIFT`, `F1`, `BACK`), mouse buttons (`MOUSE_LEFT`, …) and touch gestures (`TOUCH`, `TAP`, `DOUBLE_TAP`, `LONG_PRESS`, `DRAG`, `SWIPE_LEFT`/`RIGHT`/`UP`/`DOWN`).
+- **Bindings:** libGDX key names in upper case (`SPACE`, `L_SHIFT`, `F1`, `BACK`), mouse buttons (`MOUSE_LEFT`, …), touch gestures (`TOUCH`, `TAP`, `DOUBLE_TAP`, `LONG_PRESS`, `DRAG`, `SWIPE_LEFT`/`RIGHT`/`UP`/`DOWN`) and gamepad inputs (`PAD_A`, `PAD_START`, `PAD_LSTICK_LEFT`, …; section 5).
 - **Axes:** a 1D axis has `negative`/`positive`, a 2D axis `left`/`right`/`up`/`down`. Diagonals are normalised unless `"normalize": false`.
 - **Names:** action and axis names are unique across all contexts.
 - **Checks:** the file is checked at boot, and every problem is listed with its path.
@@ -73,16 +73,41 @@ The `touchControls` section of the bindings file:
 - **Vibration:** `input.vibrate(ms)`, honouring `setHapticsEnabled`.
 - **Skin:** `config.touchControlsSkin` can supply `touch-base`, `touch-knob`, `touch-button`, `touch-button-down`, `touch-dpad` and `touch-dpad-down`.
 
-## 5. Rebinding
+## 5. Gamepads
+Gamepads are more binding names (F-005, I-530), read through gdx-controllers: jamepad/SDL on desktop, Android's controller support on phones and TVs. Nothing needs to be added to a game's build.
+
+| Group | Names (Xbox layout: `PAD_A` is the bottom face button on every pad) |
+| --- | --- |
+| Face buttons | `PAD_A`, `PAD_B`, `PAD_X`, `PAD_Y` |
+| Menu buttons | `PAD_BACK`, `PAD_START` |
+| Shoulders and triggers | `PAD_L1`, `PAD_R1`, `PAD_L2`, `PAD_R2` |
+| Stick clicks | `PAD_L3`, `PAD_R3` |
+| D-pad | `PAD_UP`, `PAD_DOWN`, `PAD_LEFT`, `PAD_RIGHT` |
+| Sticks | `PAD_LSTICK_LEFT/RIGHT/UP/DOWN`, `PAD_RSTICK_LEFT/RIGHT/UP/DOWN` |
+
+```json
+"jump": ["SPACE", "PAD_A"],
+"move": { "left": ["A", "PAD_LEFT", "PAD_LSTICK_LEFT"], "right": ["D", "PAD_RIGHT", "PAD_LSTICK_RIGHT"],
+          "up": ["W", "PAD_UP", "PAD_LSTICK_UP"], "down": ["S", "PAD_DOWN", "PAD_LSTICK_DOWN"] }
+```
+- **Analog:** stick directions are analog in axes (0..1 after a 0.2 radial dead zone), so `axis2` gives partial speed. Full diagonals are clamped to length 1.
+- **As actions:** a stick or trigger is pressed past 0.5 and released below 0.4, so menus can be driven with the stick.
+- **Which pad:** the most recently used connected pad (one player).
+- **Connection:** `GamepadConnected(name)` and `GamepadDisconnected(name)` are queued. A disconnect releases every pad input. `input.gamepadConnected()` and `input.gamepadName()` are for button hints.
+- **On-screen controls:** pad use hides them like the keyboard does.
+- **Menus:** they work with a pad once `ui_nav`, `ui_confirm` and `ui_back` list pad names. The platformer demo has them all.
+- **Checked:** unit tests; a desktop run detected an XInput controller; the Android release build starts with the backend. Not yet played by a person with a pad.
+
+## 6. Rebinding
 ```java
 input.rebindAction("jump", List.of("W", "UP"));
 input.resetBinding("jump");
 Map<String, List<String>> overrides = input.bindingOverrides();   // saved with the settings
 List<String> keys = input.actionInputs("jump");                    // for a "press a key" menu
 ```
-Overrides survive hot reloads of the bindings file and are saved with the settings.
+Overrides survive hot reloads of the bindings file and are saved with the settings. There is no ready-made "press a button" screen yet (the F-005 rebinding UI is still a draft).
 
-## 6. Common mistakes
+## 7. Common mistakes
 | Symptom | Cause | Fix |
 | --- | --- | --- |
 | `Unknown input action "fire"` | a component reads an action your bindings don't have | bind it, or guard with `hasAction` |

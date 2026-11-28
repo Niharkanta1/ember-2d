@@ -2,7 +2,7 @@
 
 Package `ember.collision` (`Collision`, `Collider`, `Actor`, `Solid`, `CollisionSystem`, `CollisionDebugSystem`, `MoveResult`, `RayHit`, `Direction`, `TileGrid`, `TriggerEntered`, `TriggerExited`, `ActorSquished`). Spec F-006, ADR-005.
 
-Ember2D uses **kinematic** collision: axis-aligned boxes, exact contacts, no physics simulation. It is the right tool for platformers, top-down games and RPGs. Rigid bodies are planned as an optional Box2D module (`ember-box2d`, F-006B), which is not built yet.
+Ember2D uses **kinematic** collision: axis-aligned boxes, exact contacts, no physics simulation. It is the right tool for platformers, top-down games and RPGs. For rigid bodies (stacks, tumbling crates, physics puzzles) use the optional Box2D module ([Physics with Box2D](Physics-Box2D)); the two systems are separate.
 
 ## 1. Bodies
 | Component | Fields | Meaning |

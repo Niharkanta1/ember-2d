@@ -22,6 +22,7 @@
 - [Sprite Materials](Sprite-Materials)
 - [Animation](Animation)
 - [Collision](Collision)
+- [Physics with Box2D](Physics-Box2D)
 - [Tilemaps and Tiled](Tilemaps-and-Tiled)
 - [Prefabs and Components from Data](Prefabs-and-Data)
 - [Audio](Audio)

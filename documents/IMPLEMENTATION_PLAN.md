@@ -112,7 +112,7 @@ Time-boxed throwaway prototypes (`templates/SPIKE_TEMPLATE.md`). Code is deleted
 - **I-580 Project generator** — `./gradlew newGame` creates a game under `demos/` from a blank or demo template (F-027)
 - **I-590 Asset tools** — `assetManifest` and `makeClips` generate the manifest and clip sets (F-028)
 
-- **G-6 Guide chapters** — one chapter per adopted extra in `documents/guide/`; developer review and approval required
+- **G-6 Guide chapters** — one chapter per adopted extra in `documents/guide/`; developer review and approval required. Drafts written 2026-11-28 (particles, materials, Box2D, gamepad, project and asset tools); waiting for review
 
 ## Definition of Done
 - Acceptance criteria fulfilled.

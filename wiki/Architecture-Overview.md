@@ -36,7 +36,7 @@ Arrows point from a module to what it uses.
 | `ember-desktop` | platform | `DesktopLogging`, `CrashLog`, `StartupHelper`, `DesktopWindow` for LWJGL3 launchers. |
 | `ember-android` | platform | `EmberAndroidLauncher`: lifecycle, safe areas, vibration, GL context loss. |
 | `ember-devtools` | dev only | `DevTools.wrap` (Dear ImGui panels), `DevTools.watch` (hot reload). Never in a release. |
-| `ember-box2d` | optional | Rigid-body physics through gdx-box2d. A placeholder until I-500 is built. |
+| `ember-box2d` | optional | Rigid-body physics through gdx-box2d: `RigidBody`, `Box2dSystem` ([Physics with Box2D](Physics-Box2D)). |
 | `kit-common` | shared kit | Health, hits, triggers, spawners, pools, hit flash, the Ink `DialogueRunner`. |
 | `kit-bullets` | shared kit | The data-oriented bullet world and patterns. |
 | `kit-platformer` | genre kit | Platformer bodies, patrollers, moving platforms. |

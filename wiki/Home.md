@@ -31,6 +31,7 @@ This wiki is the developer handbook. It has four parts:
 | `ember-desktop` | The LWJGL3 desktop launcher helpers, logging, crash logs, Construo packaging |
 | `ember-android` | The Android launcher base class and platform wiring |
 | `ember-devtools` | Hot reload and Dear ImGui dev tools (desktop dev builds only) |
+| `ember-box2d` | Optional rigid-body physics with Box2D ([Physics with Box2D](Physics-Box2D)) |
 | `kit-common` | Health, damage, hit and hurt boxes, triggers, spawners, pools, hit flash, the Ink dialogue runner |
 | `kit-platformer` | Platformer movement (coyote time, buffering, wall jump, dash, ladders), patrollers, moving platforms |
 | `kit-topdown` | Top-down movement, aiming and weapons, steering and A* paths, RPG interaction and inventories |

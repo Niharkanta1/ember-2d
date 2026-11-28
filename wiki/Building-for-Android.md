@@ -100,10 +100,11 @@ adb shell pm clear com.example.mygame                             # wipe saves a
 ./gradlew :demos:my-game:android:assembleRelease   # minified APK → build/outputs/apk/release/android-release.apk
 ./gradlew :demos:my-game:android:bundleRelease     # AAB for Google Play → build/outputs/bundle/release/android-release.aab
 ```
-- **R8:** release builds are minified with R8. The keep rules have three parts:
+- **R8:** release builds are minified with R8. The keep rules have four parts:
   - **libGDX's:** in `proguard-rules.pro`.
   - **Generated:** the `emberKeepRules` task runs your `ComponentSetup` on every build and writes `build/generated/ember-keep-rules.pro`. Registered components keep their names and fields, so prefabs and maps work after minification. **An unregistered component works in debug but breaks in release.**
   - **Line numbers:** `-keepattributes LineNumberTable,SourceFile` keeps stack traces readable with the mapping file.
+  - **From `ember-android`:** its `consumer-rules.pro` is applied automatically; it keeps the gamepad backend (gdx-controllers creates it by name). Games using `ember-box2d` add the Box2D rule themselves ([Physics with Box2D](Physics-Box2D)).
 - **Mapping file:** `build/outputs/mapping/release/mapping.txt`. Keep it for every build you publish; upload it to Google Play to de-obfuscate crash traces.
 - `./gradlew build` also builds the release APKs, signed with the debug key unless an upload key is set.
 
