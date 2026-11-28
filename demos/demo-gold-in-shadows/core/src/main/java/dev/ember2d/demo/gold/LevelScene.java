@@ -8,6 +8,10 @@ import dev.ember2d.animation.AnimationLibrary;
 import dev.ember2d.animation.AnimationSystem;
 import dev.ember2d.app.EngineContext;
 import dev.ember2d.app.Scene;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import dev.ember2d.ui.ConfirmDialog;
+import dev.ember2d.ui.MenuList;
+import dev.ember2d.ui.Ui;
 import dev.ember2d.audio.Audio;
 import dev.ember2d.collision.Collision;
 import dev.ember2d.collision.CollisionSystem;
@@ -65,6 +69,11 @@ final class LevelScene extends Scene {
     private PickupSystem pickups;
     private FloatingTexts texts;
     private boolean leaving;
+    private boolean showFps;
+    private String openHint;
+    private Table pausePanel;
+    private boolean paused;
+    private boolean finished;
     private Input input;
     private World world;
     private Hud hud;
@@ -159,6 +168,9 @@ final class LevelScene extends Scene {
         sprites.addLayerContent(fog);
 
         hud = new Hud(ui(), context.assets());
+        showFps = GoldUi.showFps(context);
+        openHint = input.touchControlsActive() ? "OPEN CHEST" : input.gamepadConnected() ? "A: OPEN CHEST"
+                : "E: OPEN CHEST";
         context.events().on(ShotEvents.Fired.class, e -> audio.playVaried("sfx.shoot", 0.05f));
         context.events().on(ShotEvents.ReloadStarted.class, e -> audio.play("sfx.reload"));
         context.events().on(Damaged.class, e -> {
@@ -175,7 +187,7 @@ final class LevelScene extends Scene {
                 campaign.kills++;
             }
         });
-        context.events().on(HeroDied.class, e -> retry());
+        context.events().on(HeroDied.class, e -> died());
         context.events().on(ExitSystem.LevelCleared.class, e -> cleared());
         context.audio().playMusic("music.dungeon", 0.5f);
         LOG.info("Level " + level + " (" + map.properties().get("title", "", String.class) + "): " + walls
@@ -183,27 +195,110 @@ final class LevelScene extends Scene {
                 + " entities");
     }
 
-    /** Until the death screen exists (I-650): the level starts again with the gold and kills it started with. */
-    private void retry() {
-        campaign.retryLevel();
-        leave(new LevelScene(campaign));
+    /** After the death sequence: the death screen (Restart starts this level again). */
+    private void died() {
+        finished = true;
+        LOG.info("Died on level " + level + " with " + campaign.gold + " gold");
+        leave(new EndScene(campaign, false, false));
     }
 
     /**
-     * The player walked out through the exit: the next level, with the gold carried over and the progress saved for
-     * Continue. After the last level the campaign ends (until the end screen exists, I-650: a new campaign starts).
+     * The player walked out through the exit: the game stops and the level-complete panel shows the level's gold,
+     * kills and time. The progress is saved for Continue. After the last level: the victory screen.
      */
     private void cleared() {
+        if (finished) {
+            return;
+        }
+        finished = true;
         LOG.info("Level " + level + " cleared: " + campaign.levelGold() + " gold, " + campaign.levelKills()
                 + " kills, " + Math.round(campaign.levelTime) + " s; score " + campaign.gold);
+        boolean newBest = campaign.gold > Campaign.best(context.saves().global());
         boolean next = campaign.advance(context.saves().global());
         context.saves().flush();
-        if (next) {
+        context.audio().play("sfx.door");
+        if (!next) {
+            leave(new EndScene(campaign, true, newBest));
+            return;
+        }
+        showClearPanel();
+    }
+
+    private void showClearPanel() {
+        context.time().setPaused(true);
+        input.pushContext("ui");
+        Ui ui = ui();
+        Table overlay = GoldUi.overlay(ui);
+        overlay.add(GoldUi.title(ui, "LEVEL " + level + " CLEAR", Hud.CREAM)).padBottom(8f).row();
+        overlay.add(GoldUi.label(ui, "$ GOLD  " + campaign.levelGold(), Hud.TAN)).padBottom(2f).row();
+        overlay.add(GoldUi.label(ui, "# KILLS " + campaign.levelKills(), Hud.TAN)).padBottom(2f).row();
+        overlay.add(GoldUi.label(ui, "TIME    " + clock(campaign.levelTime), Hud.TAN)).padBottom(10f).row();
+        MenuList menu = GoldUi.menu(ui);
+        GoldUi.add(menu, "Next level", context.audio(), () -> {
             campaign.startLevel();
             leave(new LevelScene(campaign));
-        } else {
-            leave(new LevelScene(Campaign.fresh()));
+        });
+        GoldUi.add(menu, "Main menu", context.audio(), () -> leave(new TitleScene()));
+        overlay.add(GoldUi.panel(ui, menu)).minWidth(80f);
+    }
+
+    /** m:ss */
+    static String clock(float seconds) {
+        int s = Math.max(0, (int) seconds);
+        return s / 60 + ":" + (s % 60 < 10 ? "0" : "") + s % 60;
+    }
+
+    // ---- pause ----
+
+    private void openPause() {
+        if (paused || finished) {
+            return;
         }
+        paused = true;
+        context.time().setPaused(true);
+        context.audio().pauseMusic();
+        input.pushContext("ui");
+        Table overlay = GoldUi.overlay(ui());
+        pausePanel = new Table(ui().skin());
+        overlay.add(pausePanel);
+        showPauseMenu();
+    }
+
+    private void showPauseMenu() {
+        Ui ui = ui();
+        MenuList menu = GoldUi.menu(ui);
+        GoldUi.add(menu, "Resume", context.audio(), this::closePause);
+        GoldUi.add(menu, "Restart", context.audio(), () -> {
+            campaign.retryLevel();
+            leave(new LevelScene(campaign));
+        });
+        GoldUi.add(menu, "Settings", context.audio(), this::showPauseSettings);
+        GoldUi.add(menu, "Main menu", context.audio(), () -> ConfirmDialog.show(ui, "Quit to the menu?", "Yes", "No",
+                () -> leave(new TitleScene())));
+        menu.onBack(this::closePause);
+        pausePanel.clearChildren();
+        pausePanel.add(GoldUi.title(ui, "PAUSED", Hud.CREAM)).padBottom(10f).row();
+        pausePanel.add(GoldUi.panel(ui, menu)).minWidth(80f);
+    }
+
+    private void showPauseSettings() {
+        Ui ui = ui();
+        pausePanel.clearChildren();
+        pausePanel.add(GoldUi.title(ui, "SETTINGS", Hud.CREAM)).padBottom(6f).row();
+        pausePanel.add(GoldUi.panel(ui, GoldUi.settings(ui, context, this::showPauseMenu, this::showPauseSettings)))
+                .minWidth(110f);
+    }
+
+    private void closePause() {
+        if (!paused) {
+            return;
+        }
+        paused = false;
+        pausePanel.getParent().remove();
+        input.popContext();
+        context.time().setPaused(false);
+        context.audio().resumeMusic();
+        showFps = GoldUi.showFps(context);
     }
 
     private void leave(Scene next) {
@@ -215,16 +310,20 @@ final class LevelScene extends Scene {
 
     @Override
     protected void update(float delta) {
-        if (input.justPressed("pause")) {
-            Gdx.app.exit();   // until the pause menu exists (I-650)
+        if ("gameplay".equals(input.topContext()) && input.justPressed("pause")) {
+            openPause();
+        }
+        if (paused || finished) {
+            return;
         }
         campaign.levelTime += delta;
+        hud.fps(showFps ? Gdx.graphics.getFramesPerSecond() + " FPS" : "");
         texts.update(delta);
         Health h = world.get(player, Health.class);
         Weapon weapon = world.get(player, Weapon.class);
         Hero hero = world.get(player, Hero.class);
         int magazine = 30;
-        hud.hint(pickups.chestInReach() ? "E: OPEN CHEST" : "");
+        hud.hint(pickups.chestInReach() ? openHint : "");
         hud.update(delta, h == null ? 0 : h.current, h == null ? 0 : h.max, campaign.gold, hero == null ? 0 : hero.keys,
                 creaturesLeft(), weapon == null || weapon.ammo < 0 ? magazine : weapon.ammo,
                 magazine, weapon != null && weapon.reloading);
@@ -243,6 +342,13 @@ final class LevelScene extends Scene {
 
     @Override
     protected void exit() {
+        while (!"gameplay".equals(input.topContext())) {
+            input.popContext();
+        }
+        if (context.time().paused()) {
+            context.time().setPaused(false);
+            context.audio().resumeMusic();
+        }
         overlay.dispose();
         fog.dispose();
     }

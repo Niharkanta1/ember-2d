@@ -1,14 +1,12 @@
 package dev.ember2d.demo.gold;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import dev.ember2d.assets.Assets;
 import dev.ember2d.ui.Ui;
-import dev.ember2d.ui.UiSkins;
 
 /**
  * The in-game HUD (F-029), laid out like the original's {@code HudRenderer} in its pixel font and palette: hearts top
@@ -31,12 +29,12 @@ final class Hud {
     private final Label creatures;
     private final Label ammo;
     private final Label hint;
+    private final Label fps;
     private final Image flash;
     private float sinceHit = FLASH_SECONDS;
 
     Hud(Ui ui, Assets assets) {
-        BitmapFont font = assets.get("font.pixel", BitmapFont.class);
-        ui.setSkin(UiSkins.pixel(font), true);
+        GoldUi.useSkin(ui, assets);
         flash = new Image(ui.skin().getDrawable("white"));
         flash.setFillParent(true);
         flash.setColor(1f, 1f, 1f, 0f);
@@ -50,10 +48,12 @@ final class Hud {
         creatures = label(ui, TAN);
         ammo = label(ui, CREAM);
         hint = label(ui, CREAM);
+        fps = label(ui, CREAM);
         Table root = ui.root();
         root.top().pad(3f, 4f, 3f, 4f);
         Table top = new Table();
         top.add(hearts).left().expandX();
+        top.add(fps).padRight(6f);
         top.add(gold).right();
         root.add(top).growX().row();
         root.add(key).left().row();
@@ -99,6 +99,11 @@ final class Hud {
         } else {
             flash.setVisible(false);
         }
+    }
+
+    /** The FPS counter (Settings > Show FPS); empty hides it. */
+    void fps(String text) {
+        fps.setText(text);
     }
 
     /** A short line above the bottom row (for example "E: open"); empty hides it. */

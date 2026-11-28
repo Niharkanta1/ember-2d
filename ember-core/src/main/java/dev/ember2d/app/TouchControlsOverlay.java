@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.glutils.HdpiUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
@@ -41,6 +42,9 @@ final class TouchControlsOverlay implements Disposable {
     void draw(TouchControls controls, Batch batch, float width, float height) {
         TouchControlsConfig config = controls.config();
         float alpha = controls.opacity();
+        // The controls are laid out on the whole screen (their touch areas are), so draw them there and not in the
+        // game's letterboxed viewport, which the frame leaves set (a 160x144 game on a 16:9 phone has wide bars).
+        HdpiUtils.glViewport(0, 0, (int) width, (int) height);
         projection.setToOrtho2D(0f, 0f, width, height);
         batch.setProjectionMatrix(projection);
         batch.begin();
