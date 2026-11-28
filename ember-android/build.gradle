@@ -11,6 +11,7 @@ android {
     defaultConfig {
         // Android 6; decided in I-015 (ADR-015).
         minSdk = libs.versions.androidMinSdk.get().toInteger()
+        consumerProguardFiles 'consumer-rules.pro'   // applied to every game's release build (R8)
     }
 
     compileOptions {
@@ -23,5 +24,7 @@ android {
 dependencies {
     api project(':ember-core')
     api libs.gdx.backend.android
+    // Gamepads (F-005, I-530): the Android backend gdx-controllers picks; its keep rule is in consumer-rules.pro.
+    implementation libs.gdx.controllers.android
     coreLibraryDesugaring libs.android.desugar
 }

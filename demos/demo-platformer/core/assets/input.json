@@ -1,13 +1,16 @@
 { "version": 1,
   "contexts": {
     "gameplay": {
-      "actions": { "jump": ["SPACE", "Z", "UP", "W"], "pause": ["P", "DOUBLE_TAP"],
-                   "menu": ["ESCAPE", "BACK", "LONG_PRESS"],
-                   "dash": ["X", "L_SHIFT"] },
-      "axes": { "move": { "left": ["LEFT", "A"], "right": ["RIGHT", "D"], "up": ["UP", "W"], "down": ["DOWN", "S"] } } },
+      "actions": { "jump": ["SPACE", "Z", "UP", "W", "PAD_A"], "pause": ["P", "DOUBLE_TAP", "PAD_START"],
+                   "menu": ["ESCAPE", "BACK", "LONG_PRESS", "PAD_BACK"],
+                   "dash": ["X", "L_SHIFT", "PAD_X", "PAD_R1"] },
+      "axes": { "move": { "left": ["LEFT", "A", "PAD_LEFT", "PAD_LSTICK_LEFT"], "right": ["RIGHT", "D", "PAD_RIGHT", "PAD_LSTICK_RIGHT"],
+                          "up": ["UP", "W", "PAD_UP", "PAD_LSTICK_UP"], "down": ["DOWN", "S", "PAD_DOWN", "PAD_LSTICK_DOWN"] } } },
     "ui": {
-      "actions": { "ui_back": ["ESCAPE", "BACK", "P"], "ui_confirm": ["ENTER", "SPACE", "Z"], "crates_reset": ["R"] },
-      "axes": { "ui_nav": { "left": ["LEFT", "A"], "right": ["RIGHT", "D"], "up": ["UP", "W"], "down": ["DOWN", "S"] } } } },
+      "actions": { "ui_back": ["ESCAPE", "BACK", "P", "PAD_B", "PAD_START"], "ui_confirm": ["ENTER", "SPACE", "Z", "PAD_A"],
+                   "crates_reset": ["R", "PAD_Y"] },
+      "axes": { "ui_nav": { "left": ["LEFT", "A", "PAD_LEFT", "PAD_LSTICK_LEFT"], "right": ["RIGHT", "D", "PAD_RIGHT", "PAD_LSTICK_RIGHT"],
+                            "up": ["UP", "W", "PAD_UP", "PAD_LSTICK_UP"], "down": ["DOWN", "S", "PAD_DOWN", "PAD_LSTICK_DOWN"] } } } },
   "touchControls": {
     "opacity": 0.35,
     "joystick": { "axis": "move", "mode": "floating", "radius": 56, "deadZone": 0.2 },

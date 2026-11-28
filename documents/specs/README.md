@@ -14,7 +14,7 @@ Specifications define feature scope, behaviour, API boundaries and acceptance cr
 | F-010 | Scenes, data, prefabs, component registry | 1, 2, 3 | `ember.app`, `ember.scene`, `ember.data` | Scene lifecycle Ready; rest Draft |
 | F-014 | Debug overlay and particles | 1, 6 | `ember.debug`, `ember.particles` | Overlay (Phase 1) and particles (I-510) Ready; rest Draft |
 | F-022 | Android platform and touch input | 1, 2, 3 | `ember-android`, `ember.input` | Launcher Ready; rest Draft |
-| F-005 | Input actions | 2, 3, 6 | `ember.input` | Draft |
+| F-005 | Input actions | 2, 3, 6 | `ember.input` | Ready (I-100, I-530); rebinding UI Draft |
 | F-006 | Physics: kinematic collision | 2 | `ember.collision` | Draft |
 | F-007 | Animation and animation state machine | 2, 6 | `ember.animation` | Draft |
 | F-009 | Tilemaps and entity placement (Tiled) | 2, 3 | `ember.tilemap` | Draft |

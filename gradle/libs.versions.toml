@@ -3,6 +3,7 @@
 
 [versions]
 gdx = "1.14.2"
+gdxControllers = "2.2.4"   # gamepads (F-005, I-530)
 agp = "9.5.2"
 desugarJdkLibs = "2.1.5"
 junit = "6.1.3"
@@ -38,6 +39,9 @@ gdx-freetype = { module = "com.badlogicgames.gdx:gdx-freetype", version.ref = "g
 gdx-freetype-platform = { module = "com.badlogicgames.gdx:gdx-freetype-platform", version.ref = "gdx" }
 gdx-box2d = { module = "com.badlogicgames.gdx:gdx-box2d", version.ref = "gdx" }                       # ember-box2d (F-006B, I-500)
 gdx-box2d-platform = { module = "com.badlogicgames.gdx:gdx-box2d-platform", version.ref = "gdx" }
+gdx-controllers-core = { module = "com.badlogicgames.gdx-controllers:gdx-controllers-core", version.ref = "gdxControllers" }
+gdx-controllers-desktop = { module = "com.badlogicgames.gdx-controllers:gdx-controllers-desktop", version.ref = "gdxControllers" }
+gdx-controllers-android = { module = "com.badlogicgames.gdx-controllers:gdx-controllers-android", version.ref = "gdxControllers" }
 gdx-ai = { module = "com.badlogicgames.gdx:gdx-ai", version.ref = "gdxAi" }
 blade-ink = { module = "com.bladecoder.ink:blade-ink", version.ref = "bladeInk" }
 android-desugar = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugarJdkLibs" }

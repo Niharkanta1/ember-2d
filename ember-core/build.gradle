@@ -9,6 +9,8 @@ dependencies {
     api libs.gdx.core
     // FreeType fonts rendered at load time (F-004, I-140); natives come from the platform modules.
     implementation libs.gdx.freetype
+    // Gamepads (F-005, I-530): the controller API; the desktop and Android backends come from the platform modules.
+    implementation libs.gdx.controllers.core
 
     // Shared architecture rules (EmberArchitectureRules), reused by the kits' and demos' architecture tests.
     testFixturesApi libs.archunit

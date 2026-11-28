@@ -186,6 +186,7 @@ public class EmberGame implements ApplicationListener {
             context.scenes().push(Objects.requireNonNull(config.firstScene.get(), "EngineConfig.firstScene returned null"));
             context.scenes().applyPending();   // enter now, so a broken first scene fails at boot
         }
+        input.pollGamepadNow();    // starts the controller backend now, not in the first game frame (I-530)
         loop.resetAccumulator();   // the first frame is long (boot); do not catch up on it
         state = AppState.RUNNING;
         if (config.devMode) {

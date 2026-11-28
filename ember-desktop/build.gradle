@@ -11,4 +11,6 @@ dependencies {
     api platform(libs.lwjgl.bom)
     runtimeOnly variantOf(libs.gdx.platform) { classifier('natives-desktop') }
     runtimeOnly variantOf(libs.gdx.freetype.platform) { classifier('natives-desktop') }
+    // Gamepads (F-005, I-530): the jamepad (SDL) backend gdx-controllers picks on desktop.
+    runtimeOnly libs.gdx.controllers.desktop
 }

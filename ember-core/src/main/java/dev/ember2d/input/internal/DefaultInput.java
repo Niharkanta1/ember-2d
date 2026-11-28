@@ -7,6 +7,9 @@ import com.badlogic.gdx.utils.IntArray;
 import com.badlogic.gdx.utils.ObjectIntMap;
 import dev.ember2d.core.Time;
 import dev.ember2d.event.EventBus;
+import dev.ember2d.core.Log;
+import dev.ember2d.input.GamepadConnected;
+import dev.ember2d.input.GamepadDisconnected;
 import dev.ember2d.input.Input;
 import dev.ember2d.input.InputBindings;
 import dev.ember2d.input.InputCapture;
@@ -29,7 +32,13 @@ import java.util.Objects;
  */
 public final class DefaultInput implements Input {
 
-    private static final float DIAGONAL = (float) (1.0 / Math.sqrt(2.0));
+    /** Gamepads (I-530): radial stick dead zone, and the action thresholds for analog inputs (with hysteresis). */
+    private static final Log LOG = Log.get("input");
+    static final float PAD_DEAD_ZONE = 0.2f;
+    static final float PAD_PRESS = 0.5f;
+    static final float PAD_RELEASE = 0.4f;
+    private static final int LSTICK = InputNames.PAD_NAMES.indexOf("PAD_LSTICK_LEFT");
+    private static final int RSTICK = InputNames.PAD_NAMES.indexOf("PAD_RSTICK_LEFT");
 
     private final Time time;
     private final EventBus events;
@@ -56,6 +65,10 @@ public final class DefaultInput implements Input {
 
     // Physical inputs (InputNames codes)
     private final boolean[] physicalDown = new boolean[InputNames.COUNT];
+    private final float[] analog = new float[InputNames.COUNT];   // pad inputs' strength 0..1 (I-530)
+    private final float[] padValues = new float[InputNames.PAD_COUNT];
+    private GamepadSource gamepads = new GdxGamepads();
+    private String padName;
     private final boolean[] stale = new boolean[InputNames.COUNT];   // held across a context change: up until re-pressed
     private final int[] owner = new int[InputNames.COUNT];           // context index that receives the input, or -1
 
@@ -91,6 +104,11 @@ public final class DefaultInput implements Input {
         this.time = Objects.requireNonNull(time, "time");
         this.events = Objects.requireNonNull(events, "events");
         setBindings(InputBindings.empty());
+    }
+
+    /** Replaces the gamepad source (tests); the default reads gdx-controllers. */
+    public void setGamepadSource(GamepadSource gamepads) {
+        this.gamepads = Objects.requireNonNull(gamepads, "gamepads");
     }
 
     /** The libGDX input processor feeding this input. */
@@ -305,6 +323,7 @@ public final class DefaultInput implements Input {
             touch.releaseAll();
             controls.reset();
             for (int code = 0; code < InputNames.COUNT; code++) {
+                analog[code] = 0f;
                 if (physicalDown[code]) {
                     apply(code, false, false, false);
                 }
@@ -325,6 +344,7 @@ public final class DefaultInput implements Input {
             apply(code, down, keyboardCaptured, pointerCaptured);
         }
         recorded.clear();
+        pollGamepad();
         if (controls.autoHidden() && hasTouchDown(source.touches())) {
             controls.setAutoHidden(false);   // a touch brings them back; the touch itself acts normally
         }
@@ -397,9 +417,11 @@ public final class DefaultInput implements Input {
         }
         float dx = direction(axisCodes[x][1], ctx) - direction(axisCodes[x][0], ctx);
         float dy = direction(axisCodes[x][2], ctx) - direction(axisCodes[x][3], ctx);
-        if (axisNormalize[x] && dx != 0f && dy != 0f) {
-            dx *= DIAGONAL;
-            dy *= DIAGONAL;
+        float length2 = dx * dx + dy * dy;
+        if (axisNormalize[x] && length2 > 1f) {   // digital diagonals become 0.707; analog sticks stay inside the circle
+            float scale = (float) (1.0 / Math.sqrt(length2));
+            dx *= scale;
+            dy *= scale;
         }
         return out.set(dx, dy);
     }
@@ -630,6 +652,82 @@ public final class DefaultInput implements Input {
         return false;
     }
 
+    /**
+     * Reads the gamepad once outside a frame, so the controller backend starts during boot rather than stalling the
+     * first game frame (I-530).
+     */
+    public void pollGamepadNow() {
+        pollGamepad();
+    }
+
+    /** Reads the pad (I-530): connection events, dead zone, hysteresis, then the same path as keys. */
+    private void pollGamepad() {
+        String name = gamepads.poll(padValues);
+        if (!Objects.equals(name, padName)) {
+            if (padName != null) {
+                releasePad();
+                events.queue(new GamepadDisconnected(padName));
+                LOG.info("Gamepad disconnected: " + padName);
+            }
+            if (name != null) {
+                events.queue(new GamepadConnected(name));
+                LOG.info("Gamepad connected: " + name);
+            }
+            padName = name;
+        }
+        if (name == null) {
+            return;
+        }
+        deadZone(LSTICK);
+        deadZone(RSTICK);
+        for (int i = 0; i < InputNames.PAD_COUNT; i++) {
+            int code = InputNames.PAD_BASE + i;
+            float v = padValues[i];
+            analog[code] = v;
+            boolean down = physicalDown[code] ? v >= PAD_RELEASE : v > PAD_PRESS;
+            if (down && !physicalDown[code] && autoHide && !controls.autoHidden() && controls.active()) {
+                releaseControls();
+                controls.setAutoHidden(true);   // a pad in use: hide the on-screen controls, like the keyboard
+            }
+            apply(code, down, keyboardCaptured, pointerCaptured);
+        }
+    }
+
+    /** A radial dead zone on one stick's four directions (left, right, up, down), rescaled to 0..1. */
+    private void deadZone(int first) {
+        float x = padValues[first + 1] - padValues[first];
+        float y = padValues[first + 2] - padValues[first + 3];
+        float length = (float) Math.sqrt(x * x + y * y);
+        float scale = 0f;
+        if (length > PAD_DEAD_ZONE) {
+            scale = Math.min(1f, (length - PAD_DEAD_ZONE) / (1f - PAD_DEAD_ZONE)) / length;
+        }
+        x *= scale;
+        y *= scale;
+        padValues[first] = Math.max(0f, -x);
+        padValues[first + 1] = Math.max(0f, x);
+        padValues[first + 2] = Math.max(0f, y);
+        padValues[first + 3] = Math.max(0f, -y);
+    }
+
+    private void releasePad() {
+        for (int i = 0; i < InputNames.PAD_COUNT; i++) {
+            int code = InputNames.PAD_BASE + i;
+            analog[code] = 0f;
+            apply(code, false, false, false);
+        }
+    }
+
+    @Override
+    public boolean gamepadConnected() {
+        return padName != null;
+    }
+
+    @Override
+    public String gamepadName() {
+        return padName == null ? "" : padName;
+    }
+
     private void touchInput(int code, boolean down) {
         apply(code, down, keyboardCaptured, pointerCaptured);
     }
@@ -718,12 +816,17 @@ public final class DefaultInput implements Input {
     }
 
     private float direction(int[] codes, int context) {
+        float strongest = 0f;
         for (int code : codes) {
-            if (live(code, context)) {
+            if (InputNames.isPad(code)) {   // analog (I-530): its strength, even below the action threshold
+                if (owner[code] == context && !stale[code]) {
+                    strongest = Math.max(strongest, analog[code]);
+                }
+            } else if (live(code, context)) {
                 return 1f;
             }
         }
-        return 0f;
+        return strongest;
     }
 
     private void clearFixedEdges() {

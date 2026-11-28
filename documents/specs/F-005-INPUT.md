@@ -1,6 +1,6 @@
 # F-005 — Input Actions
 
-- Status: Ready for the I-100 part (keyboard, mouse, contexts, back action), approved 2026-11-26; see "Decisions in I-100". Touch (I-105, F-022), settings overrides (F-013), gamepad and rebinding UI (I-530): Draft.
+- Status: Ready for the I-100 part (keyboard, mouse, contexts, back action), approved 2026-11-26; see "Decisions in I-100". Touch (I-105, F-022) and settings overrides (F-013) as specified there. Gamepad: Ready (I-530, section "Gamepad (I-530)"). Rebinding UI: Draft.
 - Phase: 2 (keyboard/mouse, touch actions, contexts), 3 (on-screen controls via F-022), 6 (gamepad, rebinding UI)
 - Module / package: `ember-core` / `ember.input`; wiring in `ember.app`; focus handling in `ember-desktop`
 - Depends on: F-002, F-008 (the bindings file is a manifest asset), F-019 (context and events), F-013 (bindings stored in settings, later)
@@ -246,3 +246,64 @@ Additions and changes made while implementing:
 - **Input processor ownership:** when Scene2D arrives (F-012), the processor becomes a multiplexer. The capture hook keeps that change small.
 - **Debug key:** the F3 debug toggle still reads `Gdx.input` directly. Moving it onto actions is not part of I-100.
 - **Focus regained:** losing focus can still drop fixed steps (S-01). I-100 only releases inputs; no accumulator reset on focus regained.
+
+## Gamepad (I-530)
+Approved 2026-11-28 (the developer approved the gdx-controllers download the same day).
+
+**Library:**
+- `gdx-controllers` 2.2.4: `gdx-controllers-core` in `ember-core`, `gdx-controllers-desktop` (jamepad, SDL) in `ember-desktop`, `gdx-controllers-android` in `ember-android`.
+- Its types stay in `dev.ember2d.input.internal`, like the backends (ADR-013).
+
+**Binding names** (Xbox layout; `PAD_A` is the bottom face button on every pad):
+
+| Group | Names |
+| --- | --- |
+| Face buttons | `PAD_A`, `PAD_B`, `PAD_X`, `PAD_Y` |
+| Menu buttons | `PAD_BACK` (View/Select/Share), `PAD_START` (Menu/Options) |
+| Shoulders and triggers | `PAD_L1`, `PAD_R1`, `PAD_L2`, `PAD_R2` |
+| Stick clicks | `PAD_L3`, `PAD_R3` |
+| D-pad | `PAD_UP`, `PAD_DOWN`, `PAD_LEFT`, `PAD_RIGHT` |
+| Stick directions | `PAD_LSTICK_LEFT/RIGHT/UP/DOWN`, `PAD_RSTICK_LEFT/RIGHT/UP/DOWN` |
+
+They go in the same action and axis lists as keys:
+```json
+"jump": ["SPACE", "PAD_A"],
+"move": { "left": ["A", "PAD_LEFT", "PAD_LSTICK_LEFT"], "right": ["D", "PAD_RIGHT", "PAD_LSTICK_RIGHT"] }
+```
+
+**Analog:**
+- **Stick directions are analog in axes.** A radial dead zone of 0.2 is applied, the rest is rescaled to 0–1, and `axis`/`axis2` return the strength.
+- `axis2` with `normalize` clamps the vector to length 1 (for digital diagonals this is the same 0.707 as before).
+- **As actions**, a stick direction or trigger is pressed past 0.5 and released below 0.4 (hysteresis), so menus can be driven with the stick.
+- Buttons are 0 or 1.
+
+**Which pad:** the most recently used connected controller (`Controllers.getCurrent()`). One player; local multiplayer is a non-goal.
+
+**Polling:** read once per frame at the start of the input phase (no listener threads).
+
+**Connection:**
+- `GamepadConnected(name)` and `GamepadDisconnected(name)` (new events in `dev.ember2d.input`) are queued when the current pad appears, changes or goes away.
+- A disconnect releases every pad input, so nothing stays pressed.
+- `Input.gamepadConnected()` and `Input.gamepadName()` (empty when none) are for UI hints.
+
+**On-screen controls:** pad input hides them like the keyboard does (auto-hide); a touch brings them back.
+
+**Headless and tests:** without a running app (`Gdx.app == null`) the pad source does nothing. Tests inject a fake `GamepadSource`. A backend that fails to start is logged once and ignored.
+
+**R8:** gdx-controllers creates its Android manager by name. `ember-android` ships the keep rule as consumer rules, so games add nothing.
+
+**Demo:** the platformer demo is fully playable with a pad:
+- stick or D-pad to move;
+- A to jump, X or R1 to dash, Start to pause, Back for the menu;
+- the menus work with the stick or D-pad, A to confirm and B to go back.
+
+**Rebinding UI:** still Draft, not part of I-530. `rebindAction`/`resetBinding` and the saved overrides (F-013) exist; a "press a button" screen is a later task.
+
+**Tests:**
+- binding names;
+- analog axes with the dead zone and clamping;
+- action hysteresis;
+- context ownership for pad inputs;
+- connect, disconnect and release;
+- auto-hide of touch controls;
+- the fake source.

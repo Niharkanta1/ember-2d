@@ -45,5 +45,6 @@ dependencies {
     implementation libs.gdx.ai   // kit-topdown's AI adapter (I-330)
     implementation libs.blade.ink   // kit-common's DialogueRunner (I-420)
     implementation libs.gdx.box2d   // ember-box2d (I-500)
+    implementation libs.gdx.controllers.core   // ember-core's gamepad source (I-530)
     coreLibraryDesugaring libs.android.desugar
 }

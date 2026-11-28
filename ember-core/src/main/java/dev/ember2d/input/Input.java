@@ -78,6 +78,12 @@ public interface Input {
     /** True while the on-screen controls (F-022, I-122) are configured and shown. */
     boolean touchControlsActive();
 
+    /** True while a gamepad is connected (F-005, I-530); for button hints in the UI. */
+    boolean gamepadConnected();
+
+    /** The connected gamepad's name, or "" when none is connected. */
+    String gamepadName();
+
     /** The on-screen joystick's value (x right, y up, length 0-1), zero while it is not held. Returns {@code out}. */
     Vector2 joystickValue(Vector2 out);
 
