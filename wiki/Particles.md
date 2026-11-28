@@ -3,7 +3,7 @@
 Package `ember.particles` (`Particles`, `ParticleSource`, `ParticleSystem`). Spec F-014 part B, ADR-014. Ember2D wraps libGDX's `ParticleEffect` and adds pooling, world units, render layers and entity attachment.
 
 ## 1. Effect files
-Effects are libGDX particle editor files (`.p`), with their images next to them:
+Effects are libGDX particle editor files (`.p`), with their images next to them. Design them in **GDX Particle Editor** and register them with `assetManifest` ([Working Without an Editor](Working-Without-an-Editor#7-particle-effects)).
 ```json
 { "id": "fx.hit",  "path": "fx/hit.p",  "type": "particle", "group": "global" },
 { "id": "fx.dust", "path": "fx/dust.p", "type": "particle", "group": "global" }

@@ -18,6 +18,7 @@ This wiki is the developer handbook. It has four parts:
 | Build the engine and run a demo in 10 minutes | [Getting Started](Getting-Started) |
 | Understand how Ember2D is organised | [Architecture Overview](Architecture-Overview), [Design Principles](Design-Principles) |
 | Start your own game | [Creating a New Game Project](Creating-a-New-Game-Project) |
+| Make prefabs, enemies, manifests, clips, cameras and effects without an editor | [Working Without an Editor](Working-Without-an-Editor) |
 | Learn one subsystem | the **Engine reference** in the sidebar |
 | Build a complete game in a genre | the **Game guides** in the sidebar |
 | Ship it | [Building for Desktop](Building-for-Desktop), [Building for Android](Building-for-Android) |

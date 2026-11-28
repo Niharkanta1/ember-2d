@@ -34,6 +34,7 @@ The main class names come from the name: `forest-run` → `ForestRunGame` (the c
   - Classes: the config, an empty component setup, and one `MainScene` that shows the title as world text (gently bobbing, a tween), a hint label in the UI, and quits on Escape (desktop) or Back (Android).
   - Assets: the Press Start 2P font with its licence, `manifest.json`, `input.json` and `ART-CREDITS.txt`.
   - Tests: an architecture test.
+  - A `tiledTypes` task writing `assets/maps/<gameName>.tiled-project` (added in I-590 for the I-550 review).
   - The `desktop` and `android` modules come from the shooter demo (no Ink step).
 - `platformer`, `shooter`, `rpg`, `novel`: a full copy of the demo, assets and tests included, with every name changed.
 

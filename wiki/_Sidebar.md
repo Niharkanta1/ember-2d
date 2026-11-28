@@ -3,6 +3,7 @@
 **Start**
 - [Getting Started](Getting-Started)
 - [Creating a New Game Project](Creating-a-New-Game-Project)
+- [Working Without an Editor](Working-Without-an-Editor)
 
 **Architecture**
 - [Architecture Overview](Architecture-Overview)

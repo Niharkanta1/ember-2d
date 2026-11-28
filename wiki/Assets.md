@@ -3,7 +3,7 @@
 Package `ember.assets` (`Assets`, `AsyncLoad`, `AssetReloaded`, `AssetReloadFailed`). Spec F-008. Games refer to every image, sound, map and data file by an **ID** listed in a manifest, never by a file path.
 
 ## 1. The manifest
-`core/assets/manifest.json` (the path is `EngineConfig.assetManifest`):
+`core/assets/manifest.json` (the path is `EngineConfig.assetManifest`). **You don't have to write it:** drop files into `core/assets/` and run `./gradlew assetManifest -Pgame=<game>`, which adds every new file with a type and ID and keeps your existing entries ([Working Without an Editor](Working-Without-an-Editor#4-the-asset-manifest)). The format:
 ```json
 { "version": 1, "assets": [
   { "id": "atlas.shooter", "path": "gfx/shooter.atlas", "type": "atlas", "group": "global" },

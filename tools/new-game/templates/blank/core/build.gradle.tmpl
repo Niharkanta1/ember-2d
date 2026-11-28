@@ -11,3 +11,14 @@ dependencies {
     // api project(':kits:kit-common')
     // api project(':kits:kit-platformer')
 }
+
+// Tiled custom types (F-009): writes every registered component and prefab into a Tiled project, so maps can place
+// prefabs as object classes and override their fields per object. Run it after adding a component or prefab, then
+// open assets/maps/@NAME@.tiled-project in Tiled: ./gradlew :demos:@NAME@:core:tiledTypes
+tasks.register('tiledTypes', JavaExec) {
+    description = 'Writes prefab and component types into assets/maps/@NAME@.tiled-project (F-009).'
+    group = 'ember2d'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'dev.ember2d.data.TiledTypes'
+    args '@PACKAGE@.@COMPONENTS@', file('assets').path, file('assets/maps/@NAME@.tiled-project').path
+}

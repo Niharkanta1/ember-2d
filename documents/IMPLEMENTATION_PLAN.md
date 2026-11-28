@@ -106,10 +106,11 @@ Time-boxed throwaway prototypes (`templates/SPIKE_TEMPLATE.md`). Code is deleted
 - **I-510 Particles** (F-014)
 - **I-520 Shaders and materials** — hit flash, outline, palette swap (F-026)
 - **I-530 Gamepad** (F-005)
-- **I-550 Standalone editor decision** (ADR-009 review)
-- **I-560 ember-spine** (ADR-021, F-007; only with a Spine license)
-- **I-570 iOS decision** (ADR-019 review; spike first if pursued)
+- **I-550 Standalone editor decision** (ADR-009 review) — done 2026-11-28: no editor; the jobs it would do are documented in the wiki page Working-Without-an-Editor
+- **I-560 ember-spine** (ADR-021, F-007; only with a Spine license) — skipped by the developer (2026-11-28)
+- **I-570 iOS decision** (ADR-019 review; spike first if pursued) — skipped by the developer (2026-11-28)
 - **I-580 Project generator** — `./gradlew newGame` creates a game under `demos/` from a blank or demo template (F-027)
+- **I-590 Asset tools** — `assetManifest` and `makeClips` generate the manifest and clip sets (F-028)
 
 - **G-6 Guide chapters** — one chapter per adopted extra in `documents/guide/`; developer review and approval required
 

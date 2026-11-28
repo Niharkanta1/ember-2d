@@ -1,0 +1,52 @@
+plugins {
+    id 'java'
+}
+
+description = 'Asset tools (F-028, I-590): generate manifest.json entries and clip sets from the asset files.'
+
+dependencies {
+    implementation libs.gdx.core   // JsonReader and JsonValue only; no natives are loaded
+}
+
+def assetsOf = { String game ->
+    if (game == null || game.isBlank()) {
+        throw new GradleException('Pass -Pgame=<folder under demos/>, for example -Pgame=demo-platformer')
+    }
+    rootProject.file("demos/${game}/core/assets").absolutePath
+}
+
+// ./gradlew assetManifest -Pgame=my-game [-Pprune=true]
+tasks.register('assetManifest', JavaExec) {
+    group = 'ember2d'
+    description = 'Adds every new asset file of a game to its manifest.json (F-028). Needs -Pgame.'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'dev.ember2d.tools.assets.AssetTools'
+    workingDir = rootDir
+    def game = providers.gradleProperty('game').orElse('')
+    def prune = providers.gradleProperty('prune').orElse('false')
+    argumentProviders.add({
+        ['manifest', "--assets=${assetsOf(game.get())}", "--prune=${prune.get()}"]
+    } as CommandLineArgumentProvider)
+}
+
+// ./gradlew makeClips -Pgame=my-game -Pfrom=gfx/hero [-Pname=hero] [-Pframe=32x32] [-Pduration=0.1]
+tasks.register('makeClips', JavaExec) {
+    group = 'ember2d'
+    description = 'Writes anim/<name>.clips.json from a folder of sprite strips or an Aseprite export (F-028).'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'dev.ember2d.tools.assets.AssetTools'
+    workingDir = rootDir
+    def game = providers.gradleProperty('game').orElse('')
+    def from = providers.gradleProperty('from').orElse('')
+    def name = providers.gradleProperty('name').orElse('')
+    def frame = providers.gradleProperty('frame').orElse('')
+    def duration = providers.gradleProperty('duration').orElse('')
+    argumentProviders.add({
+        ['clips', "--assets=${assetsOf(game.get())}", "--from=${from.get()}", "--name=${name.get()}",
+         "--frame=${frame.get()}", "--duration=${duration.get()}"]
+    } as CommandLineArgumentProvider)
+}
+
+tasks.named('test', Test) {
+    systemProperty 'ember.repo', rootDir.absolutePath
+}

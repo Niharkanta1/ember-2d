@@ -5,6 +5,7 @@
 | **Actor** | a body moved only through `Collision`; actors never block each other |
 | **Asset group** | a named set of manifest entries loaded and unloaded together; `global` loads at boot |
 | **Asset ID** | the name a game uses for an asset (`atlas.shooter`, `map.room`); never a file path |
+| **`assetManifest`** | the Gradle task that adds new asset files to a game's `manifest.json` |
 | **Backlog** | the last 100 lines of a novel scene, with voice replay |
 | **CG** | a full-screen picture in a novel, unlocked when shown and listed in the gallery |
 | **Clip set** | JSON naming the frames of each animation clip |
@@ -23,6 +24,7 @@
 | **Keep rules** | R8 rules generated from your `ComponentSetup` so minified Android builds keep your components |
 | **Kit** | an optional gameplay module for a genre |
 | **Layer content** | something drawn inside a render layer besides sprites (tiles, bullets, particles) |
+| **`makeClips`** | the Gradle task that writes a clip set from sprite strips or an Aseprite export |
 | **Manifest** | `manifest.json`, the list of all assets |
 | **Marker** | an empty prefab placed in a map as a named position (arrival points) |
 | **Material** | a sprite effect drawn with the built-in shader: flash, outline, palette swap |

@@ -84,6 +84,7 @@ world.addSystem(new AnimationSystem(world, clips, context.events()));           
 ```
 
 ## 4. Hot reload and tools
+- **Generate clip sets** instead of writing them: `./gradlew makeClips -Pgame=<game> -Pfrom=gfx/hero` (a folder of sprite strips) or `-Pfrom=anim/hero.json` (an Aseprite export, one clip per tag). See [Working Without an Editor](Working-Without-an-Editor#5-animation-clips).
 - Saving a clip set or state machine in a dev run switches animators on their next update.
 - The dev tools' **Animation** panel shows the state, the time in state and the last transition. You can change parameters and fire triggers there.
 

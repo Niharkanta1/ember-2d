@@ -32,7 +32,7 @@ The generator checks everything first and lists every problem together. It write
 ./gradlew :demos:my-game:core:test                # your tests and the architecture rules
 ./gradlew :demos:my-game:android:installDebug     # on a connected device or emulator
 ```
-Reload the Gradle project in your IDE so it picks up the new modules.
+Reload the Gradle project in your IDE so it picks up the new modules. Then add art, prefabs and animations with the generators and tools in [Working Without an Editor](Working-Without-an-Editor).
 
 ## 2. Pick a template
 | Template | Your game | Kits it brings | What you get |
