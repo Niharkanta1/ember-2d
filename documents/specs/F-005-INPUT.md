@@ -1,6 +1,6 @@
 # F-005 — Input Actions
 
-- Status: Ready for the I-100 part (keyboard, mouse, contexts, back action), approved 2026-11-26; see "Decisions in I-100". Touch (I-105, F-022) and settings overrides (F-013) as specified there. Gamepad: Ready (I-530, section "Gamepad (I-530)"). Rebinding UI: Draft.
+- Status: Ready for the I-100 part (keyboard, mouse, contexts, back action), approved 2026-11-26; see "Decisions in I-100". Touch (I-105, F-022) and settings overrides (F-013) as specified there. Gamepad: Ready (I-530, section "Gamepad (I-530)"). Rebinding UI: Ready (I-535, section "Rebinding UI (I-535)").
 - Phase: 2 (keyboard/mouse, touch actions, contexts), 3 (on-screen controls via F-022), 6 (gamepad, rebinding UI)
 - Module / package: `ember-core` / `ember.input`; wiring in `ember.app`; focus handling in `ember-desktop`
 - Depends on: F-002, F-008 (the bindings file is a manifest asset), F-019 (context and events), F-013 (bindings stored in settings, later)
@@ -297,7 +297,7 @@ They go in the same action and axis lists as keys:
 - A to jump, X or R1 to dash, Start to pause, Back for the menu;
 - the menus work with the stick or D-pad, A to confirm and B to go back.
 
-**Rebinding UI:** still Draft, not part of I-530. `rebindAction`/`resetBinding` and the saved overrides (F-013) exist; a "press a button" screen is a later task.
+**Rebinding UI:** see "Rebinding UI (I-535)" below.
 
 **Tests:**
 - binding names;
@@ -307,3 +307,38 @@ They go in the same action and axis lists as keys:
 - connect, disconnect and release;
 - auto-hide of touch controls;
 - the fake source.
+
+## Rebinding UI (I-535)
+Approved 2026-11-28 (the developer asked for the "press a button" rebinding screen after I-530).
+
+**Engine (`Input`):**
+- **Listening:** `listenForInput(Set<InputDevice> devices, Consumer<String> onInput, Runnable onCancel)` waits for the next press of a key (`KEYBOARD`), mouse button (`MOUSE`) or pad input (`GAMEPAD`) of the given devices, and calls `onInput` with its binding name.
+  - The press is swallowed: it does not trigger any action.
+  - Escape and Android Back cancel instead (`onCancel`); they cannot be bound through listening.
+  - While listening, presses of keyboard and pad inputs that are not wanted are swallowed too. Touch and the mouse keep working, so the UI stays usable.
+  - `stopListening()` and `isListening()`.
+- **Axis directions:** `rebindAxis(axis, direction, inputs)` and `axisInputs(axis, direction)` (`left/right/up/down` or `negative/positive`). These overrides are saved like action overrides, under the key `axis:direction` (`move:left`).
+- **Resetting:** `resetBinding(name)` accepts an action or `axis:direction`; `resetAllBindings()` removes every override.
+- **`InputDevice`** (enum `KEYBOARD`, `MOUSE`, `TOUCH`, `GAMEPAD`) with `InputDevice.of(name)`; null for names that are not inputs.
+
+**Widget (`ember.ui.RebindMenu`):**
+- **Opening:** `RebindMenu.open(ui, entries, onDone)` shows a full-screen panel above the scene. Entries come from `RebindMenu.action("jump", "Jump")` and `RebindMenu.axis("move", "left", "Move left")`.
+- **Device switch:** the first row switches between **Keyboard** and **Gamepad**. It starts on Gamepad when a pad is connected.
+- **Rows:** one per entry, showing the label and the current inputs of that device (`Jump   Space, Z`; `Jump   A`).
+- **Rebinding a row:** activating it shows `press a key` or `press a button` and listens on that device for 5 seconds.
+  - The new input **replaces that device's inputs** of the entry. Its other inputs (the other device, touch gestures, mouse buttons for keyboard rows) are kept.
+  - If the input is also bound to another row of the menu, a line says so (`Z is also: Dash`). Both bindings stay, because the demos bind one key to two things on purpose (UP for jump and move up). Actions not in the menu (the `ui` context) are not checked.
+- **Other rows:** **Reset all**, then **Done** (also `ui_back`), which calls `onDone`. The game saves the settings there (`context.saveSettings()`).
+- **Labels:** `RebindMenu.label(name)` gives readable names: `SPACE` → `Space`, `L_SHIFT` → `L Shift`, `PAD_A` → `A`, `PAD_LSTICK_LEFT` → `L-stick left`, `PAD_L1` → `LB`, `PAD_R2` → `RT`, `PAD_START` → `Start`, `PAD_BACK` → `View`.
+- **Touch:** on a touch-only device the menu still works by tapping, but there is nothing to bind without a keyboard or pad. Games show it only when a keyboard or pad exists (the platformer: on desktop, or when a pad is connected).
+
+**Demo:** platformer Settings → **Controls**: jump, dash, pause, move left/right/up/down.
+
+**Non-goals:** binding touch gestures or on-screen buttons (their layout is edited with `TouchLayoutEditor`), several inputs per device in one step (the file can still list several), and per-player bindings.
+
+**Tests:**
+- listening: delivery, swallowing, device filter, cancel keys, stop;
+- axis overrides: apply, save, load, reset;
+- `resetAllBindings`;
+- `InputDevice.of`;
+- the widget headless: device switch, replace-by-device, conflicts, timeout, labels.

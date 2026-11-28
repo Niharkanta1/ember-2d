@@ -232,7 +232,7 @@ Effects are libGDX particle files (`.p`) plus their images.
 | Sound effects and music | Audacity, jsfxr-style generators, a DAW | drop into `sfx/` or `music/`, then `assetManifest` |
 | UI skins | **Skin Composer** (libGDX Scene2D skin editor) | the `.json` + `.atlas` pair is detected as a `skin` |
 | Dialogue, quests, novel scripts | **Ink** (Inky editor) | compile with `compileInk` ([Build Differences per Kit](Build-Differences-per-Kit)) |
-| Input bindings | `input.json` | short and hand-written; the player rebinding UI is not built yet |
+| Input bindings | `input.json` | short and hand-written; players rebind in-game with `RebindMenu` ([Input](Input)) |
 | Tuning values (speed, jump, damage) | dev tools **Inspector** (F1) | change live, then **Copy as prefab JSON** |
 | Bullet patterns | pattern JSON (kit-bullets) | hand-written; reload live while the game runs |
 | Text in several languages | JSON string tables in `i18n/` (`strings.<language>`) | [Localisation](Localisation); `assetManifest` names them |
@@ -240,7 +240,7 @@ Effects are libGDX particle files (`.p`) plus their images.
 **Still hand-written today:**
 - animation state machines (`*.asm.json`);
 - bullet patterns;
-- `input.json`;
+- `input.json` (players can still rebind in the game);
 - prefabs that are not made with the inspector.
 
 All of them are short, validated when they load (errors name the file and field), and hot reloaded in dev runs.

@@ -104,7 +104,12 @@ public final class EngineSettings {
                     }
                 }
                 try {
-                    input.rebindAction(action, inputs);
+                    int colon = action.indexOf(':');   // "move:left": an axis direction (I-535)
+                    if (colon < 0) {
+                        input.rebindAction(action, inputs);
+                    } else {
+                        input.rebindAxis(action.substring(0, colon), action.substring(colon + 1), inputs);
+                    }
                 } catch (IllegalArgumentException e) {
                     skip(BINDINGS + "." + action, e.getMessage());
                 }

@@ -11,6 +11,7 @@ import dev.ember2d.core.Log;
 import dev.ember2d.input.GamepadConnected;
 import dev.ember2d.input.GamepadDisconnected;
 import dev.ember2d.input.Input;
+import dev.ember2d.input.InputDevice;
 import dev.ember2d.input.InputBindings;
 import dev.ember2d.input.InputCapture;
 import dev.ember2d.input.InputContextChanged;
@@ -18,11 +19,14 @@ import dev.ember2d.input.TouchControlsConfig;
 import dev.ember2d.input.TouchLayout;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * The engine's {@link Input} (F-005). The engine drives it: {@link #beginFrame()} at the start of the {@code INPUT}
@@ -68,6 +72,9 @@ public final class DefaultInput implements Input {
     private final float[] analog = new float[InputNames.COUNT];   // pad inputs' strength 0..1 (I-530)
     private final float[] padValues = new float[InputNames.PAD_COUNT];
     private GamepadSource gamepads = new GdxGamepads();
+    private Set<InputDevice> listenDevices;
+    private Consumer<String> listenInput;
+    private Runnable listenCancel;
     private String padName;
     private final boolean[] stale = new boolean[InputNames.COUNT];   // held across a context change: up until re-pressed
     private final int[] owner = new int[InputNames.COUNT];           // context index that receives the input, or -1
@@ -131,12 +138,19 @@ public final class DefaultInput implements Input {
         for (Iterator<Map.Entry<String, List<String>>> it = overrides.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry<String, List<String>> e = it.next();
             try {
-                effective = effective.withActionInputs(e.getKey(), e.getValue());
+                effective = withOverride(effective, e.getKey(), e.getValue());
             } catch (IllegalArgumentException ex) {
                 it.remove();
             }
         }
         apply(effective);
+    }
+
+    /** An override key is an action name or {@code axis:direction} (I-535). */
+    private static InputBindings withOverride(InputBindings b, String key, List<String> inputs) {
+        int colon = key.indexOf(':');
+        return colon < 0 ? b.withActionInputs(key, inputs)
+                : b.withAxisInputs(key.substring(0, colon), key.substring(colon + 1), inputs);
     }
 
     @Override
@@ -147,14 +161,88 @@ public final class DefaultInput implements Input {
     }
 
     @Override
+    public void rebindAxis(String axis, String direction, List<String> inputs) {
+        InputBindings next = bindings.withAxisInputs(axis, direction, inputs);   // validates
+        overrides.put(axis + ":" + direction, List.copyOf(next.axisInputs(axis, direction)));
+        reapplyKeepingContexts(next);
+    }
+
+    @Override
+    public List<String> axisInputs(String axis, String direction) {
+        return bindings.axisInputs(axis, direction);
+    }
+
+    @Override
     public void resetBinding(String action) {
         if (overrides.remove(action) != null) {
-            InputBindings effective = fileBindings;
-            for (Map.Entry<String, List<String>> e : overrides.entrySet()) {
-                effective = effective.withActionInputs(e.getKey(), e.getValue());
-            }
-            reapplyKeepingContexts(effective);
+            reapplyOverrides();
         }
+    }
+
+    @Override
+    public void resetAllBindings() {
+        if (!overrides.isEmpty()) {
+            overrides.clear();
+            reapplyOverrides();
+        }
+    }
+
+    private void reapplyOverrides() {
+        InputBindings effective = fileBindings;
+        for (Map.Entry<String, List<String>> e : overrides.entrySet()) {
+            effective = withOverride(effective, e.getKey(), e.getValue());
+        }
+        reapplyKeepingContexts(effective);
+    }
+
+    // ---- Listening for a new input (I-535) ----
+
+    @Override
+    public void listenForInput(Set<InputDevice> devices, Consumer<String> onInput, Runnable onCancel) {
+        if (devices == null || devices.isEmpty()) {
+            throw new IllegalArgumentException("listenForInput needs at least one device");
+        }
+        listenDevices = EnumSet.copyOf(devices);
+        listenInput = Objects.requireNonNull(onInput, "onInput");
+        listenCancel = Objects.requireNonNull(onCancel, "onCancel");
+    }
+
+    @Override
+    public void stopListening() {
+        listenDevices = null;
+        listenInput = null;
+        listenCancel = null;
+    }
+
+    @Override
+    public boolean isListening() {
+        return listenInput != null;
+    }
+
+    /** A new press while listening: delivered, cancelled or swallowed. Returns true if it was handled here. */
+    private boolean listened(int code) {
+        if (listenInput == null) {
+            return false;
+        }
+        String name = InputNames.name(code);
+        InputDevice device = name == null ? null : InputDevice.of(name);
+        boolean cancel = code == com.badlogic.gdx.Input.Keys.ESCAPE || code == com.badlogic.gdx.Input.Keys.BACK;
+        boolean wanted = device != null && listenDevices.contains(device);
+        if (!cancel && !wanted && device != InputDevice.KEYBOARD && device != InputDevice.GAMEPAD) {
+            return false;   // touch and unwanted mouse buttons keep working for the UI
+        }
+        physicalDown[code] = true;
+        stale[code] = true;   // swallowed: no action until it is pressed again
+        Consumer<String> onInput = listenInput;
+        Runnable onCancel = listenCancel;
+        if (cancel) {
+            stopListening();
+            onCancel.run();
+        } else if (wanted) {
+            stopListening();
+            onInput.accept(name);
+        }
+        return true;
     }
 
     @Override
@@ -685,6 +773,9 @@ public final class DefaultInput implements Input {
             float v = padValues[i];
             analog[code] = v;
             boolean down = physicalDown[code] ? v >= PAD_RELEASE : v > PAD_PRESS;
+            if (down != physicalDown[code] && LOG.isEnabled(dev.ember2d.core.LogLevel.DEBUG)) {
+                LOG.debug("Pad " + InputNames.PAD_NAMES.get(i) + (down ? " down" : " up") + " (" + v + ")");
+            }
             if (down && !physicalDown[code] && autoHide && !controls.autoHidden() && controls.active()) {
                 releaseControls();
                 controls.setAutoHidden(true);   // a pad in use: hide the on-screen controls, like the keyboard
@@ -746,8 +837,11 @@ public final class DefaultInput implements Input {
 
     private void apply(int code, boolean down, boolean keyboardCaptured, boolean pointerCaptured) {
         if (down) {
-            boolean pointer = code >= InputNames.MOUSE_BASE;
+            boolean pointer = code >= InputNames.MOUSE_BASE && !InputNames.isPad(code);
             if (physicalDown[code] || (pointer ? pointerCaptured : keyboardCaptured)) {
+                return;
+            }
+            if (listened(code)) {
                 return;
             }
             physicalDown[code] = true;

@@ -55,16 +55,32 @@ String name = input.gamepadName();
 ## 6. Limits
 - **Players:** one player (the current pad). Local multiplayer with one pad per player is not supported.
 - **Feedback:** no pad vibration or light bar control.
-- **Rebinding:** there is no rebinding screen yet. `input.rebindAction(...)` and saved overrides (F-013) exist; a "press a button" menu is a later task.
+- **Rebinding:** use `RebindMenu` (section 7).
 - **Checked:**
   - unit tests (analog values, dead zone, hysteresis, contexts, connect and disconnect);
   - a desktop run that found the developer's XInput controller;
   - Android release (R8) start-up with the controller backend.
 - **Not yet checked:** a person playing with a pad on desktop or Android.
 
-## 7. Checklist
+## 7. Letting players rebind
+`ember.ui.RebindMenu` (I-535) is a ready-made "press a button" screen. The platformer has it under Settings → Controls:
+```java
+static final List<RebindMenu.Entry> CONTROLS = List.of(
+        RebindMenu.action("jump", "Jump"), RebindMenu.action("dash", "Dash"), RebindMenu.action("pause", "Pause"),
+        RebindMenu.axis("move", "left", "Left"), RebindMenu.axis("move", "right", "Right"),
+        RebindMenu.axis("move", "up", "Up"), RebindMenu.axis("move", "down", "Down"));
+menu.add("Controls", () -> RebindMenu.open(ui, CONTROLS, context::saveSettings));
+```
+- **Device:** the first row switches between Keyboard and Gamepad; it starts on Gamepad when a pad is connected.
+- **Rebinding a row:** pick it and press the new button within 5 seconds. Escape cancels.
+- **What changes:** the new input replaces only that device's inputs of the row, so changing the pad's jump leaves Space alone.
+- **Shared inputs:** they are reported (`Z is also: Dash`) but kept.
+- **Saving:** `context.saveSettings()` in the callback stores the changes (as overrides), and they load at the next start.
+
+## 8. Checklist
 - [ ] Pad names in every action and axis that players use, including `ui_confirm`, `ui_back` and `ui_nav`.
 - [ ] Button hints follow `GamepadConnected` and `GamepadDisconnected`.
 - [ ] Pause on disconnect.
+- [ ] A Controls screen (`RebindMenu`) for the actions players use.
 
 Reference: spec `specs/F-005-INPUT.md`, section "Gamepad (I-530)".

@@ -1,5 +1,7 @@
 package dev.ember2d.demo.platformer;
 
+import com.badlogic.gdx.Application;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -11,9 +13,11 @@ import dev.ember2d.audio.Audio;
 import dev.ember2d.audio.AudioCategory;
 import dev.ember2d.input.Input;
 import dev.ember2d.ui.MenuList;
+import dev.ember2d.ui.RebindMenu;
 import dev.ember2d.ui.TouchLayoutEditor;
 import dev.ember2d.ui.Ui;
 import dev.ember2d.ui.UiSkins;
+import java.util.List;
 
 /** UI pieces shared by the demo's scenes (I-220): the pixel skin, panels and the settings menu. */
 final class DemoUi {
@@ -51,6 +55,12 @@ final class DemoUi {
      * controls" (it reopens the settings with {@code reopen} when done); and Back. Leaving the menu saves the settings
      * (I-230).
      */
+    /** What the player can rebind in Settings > Controls (I-535). */
+    static final List<RebindMenu.Entry> CONTROLS = List.of(
+            RebindMenu.action("jump", "Jump"), RebindMenu.action("dash", "Dash"), RebindMenu.action("pause", "Pause"),
+            RebindMenu.axis("move", "left", "Left"), RebindMenu.axis("move", "right", "Right"),
+            RebindMenu.axis("move", "up", "Up"), RebindMenu.axis("move", "down", "Down"));
+
     static MenuList settings(Ui ui, EngineContext context, Runnable back, Runnable reopen) {
         Audio audio = context.audio();
         Input input = context.input();
@@ -74,6 +84,10 @@ final class DemoUi {
                 context.saveSettings();
                 reopen.run();
             }));
+        }
+        boolean android = Gdx.app != null && Gdx.app.getType() == Application.ApplicationType.Android;
+        if (!android || input.gamepadConnected()) {   // something to rebind: a keyboard or a pad (I-535)
+            menu.add("Controls", () -> RebindMenu.open(ui, CONTROLS, context::saveSettings));
         }
         menu.add("Back", saveAndBack);
         menu.onBack(saveAndBack);

@@ -155,6 +155,42 @@ public final class InputBindings {
         return new InputBindings(contexts, copy, new LinkedHashMap<>(axes), touch, touchControls);
     }
 
+    /**
+     * A copy with one axis direction's inputs replaced: player rebinding of movement (F-005, I-535).
+     *
+     * @throws IllegalArgumentException for an unknown axis or direction, an empty list or an unknown input name
+     */
+    public InputBindings withAxisInputs(String axis, String direction, List<String> inputs) {
+        Axis old = axis(axis);
+        if (!old.directions().containsKey(direction)) {
+            throw new IllegalArgumentException("Axis \"" + axis + "\" has no direction \"" + direction + "\" (directions: "
+                    + old.directions().keySet() + ")");
+        }
+        String where = axis + ":" + direction;
+        if (inputs == null || inputs.isEmpty()) {
+            throw new IllegalArgumentException(where + ": needs at least one input");
+        }
+        List<String> clean = new ArrayList<>();
+        for (String input : inputs) {
+            if (input == null || InputNames.code(input) < 0) {
+                throw new IllegalArgumentException(where + ": unknown input name \"" + input + "\"");
+            }
+            if (!clean.contains(input)) {
+                clean.add(input);
+            }
+        }
+        Map<String, List<String>> directions = new LinkedHashMap<>(old.directions());
+        directions.put(direction, List.copyOf(clean));
+        Map<String, Axis> copy = new LinkedHashMap<>(axes);
+        copy.put(axis, new Axis(old.context(), old.twoD(), old.normalize(), Collections.unmodifiableMap(directions)));
+        return new InputBindings(contexts, new LinkedHashMap<>(actions), copy, touch, touchControls);
+    }
+
+    /** The directions of an axis: {@code left/right/up/down} or {@code negative/positive}. */
+    public List<String> axisDirections(String axis) {
+        return axis(axis).twoD() ? DIRECTIONS_2D : DIRECTIONS_1D;
+    }
+
     /** The on-screen controls (F-022, I-122), or null if the file has no {@code touchControls} section. */
     public TouchControlsConfig touchControls() {
         return touchControls;

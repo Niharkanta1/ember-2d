@@ -96,16 +96,38 @@ Gamepads are more binding names (F-005, I-530), read through gdx-controllers: ja
 - **Connection:** `GamepadConnected(name)` and `GamepadDisconnected(name)` are queued. A disconnect releases every pad input. `input.gamepadConnected()` and `input.gamepadName()` are for button hints.
 - **On-screen controls:** pad use hides them like the keyboard does.
 - **Menus:** they work with a pad once `ui_nav`, `ui_confirm` and `ui_back` list pad names. The platformer demo has them all.
-- **Checked:** unit tests; a desktop run detected an XInput controller; the Android release build starts with the backend. Not yet played by a person with a pad.
+- **Checked:** unit tests; a desktop run detected an XInput controller; the Android release build starts with the backend. Playing with a pad by hand has not been confirmed yet.
 
 ## 6. Rebinding
+**The ready-made screen** (`ember.ui.RebindMenu`, I-535): a "press a key / press a button" panel.
+```java
+List<RebindMenu.Entry> controls = List.of(
+        RebindMenu.action("jump", "Jump"), RebindMenu.action("dash", "Dash"),
+        RebindMenu.axis("move", "left", "Left"), RebindMenu.axis("move", "right", "Right"));
+menu.add("Controls", () -> RebindMenu.open(ui, controls, context::saveSettings));
+```
+- **Device:** the first row switches between **Keyboard** and **Gamepad**; it starts on Gamepad when a pad is connected. Each row shows that device's inputs (`Jump:  Space, Z`).
+- **Rebinding:** activating a row waits 5 seconds for a key or pad input. Escape (Android Back) cancels.
+- **What changes:** the new input **replaces that device's inputs** of the row. The other device's inputs, touch gestures and mouse buttons stay.
+- **Shared inputs:** they are reported (`Z is also: Dash`), not removed, because one key can mean two things on purpose.
+- **Other rows:** **Reset all** and **Done**. Save in the callback: `context.saveSettings()` stores the overrides, and they load at the next start.
+- **In the demo:** the platformer has it under Settings → Controls (on desktop, or on Android when a pad is connected).
+
+**The API underneath:**
 ```java
 input.rebindAction("jump", List.of("W", "UP"));
-input.resetBinding("jump");
+input.rebindAxis("move", "left", List.of("J", "PAD_LEFT"));   // saved as "move:left"
+input.resetBinding("jump");            // or "move:left"
+input.resetAllBindings();
 Map<String, List<String>> overrides = input.bindingOverrides();   // saved with the settings
-List<String> keys = input.actionInputs("jump");                    // for a "press a key" menu
+List<String> keys = input.actionInputs("jump");
+List<String> left = input.axisInputs("move", "left");
+input.listenForInput(EnumSet.of(InputDevice.KEYBOARD), name -> ..., () -> /* cancelled */ ...);
+InputDevice.of("PAD_A");               // GAMEPAD
+RebindMenu.label("L_SHIFT");           // "L Shift"
 ```
-Overrides survive hot reloads of the bindings file and are saved with the settings. There is no ready-made "press a button" screen yet (the F-005 rebinding UI is still a draft).
+- **Listening:** `listenForInput` swallows the press it reports, so it triggers no action. While waiting, other key and pad presses are swallowed too; touch and the mouse keep working for the UI.
+- **Reloads:** overrides survive hot reloads of the bindings file.
 
 ## 7. Common mistakes
 | Symptom | Cause | Fix |

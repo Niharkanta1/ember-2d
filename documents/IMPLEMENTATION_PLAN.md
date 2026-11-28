@@ -105,7 +105,8 @@ Time-boxed throwaway prototypes (`templates/SPIKE_TEMPLATE.md`). Code is deleted
 - **I-500 ember-box2d** (F-006B) — done 2026-11-28: `RigidBody`, `Box2dSystem`, debug drawing, tile bodies; the platformer demo's Crates scene
 - **I-510 Particles** (F-014)
 - **I-520 Shaders and materials** — hit flash, outline, palette swap (F-026)
-- **I-530 Gamepad** (F-005) — done 2026-11-28: `PAD_*` binding names with analog sticks, connect/disconnect events, desktop (jamepad) and Android backends; the platformer is playable with a pad. The rebinding UI stays Draft
+- **I-530 Gamepad** (F-005) — done 2026-11-28: `PAD_*` binding names with analog sticks, connect/disconnect events, desktop (jamepad) and Android backends; the platformer is playable with a pad. The rebinding UI followed in I-535
+- **I-535 Rebinding UI** (F-005) — `RebindMenu` "press a key / button" screen, `listenForInput`, axis-direction overrides; platformer Settings → Controls
 - **I-550 Standalone editor decision** (ADR-009 review) — done 2026-11-28: no editor; the jobs it would do are documented in the wiki page Working-Without-an-Editor
 - **I-560 ember-spine** (ADR-021, F-007; only with a Spine license) — skipped by the developer (2026-11-28)
 - **I-570 iOS decision** (ADR-019 review; spike first if pursued) — skipped by the developer (2026-11-28)

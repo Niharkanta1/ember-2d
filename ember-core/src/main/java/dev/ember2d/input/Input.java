@@ -5,6 +5,8 @@ import com.badlogic.gdx.math.Vector3;
 import dev.ember2d.core.PublicApi;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * Named actions and axes (F-005), available as {@code context.input()}. Gameplay code never reads raw keys.
@@ -95,11 +97,40 @@ public interface Input {
      */
     void rebindAction(String action, List<String> inputs);
 
-    /** Drops an action's override: it uses the bindings file again. */
+    /** Drops the override of an action or an axis direction ({@code "move:left"}): the bindings file applies again. */
     void resetBinding(String action);
 
     /** The player's overrides, action to inputs, in the order they were made (a copy). */
     Map<String, List<String>> bindingOverrides();
+
+    /**
+     * Replaces the inputs of one axis direction (F-005, I-535), such as {@code rebindAxis("move", "left", ...)}. Saved
+     * with the other overrides under {@code "move:left"}.
+     *
+     * @throws IllegalArgumentException for an unknown axis or direction, an empty list or an unknown input name
+     */
+    void rebindAxis(String axis, String direction, List<String> inputs);
+
+    /** The input names bound to one direction of an axis, overrides included. */
+    List<String> axisInputs(String axis, String direction);
+
+    /** Removes every override: the bindings file applies again. */
+    void resetAllBindings();
+
+    /**
+     * Waits for the next press of a key, mouse button or gamepad input of one of {@code devices} and calls
+     * {@code onInput} with its binding name (F-005, I-535); the press triggers no action. Escape and Android Back cancel
+     * instead and call {@code onCancel}. While listening, other key and pad presses are swallowed too; touch and the
+     * mouse keep working for the UI (unless {@code MOUSE} is listened for). A new call replaces the previous listener.
+     */
+    void listenForInput(Set<InputDevice> devices, Consumer<String> onInput,
+            Runnable onCancel);
+
+    /** Stops listening without calling either callback. */
+    void stopListening();
+
+    /** True while {@link #listenForInput} waits. */
+    boolean isListening();
 
     /** The inputs an action is bound to now (with any override). */
     List<String> actionInputs(String action);

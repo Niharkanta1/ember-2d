@@ -21,7 +21,8 @@ class EngineSettingsTest {
 
     static final String BINDINGS = """
             { "version": 1,
-              "contexts": { "gameplay": { "actions": { "jump": ["SPACE"], "dash": ["X"] } } },
+              "contexts": { "gameplay": { "actions": { "jump": ["SPACE"], "dash": ["X"] },
+                                          "axes": { "move": { "left": ["A"], "right": ["D"], "up": ["W"], "down": ["S"] } } } },
               "touchControls": { "buttons": [ { "action": "jump", "label": "A", "x": 72, "y": 72, "radius": 40 } ] } }
             """;
 
@@ -83,5 +84,18 @@ class EngineSettingsTest {
         ctx.saveSettings();
         assertThat(s.has("input.bindings")).isFalse();
         assertThat(TouchLayout.parse(s.getString("input.touchLayout", "")).scaleOf("jump")).isEqualTo(1.5f);
+    }
+
+    @Test
+    void axisOverridesAreSavedAndLoaded() {
+        EngineContext ctx = context();
+        ctx.input().rebindAxis("move", "left", List.of("J", "PAD_LEFT"));
+        assertThat(ctx.saveSettings().ok()).isTrue();
+        assertThat(store.settings().child("input.bindings").getString("move:left", "")).isEqualTo("J,PAD_LEFT");
+
+        EngineContext again = context();
+        EngineSettings.apply(again);
+        assertThat(again.input().axisInputs("move", "left")).containsExactly("J", "PAD_LEFT");
+        assertThat(again.input().axisInputs("move", "right")).containsExactly("D");
     }
 }
