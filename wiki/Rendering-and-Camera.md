@@ -108,3 +108,5 @@ The demos place a `camera` object in Tiled whose `CameraFollow.target` property 
 - Set sprite origins at the feet (`origin.y = 0`) for top-down games, so Y-sort and collision boxes line up.
 - Use a separate layer for effects that should be drawn above every character (`fx`, `bullets`).
 - Keep tile layers in Tiled on named render layers (`renderLayer` property) rather than drawing them yourself.
+
+Lighting, shadows, fog, mist, glow and bloom built on render layers and `LayerContent` are in [Lighting and Atmosphere](Lighting-and-Atmosphere).

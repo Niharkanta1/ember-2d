@@ -19,6 +19,7 @@
 - [Assets](Assets)
 - [Input](Input)
 - [Rendering and Camera](Rendering-and-Camera)
+- [Lighting and Atmosphere](Lighting-and-Atmosphere)
 - [Sprite Materials](Sprite-Materials)
 - [Animation](Animation)
 - [Collision](Collision)
