@@ -138,6 +138,9 @@ public final class SpriteRenderSystem extends EntitySystem {
 
     private void draw(Batch batch, int entity) {
         Sprite sprite = world().get(entity, Sprite.class);
+        if (!sprite.visible) {
+            return;   // hidden (fog of war, I-610): skipped, keeps its region and tint
+        }
         TextureRegion region = sprite.region;
         if (region != null && region == sprite.resolvedRegion && assets != null
                 && sprite.resolvedGeneration != assets.generation()) {

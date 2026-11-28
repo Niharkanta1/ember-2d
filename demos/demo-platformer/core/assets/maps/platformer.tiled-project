@@ -22,6 +22,11 @@
 				"value": "#ffffffff"
 			},
 			{
+				"name": "visible",
+				"type": "bool",
+				"value": true
+			},
+			{
 				"name": "layer",
 				"type": "string",
 				"value": "world"

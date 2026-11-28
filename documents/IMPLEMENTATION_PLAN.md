@@ -118,7 +118,7 @@ Time-boxed throwaway prototypes (`templates/SPIKE_TEMPLATE.md`). Code is deleted
 ### Demo: Gold in Shadows (F-029, F-030) — approved 2026-11-28
 The developer's own libGDX game, rebuilt on Ember2D. One task at a time, in this order:
 - **I-600 Project and assets** — done 2026-11-28: `newGame` (blank) as `demo-gold-in-shadows`; the original art with ART-CREDITS; clip sets; generated sounds; `ConvertLevels.java` turns the ASCII levels into Tiled maps with the original auto-tiling; the reachability test
-- **I-610 Field of view and fog** (F-030) — `kit-topdown` `vision`: `VisionField`, `FogLayer`, `VisionSystem`, `HiddenInFog`
+- **I-610 Field of view and fog** (F-030) — done 2026-11-28: `kit-topdown` `vision`: `VisionField`, `FogLayer`, `VisionSystem`, `HiddenInFog`
 - **I-620 Player** — movement, mouse/stick aim, the 600 RPM rifle with reload, hearts and difficulty, hit feedback, camera, HUD
 - **I-630 Creatures** — rat, slug, ghoul, cultist: behaviours, perception, alerts and noise, telegraphed attacks, drops
 - **I-640 The world** — gold, medkits, chests, key and exit door, spike traps, the three-level campaign, score and saves

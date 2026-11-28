@@ -30,24 +30,33 @@ Everything else is under a dark fog, and things standing in it (enemies, pick-up
 | `fogColor` | the palette's darkest colour | |
 
 **`VisionField`** (pure logic, no GL; tested headless):
-- `update(x, y, aimDegrees)` casts the rays from the viewer against **opaque cells** and stores each ray's length.
-- Opaque cells come from a `TileGrid` (solid cells) plus any cells marked opaque (`setOpaque(x, y, true)`).
-- Low props (barrels, crates, chests) are solid but not opaque: they block movement but not sight. The map decides this per tile with a tile property `opaque` (default: solid tiles are opaque).
-- **Queries:** `isVisible(x, y)`, `isVisible(x, y, radius)` and `visibility(x, y)` (0..1, with the soft edges).
-- **Polygon:** `polygon()` gives the visible fan for drawing.
+- **Construction:** `new VisionField(collision, sightMask, settings)`.
+- **Update:** `update(x, y, aimDegrees)` casts the rays through Ember2D's `Collision`, against non-trigger colliders and solid tile grids on the `sightMask` layers, and stores each ray's length plus `wallPeek`.
+- **What blocks sight:** a game decides per wall by its collision layer. In Gold in Shadows, walls that block sight are on layer 3 and low props (barrels, crates, chests) on layer 0, so props block movement but not sight. This uses the collision index the game already has, and it follows the original's exact wall boxes instead of whole cells.
+- **Queries:**
+  - `isVisible(x, y)` and `isVisible(x, y, radius)`: the original's rule (any part of the circle in range, its centre not behind a wall);
+  - `visibility(x, y)` (0..1, with the soft edge);
+  - `rangeAt(angle)`;
+  - per-ray `distance(i)` and directions.
+- **`enabled = false`** shows everything.
 
-**`FogLayer`** (`LayerContent`, drawn in a render layer above the world):
-- **Mask:** each frame it draws the visible fan into a low-resolution mask, one texel per virtual pixel, so the fog edge stays pixelated like the art. The mask is a `FrameBuffer` the size of the virtual screen, made once and remade after a GL context loss.
-- **Drawing:** it composites the mask over the world.
-- **Off:** with `enabled = false` it draws nothing.
+**`FogLayer`** (`LayerContent` in a render layer above the world):
+- **No frame buffer:** the fog is geometry drawn in the world pass. Per ray, a band fades from clear to `darkness` over the last `edgeSoftness` of the ray, then solid fog reaches past the edge of the view. It draws through the batch with per-vertex colours and a 1×1 white managed texture.
+- **Pixelation:** in the pixel-perfect render modes the world pass is drawn at the virtual resolution, so the fog edge is pixelated like the original's low-resolution mask.
+- **Why no frame buffer:** libGDX 1.14 frame buffers do not nest, so a mask frame buffer would break Ember2D's own pixel-perfect pass. Geometry also needs no recreation after an Android context loss.
+- **Off:** `enabled = false` draws nothing.
+- **Disposal:** dispose it with the scene.
 
-**`Viewer`** (component) and **`VisionSystem`** (LATE phase, after movement and aiming):
-- The system updates the field from the entity that has `Viewer`. It uses the entity's `Transform` and its `Aim` angle if it has one (kit-topdown shooter), else `Viewer.angle`.
-- **`HiddenInFog`** (component): the system hides its `Sprite` (alpha to 0, keeping the previous tint) while the entity is not visible, and shows it again when it is.
-  - Bullets: the system also hides kit-bullets bullets whose type is marked `hideInFog` (a new optional bullet-type field), so enemy shots are hidden in the dark.
-- **Events:** `CameIntoView(entity)` and `WentOutOfView(entity)` are queued for `HiddenInFog` entities, for "!" reactions and sounds.
+**`Viewer`** (component: `angle`, `eyeY`) and **`VisionSystem`** (LATE phase, after movement and aiming):
+- **Updating the field:** from the entity that has `Viewer`. It uses its `Aim.angle` if it has kit-topdown's `Aim`, else `Viewer.angle`.
+- **`HiddenInFog`** (component: `radius`, `centerY`): the system sets the entity's `Sprite.visible` (a new engine field; `SpriteRenderSystem` skips hidden sprites), and queues `CameIntoView(entity)` and `WentOutOfView(entity)` when that changes. The first state sends no event.
+- **Without a viewer:** nothing is hidden.
 
-**Android:** the fog is a GLES 2.0 frame buffer and one textured quad; no extensions.
+**`VisionKit.register(registry)`** registers `Viewer` and `HiddenInFog`. It is a separate kit call, so games that don't use vision keep their component lists.
+
+**Enemy bullets in the dark:** a visibility hook in kit-bullets, added with the creatures' bullets in I-630.
+
+**Android:** plain batch geometry; no extensions, no frame buffer.
 
 ## Non-goals
 - Dynamic lights, coloured lighting, normal maps (a separate "Lighting" extra in the roadmap).
@@ -60,20 +69,21 @@ package dev.ember2d.kit.topdown.vision;
 public final class VisionSettings { public float nearRadius, coneRange, coneHalfAngle, coneSoftness, edgeSoftness,
         wallPeek, darkness; public int rayCount; public final Color fogColor; }
 public final class VisionField {
-    public VisionField(TileGrid grid, VisionSettings settings);
-    public void setOpaque(int cellX, int cellY, boolean opaque);
+    public VisionField(Collision collision, int sightMask, VisionSettings settings);
     public void update(float x, float y, float aimDegrees);
     public boolean isVisible(float x, float y);
     public boolean isVisible(float x, float y, float radius);
     public float visibility(float x, float y);
-    public FloatArray polygon();           // x0, y0, x1, y1, ... around the viewer
+    public float rangeAt(float angleRadians);
+    public float distance(int ray); public float directionX(int ray); public float directionY(int ray);
 }
 public final class FogLayer implements LayerContent, Disposable {
-    public FogLayer(Renderer renderer, VisionField field, String layer);
+    public FogLayer(VisionField field, CameraRig camera, String layer);
     public boolean enabled;
 }
-public final class Viewer { public float angle; }
-public final class HiddenInFog { public float radius; }
+public final class Viewer { public float angle, eyeY; }
+public final class HiddenInFog { public float radius, centerY; }
+public final class VisionKit { public static void register(ComponentRegistry registry); }
 public final class VisionSystem extends EntitySystem {
     public VisionSystem(World world, VisionField field, EventBus events);
 }
@@ -88,13 +98,14 @@ public record WentOutOfView(int entity) { }
 - Headless tests cover the field (rays, occlusion, cone, soft edges, peek, opaque cells) and the system (hide/show, events).
 
 ## Tests
-- `VisionField` on small grids:
-  - an open room;
-  - a wall shadow;
-  - the cone direction;
-  - the near circle behind a wall;
-  - low props;
-  - wall peek;
-  - soft edge values.
-- `VisionSystem`: hide and show, the events, no `Viewer`.
-- `FogLayer`: a mask size test where possible headless; the drawing itself is checked by screenshots on desktop and the emulator.
+- `VisionField` with real `Collision` worlds:
+  - an open room (circle and cone);
+  - smooth cone sides;
+  - wall shadows and the peek;
+  - low props on another layer;
+  - solid tile grids;
+  - soft edge values;
+  - disabled;
+  - settings validation.
+- `VisionSystem`: hide and show, the events, no `Viewer`; `VisionKit` registration.
+- `FogLayer`: checked by screenshots (Gold in Shadows level 1 on desktop in I-610; the emulator in I-650).

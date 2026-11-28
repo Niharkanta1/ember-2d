@@ -20,6 +20,8 @@ public final class Sprite {
     public final Color tint = new Color(Color.WHITE);
     public boolean flipX;
     public boolean flipY;
+    /** False skips drawing (for example outside the player's field of view, F-030); everything else is kept. */
+    public boolean visible = true;
     /** Render layer name. */
     public String layer = "world";
     /** Order within a {@link SortMode#Z} layer, ascending. */
