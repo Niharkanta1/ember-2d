@@ -2,8 +2,15 @@ plugins {
     id 'java-library'
 }
 
-description = 'Ember2D optional rigid-body physics (F-006B).'
+description = 'Ember2D optional rigid-body physics (F-006B): the classic libGDX Box2D extension inside the ECS.'
 
 dependencies {
     api project(':ember-core')
+    // Box2D types stay behind this module's API (ADR-013), so the library is not exported.
+    implementation libs.gdx.box2d
+
+    testImplementation testFixtures(project(':ember-core'))
+    // The tests step real Box2D worlds headless; games add the natives in their launchers (desktop and Android).
+    testRuntimeOnly variantOf(libs.gdx.box2d.platform) { classifier('natives-desktop') }
+    testRuntimeOnly variantOf(libs.gdx.platform) { classifier('natives-desktop') }
 }

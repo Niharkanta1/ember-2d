@@ -36,6 +36,8 @@ gdx-backend-headless = { module = "com.badlogicgames.gdx:gdx-backend-headless", 
 gdx-backend-android = { module = "com.badlogicgames.gdx:gdx-backend-android", version.ref = "gdx" }
 gdx-freetype = { module = "com.badlogicgames.gdx:gdx-freetype", version.ref = "gdx" }
 gdx-freetype-platform = { module = "com.badlogicgames.gdx:gdx-freetype-platform", version.ref = "gdx" }
+gdx-box2d = { module = "com.badlogicgames.gdx:gdx-box2d", version.ref = "gdx" }                       # ember-box2d (F-006B, I-500)
+gdx-box2d-platform = { module = "com.badlogicgames.gdx:gdx-box2d-platform", version.ref = "gdx" }
 gdx-ai = { module = "com.badlogicgames.gdx:gdx-ai", version.ref = "gdxAi" }
 blade-ink = { module = "com.bladecoder.ink:blade-ink", version.ref = "bladeInk" }
 android-desugar = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugarJdkLibs" }

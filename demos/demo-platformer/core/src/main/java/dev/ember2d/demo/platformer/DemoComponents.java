@@ -1,5 +1,6 @@
 package dev.ember2d.demo.platformer;
 
+import dev.ember2d.box2d.Box2dKit;
 import dev.ember2d.camera.CameraFollow;
 import dev.ember2d.data.ComponentRegistry;
 import dev.ember2d.data.ComponentSetup;
@@ -11,6 +12,7 @@ public final class DemoComponents implements ComponentSetup {
     @Override
     public void register(ComponentRegistry registry) {
         PlatformerKit.register(registry);   // PlatformerBody, Patroller, MovingPlatform, Ladder
+        Box2dKit.register(registry);        // RigidBody (the Crates scene)
         registry.register(CameraFollow.class, CameraFollow::new)
                 .register(Enemy.class, Enemy::new)
                 .register(Hazard.class, Hazard::new)

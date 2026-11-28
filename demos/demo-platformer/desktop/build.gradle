@@ -10,6 +10,8 @@ description = 'Platformer demo: desktop (LWJGL3) launcher.'
 dependencies {
     implementation project(':demos:demo-platformer:core')
     implementation project(':ember-desktop')
+    // Box2D's desktop natives (F-006B): the Crates scene. Android packs its own per ABI.
+    runtimeOnly variantOf(libs.gdx.box2d.platform) { classifier('natives-desktop') }
 }
 
 // Demo assets (shared with Android) are served from the classpath on desktop (F-008).

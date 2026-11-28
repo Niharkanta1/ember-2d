@@ -7,6 +7,7 @@ description = 'Platformer demo: game code shared by all launchers.'
 dependencies {
     testImplementation testFixtures(project(':ember-core'))
     api project(':ember-core')
+    api project(':ember-box2d')   // the Crates scene (F-006B, I-500)
     api project(':kits:kit-common')
     api project(':kits:kit-platformer')
 }

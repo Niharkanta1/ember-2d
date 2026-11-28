@@ -29,7 +29,7 @@ Specifications define feature scope, behaviour, API boundaries and acceptance cr
 | F-016 | Top-down movement and shooter | 4 | `kit-topdown` | Draft |
 | F-017 | RPG package | 5 | `kit-topdown` | Draft |
 | F-023 | Visual novel kit | 5 | `kit-novel` | Ready (I-460, I-470) |
-| F-006B | Optional Box2D module | 6 | `ember-box2d` | Draft |
+| F-006B | Optional Box2D module | 6 | `ember-box2d` | Ready (I-500) |
 | F-026 | Sprite materials: hit flash, outline, palette swap | 6 | `ember.render`, `kit-common` | Ready (I-520) |
 | F-027 | Project generator (`newGame`) | 6 | `tools/new-game` | Ready (I-580) |
 | F-028 | Asset tools: manifest and clip generation | 6 | `tools/asset-tools` | Ready (I-590) |

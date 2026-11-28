@@ -102,7 +102,7 @@ Time-boxed throwaway prototypes (`templates/SPIKE_TEMPLATE.md`). Code is deleted
 - **G-5 Guide chapter** — write `documents/guide/05-rpg-and-visual-novel.md` from the delivered code and demos; developer review and approval required for the phase gate (`ROADMAP.md`)
 
 ### Phase 6 — Optional extras
-- **I-500 ember-box2d** (F-006B)
+- **I-500 ember-box2d** (F-006B) — done 2026-11-28: `RigidBody`, `Box2dSystem`, debug drawing, tile bodies; the platformer demo's Crates scene
 - **I-510 Particles** (F-014)
 - **I-520 Shaders and materials** — hit flash, outline, palette swap (F-026)
 - **I-530 Gamepad** (F-005)

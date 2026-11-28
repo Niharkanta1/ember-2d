@@ -11,3 +11,6 @@
 # Readable stack traces (the mapping file is kept with releases from I-255).
 -keepattributes LineNumberTable,SourceFile
 -renamesourcefileattribute SourceFile
+
+# Box2D (F-006B, the Crates scene): the native code calls back into World by name (contacts, filters, queries).
+-keep class com.badlogic.gdx.physics.box2d.** { *; }

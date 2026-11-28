@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="20" height="12" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="1">
+ <properties>
+  <property name="title" value="Crates"/>
+ </properties>
+ <tileset firstgid="1" source="terrain.tsx"/>
+ <imagelayer id="1" name="sky" repeatx="1" repeaty="1">
+  <properties><property name="renderLayer" value="background"/></properties>
+  <image source="background.png" width="64" height="64"/>
+ </imagelayer>
+ <layer id="2" name="ground" width="20" height="12">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,
+30,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,30,
+30,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,30,
+30,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,30,
+30,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,30,
+30,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,30,
+30,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,30,
+30,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,30,
+7,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,9,
+29,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,31
+</data>
+ </layer>
+</map>

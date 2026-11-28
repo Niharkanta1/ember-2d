@@ -112,6 +112,7 @@ dependencies {
     nativeAbis.each { abi ->
         gdxNatives variantOf(libs.gdx.platform) { classifier("natives-${abi}") }
         gdxNatives variantOf(libs.gdx.freetype.platform) { classifier("natives-${abi}") }   // FreeType fonts (I-140)
+        gdxNatives variantOf(libs.gdx.box2d.platform) { classifier("natives-${abi}") }      // Box2D, Crates scene (I-500)
     }
 }
 

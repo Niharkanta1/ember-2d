@@ -54,6 +54,7 @@ final class MenuScene extends Scene {
         MenuList menu = new MenuList(ui);
         menu.add("Play", () -> showLevels(context, ui));
         menu.add("Settings", () -> showSettings(context, ui));
+        menu.add("Crates", () -> context.scenes().replace(new CratesScene(), Transition.fade(0.4f)));   // Box2D (I-500)
         boolean android = Gdx.app != null && Gdx.app.getType() == Application.ApplicationType.Android;
         if (!android) {
             menu.add("Quit", () -> Gdx.app.exit());
@@ -88,8 +89,8 @@ final class MenuScene extends Scene {
         Table root = ui.root();
         root.clearChildren();
         if (header) {
-            root.add(title).padBottom(6f).row();
-            root.add(frog).size(32f, 32f).padBottom(6f).row();
+            root.add(title).padBottom(2f).row();   // tight: the main menu has four entries (I-500)
+            root.add(frog).size(32f, 32f).padBottom(2f).row();
         }
         root.add(panel).minWidth(130f).row();
         Label version = new Label("v" + PlatformerDemo.version(), ui.skin());

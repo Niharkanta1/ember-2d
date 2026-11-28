@@ -912,6 +912,143 @@
 				"value": false
 			}
 		]
+	},
+	{
+		"id": 27,
+		"name": "RigidBody",
+		"type": "class",
+		"useAs": [
+			"property"
+		],
+		"color": "#ffa0a0a4",
+		"drawFill": true,
+		"members": [
+			{
+				"name": "type",
+				"type": "string",
+				"propertyType": "BodyType",
+				"value": "DYNAMIC"
+			},
+			{
+				"name": "shape",
+				"type": "string",
+				"propertyType": "BodyShape",
+				"value": "BOX"
+			},
+			{
+				"name": "width",
+				"type": "float",
+				"value": 1
+			},
+			{
+				"name": "height",
+				"type": "float",
+				"value": 1
+			},
+			{
+				"name": "radius",
+				"type": "float",
+				"value": 0.5
+			},
+			{
+				"name": "density",
+				"type": "float",
+				"value": 1
+			},
+			{
+				"name": "friction",
+				"type": "float",
+				"value": 0.4000000059604645
+			},
+			{
+				"name": "restitution",
+				"type": "float",
+				"value": 0
+			},
+			{
+				"name": "sensor",
+				"type": "bool",
+				"value": false
+			},
+			{
+				"name": "fixedRotation",
+				"type": "bool",
+				"value": false
+			},
+			{
+				"name": "bullet",
+				"type": "bool",
+				"value": false
+			},
+			{
+				"name": "gravityScale",
+				"type": "float",
+				"value": 1
+			},
+			{
+				"name": "linearDamping",
+				"type": "float",
+				"value": 0
+			},
+			{
+				"name": "angularDamping",
+				"type": "float",
+				"value": 0
+			},
+			{
+				"name": "category",
+				"type": "int",
+				"value": 1
+			},
+			{
+				"name": "mask",
+				"type": "int",
+				"value": 65535
+			},
+			{
+				"name": "group",
+				"type": "int",
+				"value": 0
+			},
+			{
+				"name": "velocityX",
+				"type": "float",
+				"value": 0
+			},
+			{
+				"name": "velocityY",
+				"type": "float",
+				"value": 0
+			},
+			{
+				"name": "angularVelocity",
+				"type": "float",
+				"value": 0
+			}
+		]
+	},
+	{
+		"id": 28,
+		"name": "BodyType",
+		"type": "enum",
+		"storageType": "string",
+		"values": [
+			"STATIC",
+			"KINEMATIC",
+			"DYNAMIC"
+		],
+		"valuesAsFlags": false
+	},
+	{
+		"id": 29,
+		"name": "BodyShape",
+		"type": "enum",
+		"storageType": "string",
+		"values": [
+			"BOX",
+			"CIRCLE"
+		],
+		"valuesAsFlags": false
 	}
 ]
 }

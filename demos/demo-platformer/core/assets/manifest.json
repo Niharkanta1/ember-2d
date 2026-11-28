@@ -37,5 +37,7 @@
   {"id": "level/start", "path": "prefabs/level/start.json", "type": "prefab", "group": "global"},
   {"id": "level/checkpoint", "path": "prefabs/level/checkpoint.json", "type": "prefab", "group": "global"},
   {"id": "level/goal", "path": "prefabs/level/goal.json", "type": "prefab", "group": "global"},
-  {"id": "platform/moving", "path": "prefabs/platform/moving.json", "type": "prefab", "group": "global"}
+  {"id": "platform/moving", "path": "prefabs/platform/moving.json", "type": "prefab", "group": "global"},
+  {"id": "tex.level_crate", "path": "gfx/level/crate.png", "type": "texture", "group": "global"},
+  {"id": "map.crates", "path": "maps/crates.tmx", "type": "map", "group": "crates"}
 ] }
