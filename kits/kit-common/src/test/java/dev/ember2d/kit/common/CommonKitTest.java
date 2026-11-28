@@ -155,6 +155,22 @@ class CommonKitTest {
     }
 
     @Test
+    void theDamageMultiplierScalesEveryHit() {
+        int victim = target(0f, 0f, 2);
+        Health h = world.get(victim, Health.class);
+        h.max = 20;   // five hearts counted in quarters
+        h.current = 20;
+        h.invulnerableSeconds = 0f;
+        h.damageMultiplier = 2;
+        assertThat(health.damage(victim, 1, World.NONE, 0f, 0f)).isTrue();
+        assertThat(h.current).isEqualTo(18);
+        assertThat(((Damaged) seen.get(0)).amount()).as("the event reports what was taken").isEqualTo(2);
+        h.damageMultiplier = 0;
+        assertThat(health.damage(victim, 1, World.NONE, 0f, 0f)).as("immune").isFalse();
+        assertThat(h.current).isEqualTo(18);
+    }
+
+    @Test
     void deathFiresOnceAndCanDespawn() {
         int victim = target(5f, 0f, 2);
         world.get(victim, Health.class).invulnerableSeconds = 0f;

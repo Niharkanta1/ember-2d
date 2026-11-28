@@ -41,9 +41,13 @@ public final class HealthSystem extends EntitySystem {
         if (h == null || h.dead || amount <= 0 || h.invulnerableLeft > 0f) {
             return false;
         }
-        h.current = Math.max(0, h.current - amount);
+        int taken = amount * Math.max(0, h.damageMultiplier);
+        if (taken <= 0) {
+            return false;
+        }
+        h.current = Math.max(0, h.current - taken);
         h.invulnerableLeft = h.invulnerableSeconds;
-        events.publish(new Damaged(target, source, amount, h.current, knockbackX, knockbackY));
+        events.publish(new Damaged(target, source, taken, h.current, knockbackX, knockbackY));
         if (h.current == 0) {
             die(target, h, source);
         }
