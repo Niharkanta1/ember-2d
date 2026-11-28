@@ -57,12 +57,13 @@ If you add a library that uses reflection, add its keep rules to your `android/p
 
 All of them pack the same way: desktop serves `core/assets` from the classpath, and Android packs it into the APK or AAB.
 
-## 5. Status of the four demos
+## 5. Status of the demos
 | Demo | Desktop dev run | Desktop package | Android debug | Android release (R8) |
 | --- | --- | --- | --- | --- |
 | platformer | yes | Windows zip built and run without Java; Linux zip built in CI | emulator | emulator |
 | shooter | started (not played with the mouse) | tasks configured, not built | emulator | built, not run |
 | rpg | built and tested headless; not run by hand on desktop | tasks configured, not built | emulator | emulator |
 | novel | built and tested headless; not run by hand on desktop | tasks configured, not built | emulator | emulator |
+| gold-in-shadows | run with timed screenshots of every screen; not played through by hand | tasks configured, not built | emulator (touch controls driven with adb) | emulator |
 
 None of the demos has been run on a real phone yet; all Android checks used an API 23 emulator. macOS packages have never been tested.

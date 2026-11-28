@@ -121,9 +121,9 @@ The developer's own libGDX game, rebuilt on Ember2D. One task at a time, in this
 - **I-610 Field of view and fog** (F-030) — done 2026-11-28: `kit-topdown` `vision`: `VisionField`, `FogLayer`, `VisionSystem`, `HiddenInFog`
 - **I-620 Player** — done 2026-11-29: movement, mouse/stick aim, the 600 RPM rifle with reload, hearts and difficulty, hit feedback, camera, HUD
 - **I-630 Creatures** — done 2026-11-29: rat, slug, ghoul, cultist: behaviours, perception, alerts and noise, telegraphed attacks, drops
-- **I-640 The world** — gold, medkits, chests, key and exit door, spike traps, the three-level campaign, score and saves
-- **I-650 Screens and platforms** — title, settings (difficulty, controls), pause, level-complete, death and end screens; Android twin-stick controls; gamepad; emulator checks
-- **I-660 Documentation** — the demo README (how to play, how it is built, original → Ember2D class map, screenshots), the wiki guide, the F-030 wiki page
+- **I-640 The world** — done 2026-11-29: gold, medkits, chests, key and exit door, spike traps, the three-level campaign, score and saves
+- **I-650 Screens and platforms** — done 2026-11-29: title, settings (difficulty, controls), pause, level-complete, death and end screens; Android twin-stick controls; gamepad; emulator checks (API 23, debug and release); fixed the engine's touch controls drawing in a letterboxed viewport
+- **I-660 Documentation** — done 2026-11-29: the demo README (how to play, how it is built, original → Ember2D class map, screenshots), the wiki guide, the F-030 wiki page
 
 ## Definition of Done
 - Acceptance criteria fulfilled.

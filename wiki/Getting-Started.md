@@ -1,6 +1,6 @@
 # Getting Started
 
-This page takes you from a fresh clone to a running demo on desktop and on Android. It covers the tools, the build, the four demos, and where the first logs go.
+This page takes you from a fresh clone to a running demo on desktop and on Android. It covers the tools, the build, the demos, and where the first logs go.
 
 ## 1. Prerequisites
 | Tool | Version | Notes |
@@ -52,6 +52,7 @@ Each demo has a `desktop` module with a `run` task. `run` is a **dev run**, whic
 ./gradlew :demos:demo-shooter:desktop:run
 ./gradlew :demos:demo-rpg:desktop:run
 ./gradlew :demos:demo-novel:desktop:run
+./gradlew :demos:demo-gold-in-shadows:desktop:run
 ```
 
 | Demo | Controls on desktop |
@@ -60,6 +61,7 @@ Each demo has a `desktop` module with a `run` task. `run` is a **dev run**, whic
 | Shooter | WASD move, the mouse aims, left button or Space fires, R reloads, P or Escape pauses. Dev builds have "Skip to boss". |
 | RPG | WASD or arrows move, E, Space or Enter interact and advance text, P or Escape pause. |
 | Visual novel | Click, Space or Enter advance; Escape or the Menu button opens the menu. |
+| Gold in Shadows | WASD or arrows move, the mouse aims, left button or J fires, R reloads, E opens chests, Escape or P pauses. |
 
 Extra desktop arguments (dev runs):
 ```sh

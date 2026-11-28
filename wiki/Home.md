@@ -38,7 +38,7 @@ This wiki is the developer handbook. It has four parts:
 | `kit-bullets` | Thousands of bullets, JSON patterns, grazing, bullet clearing |
 | `kit-novel` | Visual novels on Ink: staging tags, reader features, save anywhere, gallery |
 
-Four demos show the kits in real games:
+Five demos show the kits in real games:
 
 | Demo | Kits | What it is |
 | --- | --- | --- |
@@ -46,6 +46,7 @@ Four demos show the kits in real games:
 | `demos/demo-shooter` | top-down, bullets, common | A twin-stick dungeon room and a three-phase bullet-hell boss |
 | `demos/demo-rpg` | top-down (rpg), novel, common | A town and a cellar, an Ink conversation, a locked door, a chest, a cutscene |
 | `demos/demo-novel` | novel, common | "Kero and the Lost Cherries": one chapter with two endings |
+| `demos/demo-gold-in-shadows` | top-down (vision), bullets, common | A port of a finished libGDX game: three levels in a field of view and fog, four creatures, a campaign ([guide](Guide-Gold-in-Shadows)) |
 
 ## Conventions in this wiki
 - Package names are written short: `ember.render` means `dev.ember2d.render`, and `kit.topdown.rpg` means `dev.ember2d.kit.topdown.rpg`.

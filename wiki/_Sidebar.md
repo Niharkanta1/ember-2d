@@ -46,6 +46,7 @@
 - [Bullet Hell](Guide-Bullet-Hell)
 - [RPG](Guide-RPG)
 - [Visual Novel](Guide-Visual-Novel)
+- [Gold in Shadows (a port)](Guide-Gold-in-Shadows)
 
 **Build and ship**
 - [Building for Desktop](Building-for-Desktop)
