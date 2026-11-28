@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "clips": {
+    "muzzle": {"sheet": "tex.muzzle", "frameWidth": 16, "frameHeight": 16, "frames": [0, 3], "frameDuration": 0.0625, "mode": "once"},
+    "impact": {"sheet": "tex.impact", "frameWidth": 16, "frameHeight": 16, "frames": [0, 3], "frameDuration": 0.0667, "mode": "once"}
+  }
+}

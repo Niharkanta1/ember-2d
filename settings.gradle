@@ -51,3 +51,8 @@ include 'demos:demo-novel:android'
 include 'tools:android-api-check'   // Android API guard (I-016)
 include 'tools:new-game'            // project generator (I-580)
 include 'tools:asset-tools'         // manifest and clip generators (I-590)
+
+// demo-gold-in-shadows (created by newGame, F-027)
+include 'demos:demo-gold-in-shadows:core'
+include 'demos:demo-gold-in-shadows:desktop'
+include 'demos:demo-gold-in-shadows:android'

@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "defaults": {"frameDuration": 1.0},
+  "clips": {
+    "key": {"sheet": "tex.tileset", "frameWidth": 16, "frameHeight": 16, "frames": [80, 80]},
+    "coin": {"sheet": "tex.tileset", "frameWidth": 16, "frameHeight": 16, "frames": [82, 82]},
+    "pile": {"sheet": "tex.tileset", "frameWidth": 16, "frameHeight": 16, "frames": [83, 83]},
+    "chest_closed": {"sheet": "tex.tileset", "frameWidth": 16, "frameHeight": 16, "frames": [84, 84]},
+    "chest_open": {"sheet": "tex.tileset", "frameWidth": 16, "frameHeight": 16, "frames": [86, 86]},
+    "pouch": {"sheet": "tex.weapons", "frameWidth": 16, "frameHeight": 16, "frames": [30, 30]},
+    "medkit": {"sheet": "tex.weapons", "frameWidth": 16, "frameHeight": 16, "frames": [32, 32]},
+    "spikes_rise": {"sheet": "tex.tileset", "frameWidth": 16, "frameHeight": 16, "frames": [36, 39], "frameDuration": 0.06, "mode": "once"},
+    "spikes_down": {"sheet": "tex.tileset", "frameWidth": 16, "frameHeight": 16, "frames": [36, 36]}
+  }
+}

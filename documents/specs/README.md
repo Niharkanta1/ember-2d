@@ -33,6 +33,8 @@ Specifications define feature scope, behaviour, API boundaries and acceptance cr
 | F-026 | Sprite materials: hit flash, outline, palette swap | 6 | `ember.render`, `kit-common` | Ready (I-520) |
 | F-027 | Project generator (`newGame`) | 6 | `tools/new-game` | Ready (I-580) |
 | F-028 | Asset tools: manifest and clip generation | 6 | `tools/asset-tools` | Ready (I-590) |
+| F-029 | Gold in Shadows demo | demos | `demos/demo-gold-in-shadows` | Ready (I-600 to I-660) |
+| F-030 | Field of view and fog | 6 | `kit-topdown` (`vision`) | Ready (I-610) |
 
 Not yet written (Phase 6 candidates): custom shaders and post-processing (beyond F-026), gamepad details (in F-005), Spine adapter details (in F-007, ADR-021).
 

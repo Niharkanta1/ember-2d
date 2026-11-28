@@ -35,6 +35,8 @@ public final class ManifestTool {
     /** A frame size in a file name, as asset packs write it: {@code Run (32x32).png}. */
     private static final Pattern FRAME_SIZE = Pattern.compile("\\s*\\(\\s*\\d+\\s*[xX]\\s*\\d+\\s*\\)");
     private static final Pattern XML_IMAGE = Pattern.compile("<image[^>]*\\ssource=\"([^\"]+)\"");
+    /** A BMFont page line: {@code page id=0 file="pixel.png"}. */
+    private static final Pattern FNT_PAGE = Pattern.compile("^page\\s.*\\sfile=\"([^\"]+)\"", Pattern.MULTILINE);
 
     private ManifestTool() {
     }
@@ -296,6 +298,11 @@ public final class ManifestTool {
                         String image = t.replace('\\', '/');
                         out.add(normalise(folder + image.substring(image.lastIndexOf('/') + 1)));
                     }
+                }
+            } else if (lower.endsWith(".fnt")) {   // a bitmap font loads its page images
+                Matcher m = FNT_PAGE.matcher(Files.readString(assetsDir.resolve(path), StandardCharsets.UTF_8));
+                while (m.find()) {
+                    out.add(normalise(folder + m.group(1)));
                 }
             } else if (lower.endsWith(".tmx") || lower.endsWith(".tsx")) {
                 Matcher m = XML_IMAGE.matcher(Files.readString(assetsDir.resolve(path), StandardCharsets.UTF_8));

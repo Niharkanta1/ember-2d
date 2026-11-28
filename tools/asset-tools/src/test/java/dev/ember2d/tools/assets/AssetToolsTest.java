@@ -88,6 +88,8 @@ class AssetToolsTest {
         image("fx/dot.png", 2, 2);
         write("fonts/Pixel.ttf", "x");
         write("fonts/OFL.txt", "licence");
+        write("fonts/tiny.fnt", "info face=\"tiny\"\ncommon lineHeight=9\npage id=0 file=\"tiny.png\"\n");
+        image("fonts/tiny.png", 8, 8);
         write("prefabs/enemy/bat.json", "{}");
         write("anim/bat.clips.json", "{}");
         write("anim/bat.asm.json", "{}");
@@ -102,7 +104,8 @@ class AssetToolsTest {
         assertThat(m.keySet()).containsExactlyInAnyOrder("input.json", "gfx/hero/Idle Strip.png", "bg/forest.png",
                 "sfx/jump.wav", "music/theme.ogg", "maps/level1.tmx", "gfx/ui.atlas", "fx/spark.p", "fonts/Pixel.ttf",
                 "prefabs/enemy/bat.json", "anim/bat.clips.json", "anim/bat.asm.json", "ink/intro.ink.json",
-                "weapons/bow.json", "i18n/de.json", "ink/intro.de.ink.json");
+                "weapons/bow.json", "i18n/de.json", "ink/intro.de.ink.json", "fonts/tiny.fnt");
+        assertEntry(m, "fonts/tiny.fnt", "font.tiny", "font");
         assertEntry(m, "gfx/hero/Idle Strip.png", "tex.hero_idle_strip", "texture");
         assertEntry(m, "bg/forest.png", "bg.forest", "texture");
         assertEntry(m, "sfx/jump.wav", "sfx.jump", "sound");
@@ -120,7 +123,7 @@ class AssetToolsTest {
         assertEntry(m, "weapons/bow.json", "weapon.bow", "json");
         assertEntry(m, "i18n/de.json", "strings.de", "json");
         assertEntry(m, "ink/intro.de.ink.json", "ink.intro.de", "json");
-        assertThat(result.added()).hasSize(15);
+        assertThat(result.added()).hasSize(16);
 
         // Running again changes nothing.
         assertThat(ManifestTool.update(dir, false).written()).isFalse();

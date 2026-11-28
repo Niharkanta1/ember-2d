@@ -1,0 +1,24 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Gold in Shadows: game code shared by the desktop and Android launchers.'
+
+dependencies {
+    testImplementation testFixtures(project(':ember-core'))
+    api project(':ember-core')
+    api project(':kits:kit-common')    // health, hits, teams, hit flash
+    api project(':kits:kit-bullets')   // the creatures' spit and bolts
+    api project(':kits:kit-topdown')   // movement, aiming, the rifle, steering, field of view
+}
+
+// Tiled custom types (F-009): writes every registered component and prefab into a Tiled project, so maps can place
+// prefabs as object classes and override their fields per object. Run it after adding a component or prefab, then
+// open assets/maps/demo-gold-in-shadows.tiled-project in Tiled: ./gradlew :demos:demo-gold-in-shadows:core:tiledTypes
+tasks.register('tiledTypes', JavaExec) {
+    description = 'Writes prefab and component types into assets/maps/demo-gold-in-shadows.tiled-project (F-009).'
+    group = 'ember2d'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'dev.ember2d.data.TiledTypes'
+    args 'dev.ember2d.demo.gold.GoldComponents', file('assets').path, file('assets/maps/demo-gold-in-shadows.tiled-project').path
+}

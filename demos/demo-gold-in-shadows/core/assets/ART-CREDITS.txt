@@ -1,0 +1,24 @@
+Gold in Shadows - credits
+
+Game design, levels and art
+  Gold in Shadows is the developer's own game (originally a Godot 4 prototype, then a libGDX game,
+  D:\Coding\LibGDX\goldinshadows\gold). The developer created the art and owns it, under their own
+  licence; it is used in this Ember2D demo with their permission (2026-11-28).
+
+  Copied unchanged except for file names (original name -> here):
+    Character-Sheet.png  -> gfx/character.png
+    Enemy-Sheet.png      -> gfx/enemies.png
+    TileSet-Sheet.png    -> gfx/tileset.png
+    Weapons.png          -> gfx/weapons.png
+    Muzzle.png           -> gfx/muzzle.png
+    impact-bullet.png    -> gfx/impact.png
+    particle.png         -> gfx/particle.png
+    StartScreen.png      -> gfx/start-screen.png
+    fonts/pixel.fnt, fonts/pixel.png (the original's generated 5x7 pixel font with icon glyphs)
+
+  The maps in maps/ were converted from the original's levels (levels/*.level) by
+  assets-src/demo-gold-in-shadows/ConvertLevels.java, which runs the original's own level compiler.
+
+Sound and music
+  The original has no audio. The sound effects in sfx/ and the music in music/ are original,
+  synthesised by assets-src/demo-gold-in-shadows/sound/make_sounds.py for this demo.

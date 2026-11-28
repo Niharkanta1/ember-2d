@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "defaults": {"frameDuration": 0.1},
+  "clips": {
+    "idle": {"sheet": "tex.character", "frameWidth": 16, "frameHeight": 16, "frames": [4, 7]},
+    "walk": {"sheet": "tex.character", "frameWidth": 16, "frameHeight": 16, "frames": [8, 11]},
+    "hit": {"sheet": "tex.character", "frameWidth": 16, "frameHeight": 16, "frames": [12, 15], "mode": "once"},
+    "death": {"sheet": "tex.character", "frameWidth": 16, "frameHeight": 16, "frames": [16, 19], "mode": "once"}
+  }
+}

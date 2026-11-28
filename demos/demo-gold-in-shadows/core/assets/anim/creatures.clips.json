@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "clips": {
+    "rat": {"sheet": "tex.enemies", "frameWidth": 24, "frameHeight": 24, "frames": [0, 3], "frameDuration": 0.1},
+    "slug": {"sheet": "tex.enemies", "frameWidth": 24, "frameHeight": 24, "frames": [4, 7], "frameDuration": 0.15},
+    "ghoul": {"sheet": "tex.enemies", "frameWidth": 24, "frameHeight": 24, "frames": [8, 11], "frameDuration": 0.1},
+    "cultist": {"sheet": "tex.enemies", "frameWidth": 24, "frameHeight": 24, "frames": [12, 15], "frameDuration": 0.12}
+  }
+}

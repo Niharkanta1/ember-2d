@@ -115,6 +115,16 @@ Time-boxed throwaway prototypes (`templates/SPIKE_TEMPLATE.md`). Code is deleted
 
 - **G-6 Guide chapters** — one chapter per adopted extra in `documents/guide/`; developer review and approval required. Drafts written 2026-11-28 (particles, materials, Box2D, gamepad, project and asset tools); waiting for review
 
+### Demo: Gold in Shadows (F-029, F-030) — approved 2026-11-28
+The developer's own libGDX game, rebuilt on Ember2D. One task at a time, in this order:
+- **I-600 Project and assets** — done 2026-11-28: `newGame` (blank) as `demo-gold-in-shadows`; the original art with ART-CREDITS; clip sets; generated sounds; `ConvertLevels.java` turns the ASCII levels into Tiled maps with the original auto-tiling; the reachability test
+- **I-610 Field of view and fog** (F-030) — `kit-topdown` `vision`: `VisionField`, `FogLayer`, `VisionSystem`, `HiddenInFog`
+- **I-620 Player** — movement, mouse/stick aim, the 600 RPM rifle with reload, hearts and difficulty, hit feedback, camera, HUD
+- **I-630 Creatures** — rat, slug, ghoul, cultist: behaviours, perception, alerts and noise, telegraphed attacks, drops
+- **I-640 The world** — gold, medkits, chests, key and exit door, spike traps, the three-level campaign, score and saves
+- **I-650 Screens and platforms** — title, settings (difficulty, controls), pause, level-complete, death and end screens; Android twin-stick controls; gamepad; emulator checks
+- **I-660 Documentation** — the demo README (how to play, how it is built, original → Ember2D class map, screenshots), the wiki guide, the F-030 wiki page
+
 ## Definition of Done
 - Acceptance criteria fulfilled.
 - Unit/integration tests pass; architecture tests pass; Android debug build passes (from Phase 1).
