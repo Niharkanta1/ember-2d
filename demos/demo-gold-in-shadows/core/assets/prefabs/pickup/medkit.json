@@ -3,7 +3,7 @@
   "components": {
     "Sprite": {"origin": [8, 8], "z": 0},
     "Animator": {"clipSet": "anim.items", "clip": "medkit"},
-    "Pickup": {"kind": "medkit", "amount": 4},
+    "Pickup": {"kind": "medkit", "amount": 8},
     "HiddenInFog": {"radius": 0.3, "centerY": 0}
   }
 }

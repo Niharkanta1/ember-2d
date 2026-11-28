@@ -24,7 +24,7 @@ import dev.ember2d.kit.topdown.ai.PathPlanner;
 import dev.ember2d.kit.topdown.ai.Steering;
 import dev.ember2d.kit.topdown.shooter.ShotEvents;
 import dev.ember2d.render.Sprite;
-import java.util.Map;
+
 
 /**
  * The creatures' minds (F-029), ported from the original's {@code Enemy}, its behaviours and attacks, and
@@ -494,8 +494,7 @@ final class CreatureSystem extends EntitySystem {
         audio.playVaried("sfx.enemy_die", 0.08f);
         Transform t = world().get(e, Transform.class);
         if (t != null && c.gold > 0) {
-            prefabs.spawn(world(), "pickup/pouch", t.position.x, t.position.y,
-                    Map.of("Pickup.amount", (Object) c.gold));
+            PickupSystem.drop(world(), prefabs, "pickup/pouch", t.position.x, t.position.y, c.gold);
         }
     }
 

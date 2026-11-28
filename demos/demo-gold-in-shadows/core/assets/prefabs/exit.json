@@ -1,6 +1,7 @@
 {
   "version": 1,
   "components": {
+    "Sprite": {"origin": [16, 0], "z": -1},
     "ExitDoor": {}
   }
 }

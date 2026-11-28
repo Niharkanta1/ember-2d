@@ -2,7 +2,6 @@
   "version": 1,
   "components": {
     "Sprite": {"origin": [8, 0], "z": -1},
-    "Animator": {"clipSet": "anim.items", "clip": "spikes_down"},
     "SpikeTrap": {}
   }
 }

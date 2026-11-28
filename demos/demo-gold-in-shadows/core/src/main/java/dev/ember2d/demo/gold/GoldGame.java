@@ -23,7 +23,7 @@ public final class GoldGame {
         config.virtualWidth = 160;    // the original's resolution, integer-scaled
         config.virtualHeight = 144;
         config.backgroundColor.set(0x18 / 255f, 0x18 / 255f, 0x30 / 255f, 1f);   // the palette's DARK
-        config.firstScene = () -> new LevelScene(1);
+        config.firstScene = () -> new LevelScene(Campaign.fresh());
         config.inputBindings = "input";
         config.saveFolder = "demo-gold-in-shadows";
         config.components = new GoldComponents();

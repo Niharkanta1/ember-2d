@@ -59,7 +59,12 @@ final class LevelScene extends Scene {
     static final float HIT_SHAKE = 2.5f / 16f;
     static final float HIT_SHAKE_SECONDS = 0.25f;
 
+    private final Campaign campaign;
     private final int level;
+    private EngineContext context;
+    private PickupSystem pickups;
+    private FloatingTexts texts;
+    private boolean leaving;
     private Input input;
     private World world;
     private Hud hud;
@@ -67,9 +72,10 @@ final class LevelScene extends Scene {
     private CreatureOverlay overlay;
     private int player;
 
-    /** @param level 1, 2 or 3 */
-    LevelScene(int level) {
-        this.level = level;
+    /** Plays the campaign's current level (1, 2 or 3). */
+    LevelScene(Campaign campaign) {
+        this.campaign = campaign;
+        this.level = campaign.level;
     }
 
     @Override
@@ -79,6 +85,7 @@ final class LevelScene extends Scene {
 
     @Override
     protected void enter(EngineContext context) {
+        this.context = context;
         world = world();
         input = context.input();
         Audio audio = context.audio();
@@ -123,6 +130,11 @@ final class LevelScene extends Scene {
                 context.prefabs(), planner, context.events(), audio));                     // FIXED, in this order
         world.addSystem(new AiSystem(world, planner));
         world.addSystem(movement);
+        texts = new FloatingTexts(context.assets(), Effects.LAYER);
+        pickups = new PickupSystem(world, campaign, input, context.prefabs(), audio, texts);
+        world.addSystem(pickups);
+        world.addSystem(new SpikeSystem(world, health, context.assets(), audio));
+        world.addSystem(new ExitSystem(world, context.events(), context.assets(), audio, texts));
         world.addSystem(new WeaponSystem(world, bullets, new WeaponLibrary(context.assets(), types), context.events(),
                 input));
         world.addSystem(health);
@@ -142,6 +154,7 @@ final class LevelScene extends Scene {
         sprites.addLayerContent(bulletRenderer);
         overlay = new CreatureOverlay(world, context.assets(), Effects.LAYER);
         sprites.addLayerContent(overlay);
+        sprites.addLayerContent(texts);
         fog = new FogLayer(field, context.renderer().camera(), "fog");
         sprites.addLayerContent(fog);
 
@@ -158,18 +171,46 @@ final class LevelScene extends Scene {
         context.events().on(Died.class, e -> {
             if (e.entity() == player) {
                 audio.play("sfx.death");
+            } else if (world.has(e.entity(), Creature.class)) {
+                campaign.kills++;
             }
         });
-        context.events().on(HeroDied.class, e -> restart(context));
+        context.events().on(HeroDied.class, e -> retry());
+        context.events().on(ExitSystem.LevelCleared.class, e -> cleared());
         context.audio().playMusic("music.dungeon", 0.5f);
         LOG.info("Level " + level + " (" + map.properties().get("title", "", String.class) + "): " + walls
                 + " wall boxes, " + world.family(Creature.class).size() + " creatures, " + world.entityCount()
                 + " entities");
     }
 
-    /** Until the death screen exists (I-650): the level starts again. */
-    private void restart(EngineContext context) {
-        context.scenes().replace(new LevelScene(level), dev.ember2d.app.Transition.fade(0.5f));
+    /** Until the death screen exists (I-650): the level starts again with the gold and kills it started with. */
+    private void retry() {
+        campaign.retryLevel();
+        leave(new LevelScene(campaign));
+    }
+
+    /**
+     * The player walked out through the exit: the next level, with the gold carried over and the progress saved for
+     * Continue. After the last level the campaign ends (until the end screen exists, I-650: a new campaign starts).
+     */
+    private void cleared() {
+        LOG.info("Level " + level + " cleared: " + campaign.levelGold() + " gold, " + campaign.levelKills()
+                + " kills, " + Math.round(campaign.levelTime) + " s; score " + campaign.gold);
+        boolean next = campaign.advance(context.saves().global());
+        context.saves().flush();
+        if (next) {
+            campaign.startLevel();
+            leave(new LevelScene(campaign));
+        } else {
+            leave(new LevelScene(Campaign.fresh()));
+        }
+    }
+
+    private void leave(Scene next) {
+        if (!leaving) {
+            leaving = true;
+            context.scenes().replace(next, dev.ember2d.app.Transition.fade(0.5f));
+        }
     }
 
     @Override
@@ -177,11 +218,14 @@ final class LevelScene extends Scene {
         if (input.justPressed("pause")) {
             Gdx.app.exit();   // until the pause menu exists (I-650)
         }
+        campaign.levelTime += delta;
+        texts.update(delta);
         Health h = world.get(player, Health.class);
         Weapon weapon = world.get(player, Weapon.class);
         Hero hero = world.get(player, Hero.class);
         int magazine = 30;
-        hud.update(delta, h == null ? 0 : h.current, h == null ? 0 : h.max, 0, hero == null ? 0 : hero.keys,
+        hud.hint(pickups.chestInReach() ? "E: OPEN CHEST" : "");
+        hud.update(delta, h == null ? 0 : h.current, h == null ? 0 : h.max, campaign.gold, hero == null ? 0 : hero.keys,
                 creaturesLeft(), weapon == null || weapon.ammo < 0 ? magazine : weapon.ammo,
                 magazine, weapon != null && weapon.reloading);
     }
